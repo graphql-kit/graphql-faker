@@ -18,7 +18,15 @@
   },
   "homepage": "https://github.com/APIs-guru/graphql-faker#readme",
   "devDependencies": {
+    "@types/express": "^4.0.35",
+    "@types/express-graphql": "0.0.33",
+    "@types/graphql": "^0.8.6",
     "ts-node": "^2.1.0",
     "typescript": "^2.2.1"
+  },
+  "dependencies": {
+    "express": "^4.14.1",
+    "express-graphql": "^0.6.3",
+    "graphql": "^0.9.1"
   }
 }

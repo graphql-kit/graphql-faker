@@ -1,26 +1,21 @@
 import {
-  graphql,
-  GraphQLSchema,
-  GraphQLObjectType,
-  GraphQLString
+  buildSchema
 } from 'graphql';
 
 import * as express from 'express'
 import * as graphqlHTTP from 'express-graphql'
 
-const schema = new GraphQLSchema({
-  query: new GraphQLObjectType({
-    name: 'RootQueryType',
-    fields: {
-      hello: {
-        type: GraphQLString,
-        resolve() {
-          return 'world';
-        }
-      }
-    }
-  })
-});
+const idl = `
+type RootQueryType {
+  hello: String
+}
+schema {
+  query: RootQueryType
+}
+`;
+
+const schema = buildSchema(idl);
+schema.getTypeMap()['RootQueryType'].getFields()['hello'].resolve = () => 'world';
 
 const app = express();
 

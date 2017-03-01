@@ -24,6 +24,14 @@ schema {
 }
 `;
 
+const stdTypeNames = [
+  'Int',
+  'Float',
+  'String',
+  'Boolean',
+  'ID',
+];
+
 const typeFakers = {
   'Int': {
     defaultOptions: {min: 0, max: 99999},
@@ -62,7 +70,11 @@ const typeFakers = {
 };
 
 const schema = buildSchema(idl);
-schema.getType('CustomType')['serialize'] = x => x;
+
+_.each(schema.getTypeMap(), type => {
+  if (type instanceof GraphQLScalarType && !stdTypeNames.includes(type.name))
+    type.serialize = (x => x);
+});
 
 const rootType = schema.getType('RootQueryType') as GraphQLObjectType;
 _.each(rootType.getFields(), field => {

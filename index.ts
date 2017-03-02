@@ -1,6 +1,9 @@
 import {
   buildSchema,
+  getNamedType,
   isLeafType,
+  isAbstractType,
+  GraphQLAbstractType,
   GraphQLOutputType,
   GraphQLList,
   GraphQLNonNull,
@@ -23,6 +26,18 @@ enum EnumType {
   Value3
   Value4
 }
+interface Pet {
+  name: String
+}
+type Cat implements Pet {
+  name: String
+  huntingSkill: String
+}
+type Dog implements Pet {
+  name: String
+  packSize: Int
+}
+union PetUnion = Cat|Dog
 type RootQueryType {
   int: Int
   float: Float
@@ -34,6 +49,8 @@ type RootQueryType {
   nonNullInt: Int!
   arrayEnums: [EnumType]
   arrayOfNonNullArraysOfNonNullInt: [[Int!]!]
+  petInterface: Pet
+  petUnion: PetUnion
 }
 schema {
   query: RootQueryType
@@ -90,16 +107,16 @@ const schema = buildSchema(idl);
 
 _.each(schema.getTypeMap(), type => {
   if (type instanceof GraphQLScalarType && !stdTypeNames.includes(type.name))
-    type.serialize = (x => x);
+    type.serialize = (value => value);
   if (type instanceof GraphQLObjectType && !type.name.startsWith('__'))
     addFakeProperties(type);
+  if (isAbstractType(type))
+    type.resolveType = (obj => obj.__typename);
 });
 
 function addFakeProperties(objectType:GraphQLObjectType) {
   _.each(objectType.getFields(), field => {
     const type = field.type as GraphQLOutputType;
-    if (!type)
-      return;
     field.resolve = getResolver(type);
   });
 }
@@ -109,9 +126,16 @@ function getResolver(type:GraphQLOutputType) {
     return getResolver(type.ofType);
   if (type instanceof GraphQLList)
     return arrayResolver(getResolver(type.ofType));
-
   if (isLeafType(type))
     return getLeafResolver(type);
+  if (isAbstractType(type))
+    return abstractTypeResolver(type);
+  return () => {};
+}
+
+function abstractTypeResolver(type:GraphQLAbstractType) {
+  const possibleTypes = schema.getPossibleTypes(type);
+  return () => ({__typename: getRandomItem(possibleTypes)});
 }
 
 function arrayResolver(itemResolver) {

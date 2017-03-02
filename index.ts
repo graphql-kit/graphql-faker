@@ -2,6 +2,7 @@ import {
   buildSchema,
   isLeafType,
   GraphQLOutputType,
+  GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLEnumType,
@@ -31,6 +32,8 @@ type RootQueryType {
   customType: CustomType
   enumType: EnumType
   nonNullInt: Int!
+  arrayEnums: [EnumType]
+  arrayOfNonNullArraysOfNonNullInt: [[Int!]!]
 }
 schema {
   query: RootQueryType
@@ -75,6 +78,14 @@ const typeFakers = {
 };
 const stdTypeNames = Object.keys(typeFakers);
 
+function getRandomInt(min:number, max:number) {
+  return faker.random.number({min, max});
+}
+
+function getRandomItem(array:any[]) {
+  return array[getRandomInt(0, array.length - 1)];
+}
+
 const schema = buildSchema(idl);
 
 _.each(schema.getTypeMap(), type => {
@@ -94,18 +105,30 @@ function addFakeProperties(objectType:GraphQLObjectType) {
 }
 
 function getResolver(type:GraphQLOutputType) {
-  if (type instanceof GraphQLNonNull) {
+  if (type instanceof GraphQLNonNull)
     return getResolver(type.ofType);
-  }
-  if (isLeafType(type)) {
+  if (type instanceof GraphQLList)
+    return arrayResolver(getResolver(type.ofType));
+
+  if (isLeafType(type))
     return getLeafResolver(type);
+}
+
+function arrayResolver(itemResolver) {
+  return (...args) => {
+    let length = getRandomInt(2, 4);
+    const result = [];
+
+    while (length-- !== 0)
+      result.push(itemResolver(...args));
+    return result;
   }
 }
 
 function getLeafResolver(type:GraphQLLeafType) {
   if (type instanceof GraphQLEnumType) {
     const values = type.getValues().map(x => x.value);
-    return () => values[faker.random.number({min:0, max: values.length - 1})];
+    return () => getRandomItem(values);
   }
 
   const typeFaker = typeFakers[type.name];

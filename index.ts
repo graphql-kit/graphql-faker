@@ -1,5 +1,8 @@
 import {
   buildSchema,
+  isLeafType,
+  GraphQLOutputType,
+  GraphQLNonNull,
   GraphQLObjectType,
   GraphQLEnumType,
   GraphQLScalarType,
@@ -27,6 +30,7 @@ type RootQueryType {
   id: ID
   customType: CustomType
   enumType: EnumType
+  nonNullInt: Int!
 }
 schema {
   query: RootQueryType
@@ -82,11 +86,20 @@ _.each(schema.getTypeMap(), type => {
 
 function addFakeProperties(objectType:GraphQLObjectType) {
   _.each(objectType.getFields(), field => {
-    const type = field.type as GraphQLLeafType;
+    const type = field.type as GraphQLOutputType;
     if (!type)
       return;
-    field.resolve = getLeafResolver(type);
+    field.resolve = getResolver(type);
   });
+}
+
+function getResolver(type:GraphQLOutputType) {
+  if (type instanceof GraphQLNonNull) {
+    return getResolver(type.ofType);
+  }
+  if (isLeafType(type)) {
+    return getLeafResolver(type);
+  }
 }
 
 function getLeafResolver(type:GraphQLLeafType) {

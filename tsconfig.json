@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "inlineSources": true,
+    "inlineSourceMap": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "module": "commonjs",

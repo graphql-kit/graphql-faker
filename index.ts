@@ -1,7 +1,9 @@
 import {
   buildSchema,
   GraphQLObjectType,
+  GraphQLEnumType,
   GraphQLScalarType,
+  GraphQLLeafType,
 } from 'graphql';
 
 import * as _ from 'lodash';
@@ -11,6 +13,12 @@ import * as graphqlHTTP from 'express-graphql';
 
 const idl = `
 scalar CustomType
+enum EnumType {
+  Value1
+  Value2
+  Value3
+  Value4
+}
 type RootQueryType {
   int: Int
   float: Float
@@ -18,19 +26,12 @@ type RootQueryType {
   boolean: Boolean
   id: ID
   customType: CustomType
+  enumType: EnumType
 }
 schema {
   query: RootQueryType
 }
 `;
-
-const stdTypeNames = [
-  'Int',
-  'Float',
-  'String',
-  'Boolean',
-  'ID',
-];
 
 const typeFakers = {
   'Int': {
@@ -68,23 +69,38 @@ const typeFakers = {
     }
   },
 };
+const stdTypeNames = Object.keys(typeFakers);
 
 const schema = buildSchema(idl);
 
 _.each(schema.getTypeMap(), type => {
   if (type instanceof GraphQLScalarType && !stdTypeNames.includes(type.name))
     type.serialize = (x => x);
+  if (type instanceof GraphQLObjectType && !type.name.startsWith('__'))
+    addFakeProperties(type);
 });
 
-const rootType = schema.getType('RootQueryType') as GraphQLObjectType;
-_.each(rootType.getFields(), field => {
-  const type = field.type as GraphQLScalarType;
+function addFakeProperties(objectType:GraphQLObjectType) {
+  _.each(objectType.getFields(), field => {
+    const type = field.type as GraphQLLeafType;
+    if (!type)
+      return;
+    field.resolve = getLeafResolver(type);
+  });
+}
+
+function getLeafResolver(type:GraphQLLeafType) {
+  if (type instanceof GraphQLEnumType) {
+    const values = type.getValues().map(x => x.value);
+    return () => values[faker.random.number({min:0, max: values.length - 1})];
+  }
+
   const typeFaker = typeFakers[type.name];
   if (typeFaker)
-    field.resolve = typeFaker.generator(typeFaker.defaultOptions);
+    return typeFaker.generator(typeFaker.defaultOptions);
   else
-    field.resolve = () => `<${type.name}>`;
-});
+    return () => `<${type.name}>`;
+}
 
 const app = express();
 

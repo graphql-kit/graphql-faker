@@ -1,0 +1,40 @@
+scalar CustomType
+enum EnumType {
+  Value1
+  Value2
+  Value3
+  Value4
+}
+interface Pet {
+  name: String
+  countryOfOrigin: String @fake(type: address_country)
+}
+type Cat implements Pet {
+  name: String
+  countryOfOrigin: String @fake(type: address_country)
+  huntingSkill: String
+}
+type Dog implements Pet {
+  name: String
+  countryOfOrigin: String @fake(type: address_country)
+  packSize: Int
+}
+union PetUnion = Cat|Dog
+type RootQueryType {
+  int: Int
+  float: Float
+  string: String
+  boolean: Boolean
+  id: ID
+  customType: CustomType
+  enumType: EnumType
+  nonNullInt: Int!
+  arrayEnums: [EnumType]
+  arrayOfNonNullArraysOfNonNullInt: [[Int!]!]
+  petInterface: Pet
+  petUnion: PetUnion
+  city: String @fake(type:address_city)
+}
+schema {
+  query: RootQueryType
+}

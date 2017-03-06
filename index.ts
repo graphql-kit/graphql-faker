@@ -13,6 +13,7 @@ import {
   GraphQLLeafType,
 } from 'graphql';
 
+import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as faker from 'faker';
 import * as express from 'express';
@@ -23,6 +24,8 @@ interface GraphQLAppliedDiretives {
   getAppliedDirectives(): Array<string>;
   getDirectiveArgs(directiveName: string): { [argName: string]: any };
 }
+
+const userIDL = fs.readFileSync('./schema.graphql', 'utf-8');
 
 const idl = `
 enum Fake__Types {
@@ -44,48 +47,7 @@ enum Fake__Types {
   address_longitude
 }
 directive @fake(type:Fake__Types!) on FIELD_DEFINITION
-
-scalar CustomType
-enum EnumType {
-  Value1
-  Value2
-  Value3
-  Value4
-}
-interface Pet {
-  name: String
-  countryOfOrigin: String @fake(type: address_country)
-}
-type Cat implements Pet {
-  name: String
-  countryOfOrigin: String @fake(type: address_country)
-  huntingSkill: String
-}
-type Dog implements Pet {
-  name: String
-  countryOfOrigin: String @fake(type: address_country)
-  packSize: Int
-}
-union PetUnion = Cat|Dog
-type RootQueryType {
-  int: Int
-  float: Float
-  string: String
-  boolean: Boolean
-  id: ID
-  customType: CustomType
-  enumType: EnumType
-  nonNullInt: Int!
-  arrayEnums: [EnumType]
-  arrayOfNonNullArraysOfNonNullInt: [[Int!]!]
-  petInterface: Pet
-  petUnion: PetUnion
-  city: String @fake(type:address_city)
-}
-schema {
-  query: RootQueryType
-}
-`;
+` + userIDL;
 
 const typeFakers = {
   'Int': {

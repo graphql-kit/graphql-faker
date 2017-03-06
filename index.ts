@@ -18,7 +18,33 @@ import * as faker from 'faker';
 import * as express from 'express';
 import * as graphqlHTTP from 'express-graphql';
 
+interface GraphQLAppliedDiretives {
+  isApplied(directiveName: string): boolean;
+  getAppliedDirectives(): Array<string>;
+  getDirectiveArgs(directiveName: string): { [argName: string]: any };
+}
+
 const idl = `
+enum Fake__Types {
+  address_zipCode
+  address_city
+  address_cityPrefix
+  address_citySuffix
+  address_streetName
+  address_streetAddress
+  address_streetSuffix
+  address_streetPrefix
+  address_secondaryAddress
+  address_county
+  address_country
+  address_countryCode
+  address_state
+  address_stateAbbr
+  address_latitude
+  address_longitude
+}
+directive @fake(type:Fake__Types!) on FIELD_DEFINITION
+
 scalar CustomType
 enum EnumType {
   Value1
@@ -28,13 +54,16 @@ enum EnumType {
 }
 interface Pet {
   name: String
+  countryOfOrigin: String @fake(type: address_country)
 }
 type Cat implements Pet {
   name: String
+  countryOfOrigin: String @fake(type: address_country)
   huntingSkill: String
 }
 type Dog implements Pet {
   name: String
+  countryOfOrigin: String @fake(type: address_country)
   packSize: Int
 }
 union PetUnion = Cat|Dog
@@ -51,6 +80,7 @@ type RootQueryType {
   arrayOfNonNullArraysOfNonNullInt: [[Int!]!]
   petInterface: Pet
   petUnion: PetUnion
+  city: String @fake(type:address_city)
 }
 schema {
   query: RootQueryType
@@ -103,6 +133,10 @@ function getRandomItem(array:any[]) {
   return array[getRandomInt(0, array.length - 1)];
 }
 
+type FakeArgs = {
+  type:string
+};
+
 const schema = buildSchema(idl);
 
 _.each(schema.getTypeMap(), type => {
@@ -116,20 +150,26 @@ _.each(schema.getTypeMap(), type => {
 
 function addFakeProperties(objectType:GraphQLObjectType) {
   _.each(objectType.getFields(), field => {
+    const directives = field['appliedDirectives'] || null  as GraphQLAppliedDiretives;
     const type = field.type as GraphQLOutputType;
-    field.resolve = getResolver(type);
+    return field.resolve = getResolver(type, directives);
   });
 }
 
-function getResolver(type:GraphQLOutputType) {
+function fakeValue(fakeArgs:FakeArgs):() => string {
+  const [category, generator] = fakeArgs.type.split('_');
+  return faker[category][generator];
+}
+
+function getResolver(type:GraphQLOutputType, directives) {
   if (type instanceof GraphQLNonNull)
-    return getResolver(type.ofType);
+    return getResolver(type.ofType, directives);
   if (type instanceof GraphQLList)
-    return arrayResolver(getResolver(type.ofType));
-  if (isLeafType(type))
-    return getLeafResolver(type);
+    return arrayResolver(getResolver(type.ofType, directives));
   if (isAbstractType(type))
     return abstractTypeResolver(type);
+  if (isLeafType(type))
+    return getLeafResolver(type, directives);
   return () => {};
 }
 
@@ -149,7 +189,12 @@ function arrayResolver(itemResolver) {
   }
 }
 
-function getLeafResolver(type:GraphQLLeafType) {
+function getLeafResolver(type:GraphQLLeafType, directives) {
+  const fakeArgs = directives && directives.getDirectiveArgs('fake');
+
+  if (fakeArgs)
+    return fakeValue(fakeArgs);
+
   if (type instanceof GraphQLEnumType) {
     const values = type.getValues().map(x => x.value);
     return () => getRandomItem(values);

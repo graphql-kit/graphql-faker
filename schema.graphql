@@ -20,6 +20,7 @@ type Dog implements Pet {
   packSize: Int
 }
 union PetUnion = Cat|Dog
+scalar Country @fake(type:address_country)
 type RootQueryType {
 #  int: Int
 #  float: Float
@@ -33,8 +34,10 @@ type RootQueryType {
 #  arrayOfNonNullArraysOfNonNullInt: [[Int!]!]
 #  petInterface: Pet
 #  petUnion: PetUnion
-  city: String @fake(type:address_city)
-  city_uk: String @fake(type:address_city, locale:uk)
+#  city: String @fake(type:address_city)
+#  city_uk: String @fake(type:address_city, locale:uk)
+  country: Country
+  country_uk: Country @fake(type:address_country, locale:uk)
 }
 schema {
   query: RootQueryType

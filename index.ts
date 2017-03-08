@@ -95,9 +95,8 @@ _.each(schema.getTypeMap(), type => {
 
 function addFakeProperties(objectType:GraphQLObjectType) {
   _.each(objectType.getFields(), field => {
-    const directives = field['appliedDirectives'] || null  as GraphQLAppliedDiretives;
     const type = field.type as GraphQLOutputType;
-    return field.resolve = getResolver(type, directives);
+    return field.resolve = getResolver(type, field);
   });
 }
 
@@ -116,15 +115,15 @@ function fakeValue(fakeArgs:FakeArgs):() => string {
   }
 }
 
-function getResolver(type:GraphQLOutputType, directives) {
+function getResolver(type:GraphQLOutputType, field) {
   if (type instanceof GraphQLNonNull)
-    return getResolver(type.ofType, directives);
+    return getResolver(type.ofType, field);
   if (type instanceof GraphQLList)
-    return arrayResolver(getResolver(type.ofType, directives));
+    return arrayResolver(getResolver(type.ofType, field));
   if (isAbstractType(type))
     return abstractTypeResolver(type);
   if (isLeafType(type))
-    return getLeafResolver(type, directives);
+    return getLeafResolver(type, field);
   return () => {};
 }
 
@@ -144,11 +143,23 @@ function arrayResolver(itemResolver) {
   }
 }
 
-function getLeafResolver(type:GraphQLLeafType, directives) {
-  const fakeArgs = directives && directives.getDirectiveArgs('fake');
+function getFakeDirectives(object: any) {
+  const directives = object['appliedDirectives'] as GraphQLAppliedDiretives;
+  if (!directives || !directives.isApplied('fake'))
+    return {};
+  return {
+    fake: directives.getDirectiveArgs('fake'),
+  }
+}
 
-  if (fakeArgs)
-    return fakeValue(fakeArgs);
+function getLeafResolver(type:GraphQLLeafType, field) {
+  const directiveToArgs = {
+    ...getFakeDirectives(type),
+    ...getFakeDirectives(field),
+  };
+
+  if (directiveToArgs['fake'])
+    return fakeValue(directiveToArgs['fake']);
 
   if (type instanceof GraphQLEnumType) {
     const values = type.getValues().map(x => x.value);

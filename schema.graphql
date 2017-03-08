@@ -21,19 +21,20 @@ type Dog implements Pet {
 }
 union PetUnion = Cat|Dog
 type RootQueryType {
-  int: Int
-  float: Float
-  string: String
-  boolean: Boolean
-  id: ID
-  customType: CustomType
-  enumType: EnumType
-  nonNullInt: Int!
-  arrayEnums: [EnumType]
-  arrayOfNonNullArraysOfNonNullInt: [[Int!]!]
-  petInterface: Pet
-  petUnion: PetUnion
+#  int: Int
+#  float: Float
+#  string: String
+#  boolean: Boolean
+#  id: ID
+#  customType: CustomType
+#  enumType: EnumType
+#  nonNullInt: Int!
+#  arrayEnums: [EnumType]
+#  arrayOfNonNullArraysOfNonNullInt: [[Int!]!]
+#  petInterface: Pet
+#  petUnion: PetUnion
   city: String @fake(type:address_city)
+  city_uk: String @fake(type:address_city, locale:uk)
 }
 schema {
   query: RootQueryType

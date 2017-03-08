@@ -15,9 +15,11 @@ import {
 
 import * as fs from 'fs';
 import * as _ from 'lodash';
-import * as faker from 'faker';
 import * as express from 'express';
 import * as graphqlHTTP from 'express-graphql';
+
+//import * as faker from 'faker';
+const faker = require('faker');
 
 interface GraphQLAppliedDiretives {
   isApplied(directiveName: string): boolean;
@@ -25,29 +27,9 @@ interface GraphQLAppliedDiretives {
   getDirectiveArgs(directiveName: string): { [argName: string]: any };
 }
 
+const fakeDefinitionIDL = fs.readFileSync('./fake_definition.graphql', 'utf-8');
 const userIDL = fs.readFileSync('./schema.graphql', 'utf-8');
-
-const idl = `
-enum Fake__Types {
-  address_zipCode
-  address_city
-  address_cityPrefix
-  address_citySuffix
-  address_streetName
-  address_streetAddress
-  address_streetSuffix
-  address_streetPrefix
-  address_secondaryAddress
-  address_county
-  address_country
-  address_countryCode
-  address_state
-  address_stateAbbr
-  address_latitude
-  address_longitude
-}
-directive @fake(type:Fake__Types!) on FIELD_DEFINITION
-` + userIDL;
+const idl = fakeDefinitionIDL + userIDL;
 
 const typeFakers = {
   'Int': {
@@ -97,6 +79,7 @@ function getRandomItem(array:any[]) {
 
 type FakeArgs = {
   type:string
+  locale: string
 };
 
 const schema = buildSchema(idl);
@@ -120,7 +103,17 @@ function addFakeProperties(objectType:GraphQLObjectType) {
 
 function fakeValue(fakeArgs:FakeArgs):() => string {
   const [category, generator] = fakeArgs.type.split('_');
-  return faker[category][generator];
+  const locale = fakeArgs.locale;
+  return () => {
+    debugger;
+    const localeBackup = faker.locale;
+    //faker.setLocale(locale || localeBackup);
+    faker.locale = locale || localeBackup;
+    const result = faker[category][generator]();
+    //faker.setLocale(localeBackup);
+    faker.locale = localeBackup;
+    return result;
+  }
 }
 
 function getResolver(type:GraphQLOutputType, directives) {

@@ -1,26 +1,27 @@
-scalar CustomType
-enum EnumType {
-  Value1
-  Value2
-  Value3
-  Value4
-}
-interface Pet {
-  name: String
-  countryOfOrigin: String @fake(type: address_country)
-}
-type Cat implements Pet {
-  name: String
-  countryOfOrigin: String @fake(type: address_country)
-  huntingSkill: String
-}
-type Dog implements Pet {
-  name: String
-  countryOfOrigin: String @fake(type: address_country)
-  packSize: Int
-}
-union PetUnion = Cat|Dog
-scalar Country @fake(type:address_country)
+# scalar CustomType
+# enum EnumType {
+#   Value1
+#   Value2
+#   Value3
+#   Value4
+# }
+# interface Pet {
+#   name: String
+#   countryOfOrigin: String @fake(type: address_country)
+# }
+# type Cat implements Pet {
+#   name: String
+#   countryOfOrigin: String @fake(type: address_country)
+#   huntingSkill: String
+# }
+# type Dog implements Pet {
+#   name: String
+#   countryOfOrigin: String @fake(type: address_country)
+#   packSize: Int
+# }
+# union PetUnion = Cat|Dog
+# scalar Country @fake(type:address_country)
+scalar ScalarWithExamples @examples(values: [1,2,3, [{a: null, b: {c: {}}}]])
 type RootQueryType {
 #  int: Int
 #  float: Float
@@ -36,8 +37,9 @@ type RootQueryType {
 #  petUnion: PetUnion
 #  city: String @fake(type:address_city)
 #  city_uk: String @fake(type:address_city, locale:uk)
-  country: Country
-  country_uk: Country @fake(type:address_country, locale:uk)
+#  country: Country
+#  country_uk: Country @fake(type:address_country, locale:uk)
+  scalarWithExamples: ScalarWithExamples
 }
 schema {
   query: RootQueryType

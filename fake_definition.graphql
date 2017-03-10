@@ -1,4 +1,4 @@
-enum Fake__Locale {
+enum fake__Locale {
   az
   cz
   de
@@ -38,26 +38,29 @@ enum Fake__Locale {
   zh_TW
 }
 
-enum Fake__Types {
-  address_zipCode
-  address_city
-  address_cityPrefix
-  address_citySuffix
-  address_streetName
-  address_streetAddress
-  address_streetSuffix
-  address_streetPrefix
-  address_secondaryAddress
-  address_county
-  address_country
-  address_countryCode
-  address_state
-  address_stateAbbr
-  address_latitude
-  address_longitude
+enum fake__Types {
+  # Address
+
+  zipCode
+  city
+  streetName
+  streetAddress
+  secondaryAddress
+  county
+  country
+  countryCode
+  state
+  stateAbbr
+  latitude
+  longitude
 }
 
-directive @fake(type:Fake__Types!, locale:Fake__Locale) on FIELD_DEFINITION | SCALAR
+input fake__options {
+  zipCodeFormat: String
+  useFullAddress: Boolean
+}
+
+directive @fake(type:fake__Types!, options: fake__options = {}, locale:fake__Locale) on FIELD_DEFINITION | SCALAR
 
 scalar examples__JSON
 directive @examples(values: [examples__JSON]!) on SCALAR

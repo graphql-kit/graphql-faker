@@ -101,6 +101,7 @@ function astToJSON(ast) {
 
 type FakeArgs = {
   type:string
+  options: {[key:string]: any}
   locale: string
 };
 type ExamplesArgs = {
@@ -132,19 +133,45 @@ function addFakeProperties(objectType:GraphQLObjectType) {
   });
 }
 
-function fakeValue(fakeArgs):() => string {
-  const [category, generator] = fakeArgs.type.split('_');
-  const locale = fakeArgs.locale;
-  return () => {
-    debugger;
-    const localeBackup = faker.locale;
-    //faker.setLocale(locale || localeBackup);
-    faker.locale = locale || localeBackup;
-    const result = faker[category][generator]();
-    //faker.setLocale(localeBackup);
-    faker.locale = localeBackup;
-    return result;
-  }
+const fakeFunctions = {
+  zipCode: {
+    args: ['zipCodeFormat'],
+    func: (format) => faker.address.zipCode(format)
+  },
+  city: () => faker.address.city(),
+  streetName: () => faker.address.streetName(),
+  streetAddress: {
+    args: ['useFullAddress'],
+    func: (useFullAddress) => faker.address.streetAddress(useFullAddress),
+  },
+  county: () => faker.address.county(),
+  country: () => faker.address.country(),
+  countryCode: () => faker.address.countryCode(),
+  state: () => faker.address.state(),
+  stateAbbr: () => faker.address.stateAbbr(),
+  latitude: () => faker.address.latitude(),
+  longitude: () => faker.address.longitude(),
+}
+
+Object.keys(fakeFunctions).forEach(key => {
+  var value = fakeFunctions[key];
+  if (typeof fakeFunctions[key] === 'function')
+    fakeFunctions[key] = {args: [], func: value};
+});
+
+function fakeValue(type, options?, locale?) {
+  const fakeGenerator = fakeFunctions[type];
+  const argNames = fakeGenerator.args;
+  //TODO: add check
+  const callArgs = argNames.map(name => options[name]);
+
+  const localeBackup = faker.locale;
+  //faker.setLocale(locale || localeBackup);
+  faker.locale = locale || localeBackup;
+  const result = fakeGenerator.func(...callArgs);
+  //faker.setLocale(localeBackup);
+  faker.locale = localeBackup;
+  return result;
 }
 
 function getResolver(type:GraphQLOutputType, field) {
@@ -194,10 +221,11 @@ function getLeafResolver(type:GraphQLLeafType, field) {
     ...getFakeDirectives(field),
   };
 
-  if (directiveToArgs['examples'])
-    return () => getRandomItem(directiveToArgs['examples'].values)
-  if (directiveToArgs['fake'])
-    return fakeValue(directiveToArgs['fake']);
+  let {fake, examples} = directiveToArgs;
+  if (examples)
+    return () => getRandomItem(examples.values)
+  if (fake)
+    return () => fakeValue(fake.type, fake.options, fake.locale);
 
   if (type instanceof GraphQLEnumType) {
     const values = type.getValues().map(x => x.value);

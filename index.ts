@@ -19,8 +19,12 @@ import * as _ from 'lodash';
 import * as express from 'express';
 import * as graphqlHTTP from 'express-graphql';
 
-//import * as faker from 'faker';
-const faker = require('faker');
+import {
+  getRandomInt,
+  getRandomItem,
+  typeFakers,
+  fakeValue,
+} from './fake';
 
 interface GraphQLAppliedDiretives {
   isApplied(directiveName: string): boolean;
@@ -32,51 +36,7 @@ const fakeDefinitionIDL = fs.readFileSync('./fake_definition.graphql', 'utf-8');
 const userIDL = fs.readFileSync('./schema.graphql', 'utf-8');
 const idl = fakeDefinitionIDL + userIDL;
 
-const typeFakers = {
-  'Int': {
-    defaultOptions: {min: 0, max: 99999},
-    generator: (options) => {
-      options.precision = 1;
-      return () => faker.random.number(options);
-    }
-  },
-  'Float': {
-    defaultOptions: {min: 0, max: 99999, precision: 0.01},
-    generator: (options) => {
-      return () => faker.random.number(options);
-    }
-  },
-  'String': {
-    defaultOptions: {},
-    generator: (options) => {
-      return () => 'string';
-    }
-  },
-  'Boolean': {
-    defaultOptions: {},
-    generator: (options) => {
-      return () => faker.random.boolean();
-    }
-  },
-  'ID': {
-    defaultOptions: {},
-    generator: (options) => {
-      return () =>
-        new Buffer(
-          faker.random.number({max: 9999999999}).toString()
-        ).toString('base64');
-    }
-  },
-};
 const stdTypeNames = Object.keys(typeFakers);
-
-function getRandomInt(min:number, max:number) {
-  return faker.random.number({min, max});
-}
-
-function getRandomItem(array:any[]) {
-  return array[getRandomInt(0, array.length - 1)];
-}
 
 function astToJSON(ast) {
   switch (ast.kind) {
@@ -131,47 +91,6 @@ function addFakeProperties(objectType:GraphQLObjectType) {
     const type = field.type as GraphQLOutputType;
     return field.resolve = getResolver(type, field);
   });
-}
-
-const fakeFunctions = {
-  zipCode: {
-    args: ['zipCodeFormat'],
-    func: (format) => faker.address.zipCode(format)
-  },
-  city: () => faker.address.city(),
-  streetName: () => faker.address.streetName(),
-  streetAddress: {
-    args: ['useFullAddress'],
-    func: (useFullAddress) => faker.address.streetAddress(useFullAddress),
-  },
-  county: () => faker.address.county(),
-  country: () => faker.address.country(),
-  countryCode: () => faker.address.countryCode(),
-  state: () => faker.address.state(),
-  stateAbbr: () => faker.address.stateAbbr(),
-  latitude: () => faker.address.latitude(),
-  longitude: () => faker.address.longitude(),
-}
-
-Object.keys(fakeFunctions).forEach(key => {
-  var value = fakeFunctions[key];
-  if (typeof fakeFunctions[key] === 'function')
-    fakeFunctions[key] = {args: [], func: value};
-});
-
-function fakeValue(type, options?, locale?) {
-  const fakeGenerator = fakeFunctions[type];
-  const argNames = fakeGenerator.args;
-  //TODO: add check
-  const callArgs = argNames.map(name => options[name]);
-
-  const localeBackup = faker.locale;
-  //faker.setLocale(locale || localeBackup);
-  faker.locale = locale || localeBackup;
-  const result = fakeGenerator.func(...callArgs);
-  //faker.setLocale(localeBackup);
-  faker.locale = localeBackup;
-  return result;
 }
 
 function getResolver(type:GraphQLOutputType, field) {

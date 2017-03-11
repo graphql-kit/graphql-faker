@@ -15,6 +15,7 @@ import {
 } from 'graphql';
 
 import * as fs from 'fs';
+import * as path from 'path';
 import * as _ from 'lodash';
 import * as express from 'express';
 import * as graphqlHTTP from 'express-graphql';
@@ -165,10 +166,14 @@ app.use('/graphql', graphqlHTTP({
   graphiql: true
 }));
 
+app.use('/editor', express.static(path.join(__dirname, 'editor')));
+
 app.get('/user-idl', (req, res) => {
   res
     .status(200).send(userIDL);
 })
 app.listen(9002);
+
+console.log(app.routes)
 
 console.log('http://localhost:9002/graphql');

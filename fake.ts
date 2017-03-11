@@ -142,7 +142,7 @@ const fakeFunctions = {
 
   filename: () => faker.system.commonFileName(),
   mimeType: () => faker.system.mimeType(),
-  fileExtension() => faker.system.fileExt(),
+  fileExtension: () => faker.system.fileExt(),
   semver: () => faker.system.semver(),
 };
 

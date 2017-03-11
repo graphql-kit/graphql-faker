@@ -110,6 +110,8 @@ enum fake__Types {
 
   filename
   mimeType
+  fileExtension
+  semver
 }
 
 enum fake__imageCategory {

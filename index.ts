@@ -14,10 +14,10 @@ import {
   GraphQLLeafType,
 } from 'graphql';
 
-import fs from 'fs';
-import _ from 'lodash';
-import express from 'express';
-import graphqlHTTP from 'express-graphql';
+import * as fs from 'fs';
+import * as _ from 'lodash';
+import * as express from 'express';
+import * as graphqlHTTP from 'express-graphql';
 
 import {
   getRandomInt,

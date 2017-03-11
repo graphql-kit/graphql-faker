@@ -4,7 +4,6 @@
     "inlineSourceMap": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "allowSyntheticDefaultImports": true,
     "module": "commonjs",
     "target": "es5",
     "noImplicitAny": false,

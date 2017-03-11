@@ -1,7 +1,8 @@
 {
   "description": "An example using GraphQL-Voyager",
   "scripts": {
-    "start": "webpack-dev-server --config webpack.config.js"
+    "start": "webpack-dev-server --config webpack.config.js",
+    "build": "webpack -p --config webpack.config.js"
   },
   "dependencies": {
     "codemirror": "^5.24.2",

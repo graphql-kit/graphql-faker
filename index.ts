@@ -174,6 +174,4 @@ app.get('/user-idl', (req, res) => {
 })
 app.listen(9002);
 
-console.log(app.routes)
-
 console.log('http://localhost:9002/graphql');

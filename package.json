@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node index.ts"
+    "start": "nodemon -e ts,graphql --exec 'ts-node index.ts'"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
     "@types/faker": "^3.1.32",
     "@types/graphql": "^0.8.6",
     "@types/lodash": "^4.14.53",
+    "nodemon": "^1.11.0",
     "ts-node": "^2.1.0",
     "typescript": "^2.2.1"
   },

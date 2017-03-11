@@ -164,6 +164,11 @@ app.use('/graphql', graphqlHTTP({
   schema,
   graphiql: true
 }));
+
+app.get('/user-idl', (req, res) => {
+  res
+    .status(200).send(userIDL);
+})
 app.listen(9002);
 
 console.log('http://localhost:9002/graphql');

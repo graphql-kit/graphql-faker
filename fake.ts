@@ -142,6 +142,8 @@ const fakeFunctions = {
 
   filename: () => faker.system.commonFileName(),
   mimeType: () => faker.system.mimeType(),
+  fileExtension() => faker.system.fileExt(),
+  semver: () => faker.system.semver(),
 };
 
 Object.keys(fakeFunctions).forEach(key => {

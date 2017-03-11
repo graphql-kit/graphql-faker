@@ -41,6 +41,7 @@ type RootQueryType {
   country_uk: Country @fake(type:country, locale:uk)
   scalarWithExamples: ScalarWithExamples
   fullStreetAddress: String @fake(type:streetAddress, config:{useFullAddress: true})
+  companyBS: String @fake(type:companyBS)
 }
 schema {
   query: RootQueryType

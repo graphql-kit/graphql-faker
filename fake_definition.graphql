@@ -39,8 +39,6 @@ enum fake__Locale {
 }
 
 enum fake__Types {
-  # Address
-
   zipCode
   city
   streetName
@@ -53,11 +51,103 @@ enum fake__Types {
   stateAbbr
   latitude
   longitude
+
+  colorName
+  productCategory
+  productName
+  money
+  productMaterial
+  product
+
+  companyName
+  companyCatchPhrase
+  companyBS
+
+  dbColumn
+  dbType
+  dbCollation
+  dbEngine
+
+  pastDate
+  futureDate
+  recentDate
+
+  financeAccountName
+  financeTransactionType
+  currencyCode
+  currencyName
+  currencySymbol
+  bitcoinAddress
+  internationalBankAccountNumber
+  bankIdentifierCode
+
+  hackerAbbr
+  hackerPhrase
+
+  imageUrl
+  avatarUrl
+  email
+  url
+  domainName
+  ipv4Address
+  ipv6Address
+  userAgent
+  colorHex
+  macAddress
+  password
+
+  lorem
+
+  firstName
+  lastName
+  fullName
+  jobTitle
+
+  uuid
+  word
+  words
+  locale
+
+  filename
+  mimeType
+}
+
+enum fake__imageCategory {
+  abstract
+  animals
+  business
+  cats
+  city
+  food
+  nightlife
+  fashion
+  people
+  nature
+  sports
+  technics
+  transport
+}
+
+enum fake__loremSize {
+  word
+  words
+  sentence
+  sentences
+  paragraph
+  paragraphs
 }
 
 input fake__options {
-  zipCodeFormat: String
   useFullAddress: Boolean
+  minMoney: Float
+  maxMoney: Float
+  imageWidth: Int
+  imageHeight: Int
+  imageCategory: fake__imageCategory
+  randomizeImageUrl: Boolean
+  emailProvider: String
+  passwordLength: Int
+  loremSize: fake__loremSize
 }
 
 directive @fake(type:fake__Types!, options: fake__options = {}, locale:fake__Locale) on FIELD_DEFINITION | SCALAR

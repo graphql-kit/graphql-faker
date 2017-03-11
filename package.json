@@ -30,7 +30,7 @@
     "express": "^4.14.1",
     "express-graphql": "^0.6.3",
     "faker": "^4.1.0",
-    "graphql": "^0.9.1",
+    "graphql": "github:apis-guru/graphql-js#directives-fork-dist",
     "lodash": "^4.17.4"
   }
 }

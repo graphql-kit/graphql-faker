@@ -14,7 +14,7 @@ import './css/codemirror.css';
 import './editor/editor.css';
 import 'graphiql/graphiql.css';
 
-const fakeSchema = buildSchema(fakeIDL + ' schema { query: QueryType } type QueryType { a: String }');
+// const fakeSchema = buildSchema(fakeIDL + ' schema { query: QueryType } type QueryType { a: String }');
 
 class FakeEditor extends React.Component {
   constructor() {
@@ -104,7 +104,7 @@ class FakeEditor extends React.Component {
           <div className={classNames('tab-content', 'editor-container', {
             '-active': activeTab === 0
           })}>
-            <GraphQLEditor schema={fakeSchema} onEdit={this.onEdit} value={value}/>
+            <GraphQLEditor schemaPrefix={fakeIDL} mode="idl" onEdit={this.onEdit} value={value}/>
             <div className="action-panel">
               <a className="material-button" onClick={this.saveUserIDL}
                  disabled={!dirty}>

@@ -19,7 +19,7 @@ import 'codemirror-graphql/jump';
 import 'codemirror-graphql/mode';
 
 import { GraphQLSchema } from 'graphql';
-import { GraphQLNonNull, GraphQLList } from 'graphql';
+import { GraphQLNonNull, GraphQLList, buildSchema } from 'graphql';
 
 
 export default class GraphQLEditor extends React.Component {
@@ -32,11 +32,32 @@ export default class GraphQLEditor extends React.Component {
     onClickReference: PropTypes.func,
     onCommand: PropTypes.func,
     editorTheme: PropTypes.string,
+    mode: PropTypes.string,
+    schemaPrefix: PropTypes.string
   }
 
   constructor(props) {
     super(props);
     this.cachedValue = props.value || '';
+    this._schema = null;
+  }
+
+  tryBuildSchema(idl) {
+    try {
+      this._schema = buildSchema(idl);
+    } catch(e) {
+      // error here
+    }
+  }
+
+  get schema() {
+    if (this.props.mode === 'idl') {
+      let fullIDL = (this.props.schemaPrefix || '') + '\n' +  this.props.value;
+      this.tryBuildSchema(fullIDL);
+      return this._schema;
+    } else {
+      return this.props.schema;
+    }
   }
 
   componentDidMount() {
@@ -109,25 +130,33 @@ export default class GraphQLEditor extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const CodeMirror = require('codemirror');
-
     // Ensure the changes caused by this update are not interpretted as
     // user-input changes which could otherwise result in an infinite
     // event loop.
     this.ignoreChangeEvent = true;
     if (this.props.schema !== prevProps.schema) {
-      this.editor.options.lint.schema = this.props.schema;
-      this.editor.options.hintOptions.schema = this.props.schema;
-      this.editor.options.info.schema = this.props.schema;
-      this.editor.options.jump.schema = this.props.schema;
-      CodeMirror.signal(this.editor, 'change', this.editor);
+      this.updateSchema();
     }
     if (this.props.value !== prevProps.value &&
-        this.props.value !== this.cachedValue) {
+        (this.props.value !== this.cachedValue)) {
       this.cachedValue = this.props.value;
       this.editor.setValue(this.props.value);
+      if (this.props.mode === 'idl') {
+        this.updateSchema();
+      }
+    }
+    if (this.props.value !== prevProps.value && this.props.mode === 'idl') {
+      this.updateSchema();
     }
     this.ignoreChangeEvent = false;
+  }
+
+  updateSchema() {
+    this.editor.options.lint.schema = this.schema;
+    this.editor.options.hintOptions.schema = this.schema;
+    this.editor.options.info.schema = this.schema;
+    this.editor.options.jump.schema = this.schema;
+    CodeMirror.signal(this.editor, 'change', this.editor);
   }
 
   componentWillUnmount() {
@@ -145,7 +174,8 @@ export default class GraphQLEditor extends React.Component {
       (!event.shiftKey && code >= 48 && code <= 57) || // numbers
       (event.shiftKey && code === 189) || // underscore
       (event.shiftKey && code === 50) || // @
-      (event.shiftKey && code === 57) // (
+      (event.shiftKey && code === 57) || // (
+      (event.shiftKey && code === 186) // :
     ) {
       this.editor.execCommand('autocomplete');
     }

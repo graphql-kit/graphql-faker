@@ -80,7 +80,12 @@ export function fakeSchema(schema) {
   function addFakeProperties(objectType:GraphQLObjectType) {
     _.each(objectType.getFields(), field => {
       const type = field.type as GraphQLOutputType;
-      return field.resolve = getResolver(type, field);
+      const fakeResolver = getResolver(type, field);
+      return field.resolve = (source) => {
+        if (source && typeof source[field.name] !== 'undefined')
+          return source[field.name];
+        return fakeResolver();
+      }
     });
   }
 

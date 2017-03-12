@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -e ts,graphql --ignore schema.fake.graphql --exec 'ts-node index.ts -- --help'",
+    "debug": "ts-node --inspect index.ts",
     "build:editor": "cd editor && npm install && npm run build",
     "cmd": "ts-node index.ts"
   },
@@ -35,6 +36,7 @@
     "express-graphql": "^0.6.3",
     "faker": "^4.1.0",
     "graphql": "github:apis-guru/graphql-js#directives-fork-dist",
+    "graphql-fetch": "^1.0.1",
     "lodash": "^4.17.4",
     "opn": "^4.0.2",
     "yargs": "^7.0.2"

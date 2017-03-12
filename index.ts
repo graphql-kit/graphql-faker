@@ -4,18 +4,10 @@ import {
 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as _ from 'lodash';
 import * as express from 'express';
 import * as graphqlHTTP from 'express-graphql';
 
 import { fakeSchema } from './fake_schema';
-
-import {
-  getRandomInt,
-  getRandomItem,
-  typeFakers,
-  fakeValue,
-} from './fake';
 
 import * as opn from 'opn';
 
@@ -56,26 +48,57 @@ let userIDL;
 if (argv.file) {
   userIDL = fs.readFileSync(argv.file, 'utf-8');
 } else {
+  argv.file = 'schema.fake.graphql'; // default filename for output
   userIDL = fs.readFileSync(path.join(__dirname, 'schema.graphql'), 'utf-8');
 }
-const idl = fakeDefinitionIDL + userIDL;
-
-const schema = buildSchema(idl);
-fakeSchema(schema);
 
 const app = express();
+const bodyParser = require('body-parser');
 
-app.use('/graphql', graphqlHTTP({
-  schema,
-  graphiql: true
+function saveIDL(idl) {
+  fs.writeFileSync(argv.file, idl);
+  console.log(`✔ schema saved to "${argv.file}"`);
+}
+
+function buildFakeSchema() {
+  let idl = fakeDefinitionIDL + userIDL;
+  let schema = buildSchema(idl);
+  fakeSchema(schema);
+  return schema;
+}
+
+function updateSchema(idl) {
+  userIDL = idl;
+  schema = buildFakeSchema();
+}
+
+let schema = buildFakeSchema();
+
+app.use('/graphql', graphqlHTTP(() => {
+  return {
+    schema,
+    graphiql: true
+  };
 }));
 
 app.use('/editor', express.static(path.join(__dirname, 'editor')));
 
 app.get('/user-idl', (req, res) => {
-  res
-    .status(200).send(userIDL);
-})
+  res.status(200).send(userIDL);
+});
+
+app.use('/user-idl', bodyParser.text());
+
+app.post('/user-idl', (req, res) => {
+  try {
+    saveIDL(req.body);
+    updateSchema(req.body);
+    res.status(200).send('ok');
+  } catch(err) {
+    res.status(500).send(err.message)
+  }
+});
+
 app.listen(argv.port);
 
 console.log(`http://localhost:${argv.port}:/graphql`);

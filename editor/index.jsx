@@ -55,12 +55,33 @@ class FakeEditor extends React.Component {
     });
   }
 
+  postIDL(idl) {
+    return fetch('/user-idl', {
+      method: 'post',
+      headers: { 'Content-Type': 'text/plain' },
+      body: idl
+    })
+  }
+
+  saveUserIDL = () => {
+    let { value } = this.state;
+    this.postIDL(value).then(res => {
+      if (res.ok) {
+        return this.setState(prevState => ({...prevState, cachedValue: value, dirty: false, error: null}));
+      } else {
+        res.text().then(errorMessage => {
+          return this.setState(prevState => ({...prevState, error: errorMessage}));
+        });
+      }
+    })
+  }
+
   switchTab(tab) {
     this.setState(prevState => ({...prevState, activeTab: tab}));
   }
 
-  setDirty = (val) => {
-    this.setState(prevState => ({...prevState, dirty: val !== this.state.cachedValue}))
+  onEdit = (val) => {
+    this.setState(prevState => ({...prevState, value: val, dirty: val !== this.state.cachedValue}))
   }
 
   render() {
@@ -83,9 +104,13 @@ class FakeEditor extends React.Component {
           <div className={classNames('tab-content', 'editor-container', {
             '-active': activeTab === 0
           })}>
-            <GraphQLEditor schema={fakeSchema} onEdit={this.setDirty} value={value}/>
+            <GraphQLEditor schema={fakeSchema} onEdit={this.onEdit} value={value}/>
             <div className="action-panel">
-              <a className="material-button"> <span> Save </span> </a>
+              <a className="material-button" onClick={this.saveUserIDL}
+                 disabled={!dirty}>
+                 <span> Save </span>
+              </a>
+              <div className="error-message"> {this.state.error} </div>
             </div>
           </div>
           <div className={classNames('tab-content', {

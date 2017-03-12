@@ -67,6 +67,8 @@ nav li.-dirty:before {
 .action-panel {
   padding: 10px 40px;
   background: #f2f2f2;
+  display: flex;
+  align-items: center;
 }
 
 .material-button {
@@ -116,4 +118,23 @@ nav li.-dirty:before {
   background-color: rgba(236, 240, 241, .3);
   height: 100%;
   width: 100%;
+}
+
+.material-button[disabled],
+.material-button[disabled]:hover {
+  background-color: #a1aaa5;
+  cursor: default;
+  user-select: none;
+}
+
+.material-button[disabled]:active::before {
+  display: none;
+}
+
+.error-message {
+  display: inline-block;
+  color: red;
+  padding: 0 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

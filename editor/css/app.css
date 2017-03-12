@@ -1,0 +1,119 @@
+body {
+  font-family: system, -apple-system, 'San Francisco', '.SFNSDisplay-Regular', 'Segoe UI', Segoe, 'Segoe WP', 'Helvetica Neue', helvetica, 'Lucida Grande', arial, sans-serif;
+}
+
+.faker-editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.faker-editor-container > .tabs-container {
+  flex: 1;
+  overflow: hidden;
+}
+
+.tab-content {
+  overflow: hidden;
+  height: 0;
+}
+
+.tab-content.-active {
+  display: block;
+  height: 100%;
+}
+
+nav > ul {
+  margin: 0;
+  list-style: none;
+  padding: 0;
+  background-color: #f2f2f2;
+}
+
+nav li {
+  display: inline-block;
+  padding: 15px 25px 12px 25px;
+  cursor: pointer;
+  border-bottom: 3px solid #e2e2e2;
+}
+
+nav li.-active {
+  background: white;
+  border-bottom-color: #ca9801;
+}
+
+nav li.-dirty:before {
+  content: "*";
+  color: red;
+  font-weight: bold;
+  position: absolute;
+  margin-left: -0.7em;
+}
+
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-container.-active {
+  display: flex;
+}
+.editor-container > .graphql-editor {
+  flex: 1;
+  overflow: hidden;
+}
+
+.action-panel {
+  padding: 10px 40px;
+  background: #f2f2f2;
+}
+
+.material-button {
+  position: relative;
+
+  display: inline-block;
+  min-width: 160px;
+  text-align: center;
+  font-size: 14px;
+  padding: 0;
+
+  overflow: hidden;
+
+  border-width: 0;
+  outline: none;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+
+  background-color: #2ecc71;
+  color: #ecf0f1;
+
+  transition: background-color .3s;
+  cursor: pointer;
+}
+
+.material-button:hover, .material-button:focus {
+  background-color: #2cb968;
+}
+
+.material-button > * {
+  position: relative;
+}
+
+.material-button span {
+  display: block;
+  padding: 10px 24px;
+}
+
+.material-button:active:before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  display: block;
+  background-color: rgba(236, 240, 241, .3);
+  height: 100%;
+  width: 100%;
+}

@@ -1,6 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
-
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 function root(args) {
   args = Array.prototype.slice.call(arguments, 0);
   return path.join.apply(path, [__dirname].concat(args));
@@ -18,7 +18,8 @@ module.exports = {
     port: 9090,
     stats: 'errors-only',
     proxy: {
-      '/user-idl': 'http://localhost:9002'
+      '/user-idl': 'http://localhost:9002',
+      '/graphql': 'http://localhost:9002'
     }
   },
   resolve: {
@@ -39,9 +40,26 @@ module.exports = {
         options: {
           presets: ['es2015', 'react'],
           plugins: [
-            'transform-class-properties'
+            'transform-class-properties',
+            'transform-object-rest-spread'
           ]
         }
+      },
+      {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: [
+            {
+              loader: 'css-loader',
+              options: {
+                sourceMap: true,
+                minimize: true
+              },
+            },
+            'postcss-loader?sourceMap'
+          ]
+        })
       }
     ]
   },
@@ -50,6 +68,10 @@ module.exports = {
     new webpack.LoaderOptionsPlugin({
       minimize: true,
       debug: false
+    }),
+    new ExtractTextPlugin({
+      filename: 'main.css',
+      allChunks: true
     })
   ]
 }

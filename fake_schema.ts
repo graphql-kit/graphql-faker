@@ -93,7 +93,7 @@ export function fakeSchema(schema) {
       return abstractTypeResolver(type);
     if (isLeafType(type))
       return getLeafResolver(type, field);
-    return () => {};
+    return () => ({});
   }
 
   function abstractTypeResolver(type:GraphQLAbstractType) {

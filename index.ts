@@ -61,7 +61,7 @@ function saveIDL(idl) {
 }
 
 function buildFakeSchema() {
-  let idl = fakeDefinitionIDL + userIDL;
+  let idl = userIDL + '\n' + fakeDefinitionIDL;
   let schema = buildSchema(idl);
   fakeSchema(schema);
   return schema;
@@ -91,8 +91,8 @@ app.use('/user-idl', bodyParser.text());
 
 app.post('/user-idl', (req, res) => {
   try {
-    saveIDL(req.body);
     updateSchema(req.body);
+    saveIDL(req.body);
     res.status(200).send('ok');
   } catch(err) {
     res.status(500).send(err.message)

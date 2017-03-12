@@ -24,7 +24,9 @@ class FakeEditor extends React.Component {
       value: null,
       cachedValue: null,
       activeTab: 0,
-      dirty: false
+      dirty: false,
+      error: null,
+      status: null
     }
   }
 
@@ -63,17 +65,41 @@ class FakeEditor extends React.Component {
     })
   }
 
+  validateIdl(idl) {
+    let fullIdl = idl + '\n' + fakeIDL;
+    try {
+      buildSchema(fullIdl);
+      return true;
+    } catch(e) {
+      this.setState(prevState => ({...prevState, error: e.message}));
+      return false;
+    }
+  }
+
+  setStatus(status, delay) {
+    this.setState(prevState => ({...prevState, status: status}));
+    if (!delay) return;
+    setTimeout(() => {
+      this.setState(prevState => ({...prevState, status: null}));
+    }, delay);
+  }
+
   saveUserIDL = () => {
-    let { value } = this.state;
+    let { value, dirty } = this.state;
+    if (!dirty) return;
+
+    if (!this.validateIdl(value)) return;
+
     this.postIDL(value).then(res => {
       if (res.ok) {
+        this.setStatus('Saved!', 2000);
         return this.setState(prevState => ({...prevState, cachedValue: value, dirty: false, error: null}));
       } else {
         res.text().then(errorMessage => {
           return this.setState(prevState => ({...prevState, error: errorMessage}));
         });
       }
-    })
+    });
   }
 
   switchTab(tab) {
@@ -110,7 +136,10 @@ class FakeEditor extends React.Component {
                  disabled={!dirty}>
                  <span> Save </span>
               </a>
-              <div className="error-message"> {this.state.error} </div>
+              <div className="status-bar">
+                <span className="status"> {this.state.status} </span>
+                <span className="error-message">{this.state.error}</span>
+              </div>
             </div>
           </div>
           <div className={classNames('tab-content', {

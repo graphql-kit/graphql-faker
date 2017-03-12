@@ -92,6 +92,7 @@ nav li.-dirty:before {
 
   transition: background-color .3s;
   cursor: pointer;
+  text-transform: uppercase;
 }
 
 .material-button:hover, .material-button:focus {
@@ -131,10 +132,15 @@ nav li.-dirty:before {
   display: none;
 }
 
-.error-message {
-  display: inline-block;
-  color: red;
+.status-bar {
   padding: 0 20px;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.error-message {
+  color: red;
+}
+.status {
+  color: green;
 }

@@ -43,10 +43,11 @@ export default class GraphQLEditor extends React.Component {
   }
 
   tryBuildSchema(idl) {
+    // TODO: add throttling
     try {
       this._schema = buildSchema(idl);
     } catch(e) {
-      // error here
+      // skip error here
     }
   }
 

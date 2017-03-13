@@ -1,5 +1,6 @@
 import * as graphqlFetch from 'graphql-fetch';
 import {
+  Kind,
   parse,
   print,
   visit,
@@ -49,9 +50,9 @@ function getExtensionFields(extensionAST) {
 }
 
 const typenameAST = {
-  kind: 'Field',
+  kind: Kind.FIELD,
   name: {
-    kind: 'Name',
+    kind: Kind.NAME,
     value: '__typename',
   },
 };
@@ -62,14 +63,14 @@ function stripQuery(schema, query, extensionFields) {
 
   //TODO: inline all fragments
   const changedAST = visit(queryAST, visitWithTypeInfo(typeInfo, {
-    Field() {
+    [Kind.FIELD]: () => {
       const typeName = typeInfo.getParentType().name;
       const fieldName = typeInfo.getFieldDef().name;
 
       if ((extensionFields[typeName] || []).includes(fieldName))
         return null;
     },
-    SelectionSet: {
+    [Kind.SELECTION_SET]: {
       leave(node) {
         return {
           kind: node.kind,

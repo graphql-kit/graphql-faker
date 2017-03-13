@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "body-parser": "^1.17.1",
+    "chalk": "^1.1.3",
     "express": "^4.14.1",
     "express-graphql": "^0.6.3",
     "faker": "^4.1.0",

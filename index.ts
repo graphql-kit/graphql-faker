@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as express from 'express';
 import * as graphqlHTTP from 'express-graphql';
+import * as chalk from 'chalk';
 
 import { fakeSchema } from './fake_schema';
 import { proxyMiddleware } from './proxy';
@@ -23,11 +24,13 @@ const argv = require('yargs')
   .alias('e', 'extend')
   .nargs('e', 1)
   .describe('e', 'URL to existing GraphQL server to extend')
-  .alias('i', 'ide')
-  .describe('i', 'Open page with IDL editor and GraphiQL in browser')
+  .alias('o', 'open')
+  .describe('o', 'Open page with IDL editor and GraphiQL in browser')
   .help('h')
   .alias('h', 'help')
   .argv
+
+const log = console.log;
 
 let inputFile = argv._[0] || 'schema.fake.graphql';
 
@@ -37,22 +40,15 @@ if (existsSync(inputFile)) {
   userIDL = fs.readFileSync(inputFile, 'utf-8');
 } else {
   // different default IDLs for extend and non-extend modes
-  if (argv.e) {
-    userIDL = `
-      extend type Person {
-        pet: String @fake(type: imageUrl, options: { imageCategory: cats})
-      }
-    `;
-  } else {
-    userIDL = fs.readFileSync(path.join(__dirname, 'schema.graphql'), 'utf-8');
-  }
+  let defaultFileName = argv.e ? 'default-extend.graphql' : 'default-schema.graphql';
+  userIDL = fs.readFileSync(path.join(__dirname, defaultFileName), 'utf-8');
 }
 
 const bodyParser = require('body-parser');
 
 function saveIDL(idl) {
   fs.writeFileSync(inputFile, idl);
-  console.log(`✔ schema saved to "${inputFile}"`);
+  log(`${chalk.green('✔')} schema saved to "${inputFile}"`);
 }
 
 if (argv.e) {
@@ -111,9 +107,14 @@ function runServer(idl, optionsCB) {
 
   app.listen(argv.port);
 
-  console.log(`http://localhost:${argv.port}/graphql`);
+  log(`\n${chalk.green('✔')} Your GraphQL Fake API is ready to use. Here are your links:
 
-  if (argv.i) {
+  ${chalk.blue('❯')} GraphQL API:\t http://localhost:${argv.port}/graphql
+  ${chalk.blue('❯')} Interactive Editor:\t http://localhost:${argv.port}/editor
+
+  `);
+
+  if (argv.open) {
     setTimeout(() => opn(`http://localhost:${argv.port}/editor`), 500);
   }
 }

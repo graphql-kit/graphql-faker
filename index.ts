@@ -32,11 +32,12 @@ const argv = require('yargs')
 
 const log = console.log;
 
-let inputFile = argv._[0] || './schema.fake.graphql';
+let inputFile = argv._[0];
+let ouputFile = inputFile || './schema.fake.graphql';
 
 const fakeDefinitionIDL = fs.readFileSync(path.join(__dirname, 'fake_definition.graphql'), 'utf-8');
 let userIDL;
-if (existsSync(inputFile)) {
+if (inputFile && existsSync(inputFile)) {
   userIDL = fs.readFileSync(inputFile, 'utf-8');
 } else {
   // different default IDLs for extend and non-extend modes
@@ -47,8 +48,8 @@ if (existsSync(inputFile)) {
 const bodyParser = require('body-parser');
 
 function saveIDL(idl) {
-  fs.writeFileSync(inputFile, idl);
-  log(`${chalk.green('✚')} schema saved to ${chalk.magenta(inputFile)} on ${(new Date()).toLocaleString()}`);
+  fs.writeFileSync(ouputFile, idl);
+  log(`${chalk.green('✚')} schema saved to ${chalk.magenta(ouputFile)} on ${(new Date()).toLocaleString()}`);
 }
 
 if (argv.e) {

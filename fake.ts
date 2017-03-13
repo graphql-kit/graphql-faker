@@ -103,7 +103,7 @@ const fakeFunctions = {
   imageUrl: {
     args: ['imageHeight', 'imageWidth', 'imageCategory', 'randomizeImageUrl'],
     func: (height, width, category, randomize) =>
-      faker.image.imageUrl(height, width, category, randomize, true),
+      faker.image.imageUrl(height, width, category, randomize, false),
   },
 
   avatarUrl: () => faker.internet.avatar(),

@@ -21,7 +21,11 @@ export function proxyMiddleware(url) {
 
       //TODO fail if params.operationName set
       //TODO copy headers
-      return remoteServer(params.query, params.variables).then(responce => {
+      const query = params.query;
+      if (!query)
+        return { schema };
+
+      return remoteServer(query, params.variables).then(responce => {
         //TODO proxy error
         return { schema, rootValue: responce.data};
       });

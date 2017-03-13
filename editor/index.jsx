@@ -74,7 +74,7 @@ class FakeEditor extends React.Component {
   validateIdl(value) {
     let extensionIDL;
     let schemaIDL;
-    if (this.props.extendMode) {
+    if (this.state.extendMode) {
       extensionIDL = value;
       schemaIDL = this.proxiedSchemaIDL;
     } else {

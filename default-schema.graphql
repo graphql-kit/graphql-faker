@@ -1,48 +1,11 @@
-# scalar CustomType
-# enum EnumType {
-#   Value1
-#   Value2
-#   Value3
-#   Value4
-# }
-# interface Pet {
-#   name: String
-#   countryOfOrigin: String @fake(type: address_country)
-# }
-# type Cat implements Pet {
-#   name: String
-#   countryOfOrigin: String @fake(type: address_country)
-#   huntingSkill: String
-# }
-# type Dog implements Pet {
-#   name: String
-#   countryOfOrigin: String @fake(type: address_country)
-#   packSize: Int
-# }
-# union PetUnion = Cat|Dog
-scalar Country @fake(type:country)
-scalar ScalarWithExamples @examples(values: [1,2,3, [{a: null, b: {c: {}}}]])
-type RootQueryType {
-#  int: Int
-#  float: Float
-#  string: String
-#  boolean: Boolean
-#  id: ID
-#  customType: CustomType
-#  enumType: EnumType
-#  nonNullInt: Int!
-#  arrayEnums: [EnumType]
-#  arrayOfNonNullArraysOfNonNullInt: [[Int!]!]
-#  petInterface: Pet
-#  petUnion: PetUnion
-#  city: String @fake(type:city)
-#  city_uk: String @fake(type:city, locale:uk)
-  country: Country
-  country_uk: Country @fake(type:country, locale:uk)
-  scalarWithExamples: ScalarWithExamples
-  fullStreetAddress: String @fake(type:streetAddress, config:{useFullAddress: true})
-  companyBS: String @fake(type:companyBS)
+type Person {
+ firstName: String
+ lastName: String
+ address: String
+ gender: String
 }
-schema {
-  query: RootQueryType
+
+type Query {
+ topic: String
+ listeners: [Person!]
 }

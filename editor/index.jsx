@@ -26,7 +26,8 @@ class FakeEditor extends React.Component {
       activeTab: 0,
       dirty: false,
       error: null,
-      status: null
+      status: null,
+      schema: undefined
     }
   }
 
@@ -68,7 +69,8 @@ class FakeEditor extends React.Component {
   validateIdl(idl) {
     let fullIdl = idl + '\n' + fakeIDL;
     try {
-      buildSchema(fullIdl);
+      let schema = buildSchema(fullIdl);
+      this.setState(prevState => ({...prevState, schema: schema}));
       return true;
     } catch(e) {
       this.setState(prevState => ({...prevState, error: e.message}));
@@ -145,7 +147,7 @@ class FakeEditor extends React.Component {
           <div className={classNames('tab-content', {
             '-active': activeTab === 1
           })}>
-            <GraphiQL fetcher={this.fetcher} />
+            <GraphiQL fetcher={this.fetcher} schema={this.state.schema}/>
           </div>
         </div>
       </div>

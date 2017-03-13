@@ -54,16 +54,16 @@ function saveIDL(idl) {
 if (argv.e) {
   // run in proxy mode
   proxyMiddleware(argv.e)
-    .then(cb => runServer(userIDL, cb));
+    .then(([schemaIDL, cb]) => runServer(schemaIDL, userIDL, cb));
 } else {
-  runServer(userIDL, idl => {
-    let schema = buildSchema(idl);
-    fakeSchema(schema);
-    return { schema };
-  });
+  runServer(userIDL, null, () => ({ }));
 }
 
-function runServer(idl, optionsCB) {
+function buildServerSchema(idl) {
+  return buildSchema(idl + '\n' + fakeDefinitionIDL);
+}
+
+function runServer(schemaIDL, extensionIDL, optionsCB) {
   const app = express();
 
   app.use('/graphql', graphqlHTTP(request => {
@@ -76,26 +76,36 @@ function runServer(idl, optionsCB) {
         params.raw = undefined;
       request.body = params;
 
+      const schema = buildServerSchema(schemaIDL);
+      fakeSchema(schema);
       const optionsPromise = new Promise(resolve => resolve(
-        optionsCB(idl + '\n' + fakeDefinitionIDL, request, params)
+        optionsCB(schema, extensionIDL, request, params)
       ));
 
       return optionsPromise.then(options => ({
         ...options,
+        schema,
         graphiql: true,
       }));
     });
   }));
 
   app.get('/user-idl', (req, res) => {
-    res.status(200).send(idl);
+    res.status(200).json({
+      schemaIDL,
+      extensionIDL
+    });
   });
 
   app.use('/user-idl', bodyParser.text());
 
   app.post('/user-idl', (req, res) => {
     try {
-      idl = req.body;
+      if (extensionIDL === null)
+        schemaIDL = req.body;
+      else
+        extensionIDL = req.body;
+
       saveIDL(req.body);
       res.status(200).send('ok');
     } catch(err) {

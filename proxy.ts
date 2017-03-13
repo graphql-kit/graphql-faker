@@ -19,6 +19,7 @@ export function proxyMiddleware(url) {
 
   return remoteServer(introspectionQuery).then(introspection => {
     //TODO: check for errors
+    //TODO: handle scenario when type extended with a new interface
     const serverSchema = buildClientSchema(introspection.data);
     return (extensionIDL, request, params) => {
       const extensionAST = parse(extensionIDL);
@@ -33,7 +34,6 @@ export function proxyMiddleware(url) {
         return { schema };
 
       const query = stripQuery(schema, originalQuery, extensionFields);
-      console.log(query);
       //TODO: also cleanup params
       return remoteServer(query, params.variables).then(responce => {
         //TODO proxy error
@@ -44,9 +44,15 @@ export function proxyMiddleware(url) {
 }
 
 function getExtensionFields(extensionAST) {
-  return {
-    Person: ['pet']
-  };
+  const extensionFields = {};
+  (extensionAST.definitions || []).forEach(def => {
+    if (def.kind !== Kind.TYPE_EXTENSION_DEFINITION)
+      return;
+    const typeName = def.definition.name.value;
+    //FIXME: handle multiple extends of the same type
+    extensionFields[typeName] = def.definition.fields.map(field => field.name.value);
+  });
+  return extensionFields;
 }
 
 const typenameAST = {

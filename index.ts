@@ -57,7 +57,10 @@ if (argv.e) {
   proxyMiddleware(argv.e)
     .then(([schemaIDL, cb]) => runServer(schemaIDL, userIDL, cb));
 } else {
-  runServer(userIDL, null, () => ({ }));
+  runServer(userIDL, null, schema => {
+    fakeSchema(schema)
+    return {schema};
+  });
 }
 
 function buildServerSchema(idl) {
@@ -78,15 +81,13 @@ function runServer(schemaIDL, extensionIDL, optionsCB) {
       request.body = params;
 
       const schema = buildServerSchema(schemaIDL);
-      fakeSchema(schema);
       const optionsPromise = new Promise(resolve => resolve(
         optionsCB(schema, extensionIDL, request, params)
       ));
 
       return optionsPromise.then(options => ({
-        schema,
-        graphiql: true,
         ...options,
+        graphiql: true,
       }));
     });
   }));

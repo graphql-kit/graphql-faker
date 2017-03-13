@@ -28,6 +28,7 @@ export function proxyMiddleware(url) {
       const extensionAST = parse(extensionIDL);
       const extensionFields = getExtensionFields(extensionAST);
       const schema = extendSchema(serverSchema, extensionAST);
+      fakeSchema(schema);
 
       //TODO fail if params.operationName set
       //TODO copy headers

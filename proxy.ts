@@ -71,6 +71,7 @@ function stripQuery(schema, query, extensionFields) {
   const typeInfo = new TypeInfo(schema);
 
   //TODO: inline all fragments
+  //FIXME: Do something with field alias
   const changedAST = visit(queryAST, visitWithTypeInfo(typeInfo, {
     [Kind.FIELD]: () => {
       const typeName = typeInfo.getParentType().name;

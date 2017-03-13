@@ -4,8 +4,12 @@ body {
 
 .faker-editor-container {
   display: flex;
-  flex-direction: column;
   height: 100vh;
+}
+
+.faker-editor-container > nav {
+  width: 60px;
+  background-color: #59155a;
 }
 
 .faker-editor-container > .tabs-container {
@@ -27,27 +31,62 @@ nav > ul {
   margin: 0;
   list-style: none;
   padding: 0;
-  background-color: #f2f2f2;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  height: calc(100% - 60px);
 }
 
 nav li {
   display: inline-block;
-  padding: 15px 25px 12px 25px;
+  padding: 15px 14px 15px 10px;
   cursor: pointer;
-  border-bottom: 3px solid #e2e2e2;
+  position: relative;
+  text-align: center;
 }
 
 nav li.-active {
-  background: white;
-  border-bottom-color: #ca9801;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+nav li.-active::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0px;
+  border-right: 4px solid #e535ab;
 }
 
-nav li.-dirty:before {
+nav li:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+nav li.-dirty::before {
   content: "*";
-  color: red;
+  color: white;
   font-weight: bold;
   position: absolute;
-  margin-left: -0.7em;
+  right: 10px;
+}
+
+nav li.-pulldown {
+  margin-top: auto;
+}
+
+
+nav li.-link {
+  padding: 0;
+}
+
+nav li.-link > a {
+  display: inline-block;
+  padding: 15px 14px 15px 10px;
+}
+
+
+nav > .logo {
+  padding: 5px;
 }
 
 
@@ -87,16 +126,18 @@ nav li.-dirty:before {
   border-radius: 2px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
 
-  background-color: #2ecc71;
+  background-color: #1c5a15;
   color: #ecf0f1;
 
   transition: background-color .3s;
   cursor: pointer;
   text-transform: uppercase;
+  user-select: none;
+  letter-spacing: 2px;
 }
 
 .material-button:hover, .material-button:focus {
-  background-color: #2cb968;
+  background-color: #2c6a25;
 }
 
 .material-button > * {
@@ -116,14 +157,14 @@ nav li.-dirty:before {
   left: 0;
 
   display: block;
-  background-color: rgba(236, 240, 241, .3);
+  background-color: rgba(0, 0, 0, .2);
   height: 100%;
   width: 100%;
 }
 
 .material-button[disabled],
 .material-button[disabled]:hover {
-  background-color: #a1aaa5;
+  background-color: #5d795a;
   cursor: default;
   user-select: none;
 }
@@ -142,5 +183,5 @@ nav li.-dirty:before {
   color: red;
 }
 .status {
-  color: green;
+  color: #1c5a15;
 }

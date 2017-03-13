@@ -7,7 +7,9 @@ import fakeIDL from 'raw-loader!../fake_definition.graphql';
 import GraphQLEditor from './editor/GraphQLEditor';
 import GraphiQL from 'graphiql';
 
-import fetch from 'isomorphic-fetch';
+import fetch from 'isomorphic-fetch'
+
+import { EditIcon, ConsoleIcon, GithubIcon } from './icons';
 
 import './css/app.css';
 import './css/codemirror.css';
@@ -118,21 +120,33 @@ class FakeEditor extends React.Component {
     return (
       <div className="faker-editor-container">
         <nav>
+          <div className="logo">
+            <a href="https://github.com/APIs-guru/graphql-faker" target="_blank"> <img src="./logo.svg"/> </a>
+          </div>
           <ul>
             <li onClick={() => this.switchTab(0)} className={classNames({
               '-active': activeTab === 0,
               '-dirty': dirty
-            })}> Editor </li>
+            })}> <EditIcon/> </li>
             <li onClick={() => this.switchTab(1)} className={classNames({
               '-active': activeTab === 1
-            })}> GraphiQL </li>
+            })}> <ConsoleIcon/> </li>
+            <li className="-pulldown -link">
+              <a href="https://github.com/APIs-guru/graphql-faker" target="_blank"> <GithubIcon /> </a>
+            </li>
           </ul>
         </nav>
         <div className="tabs-container">
           <div className={classNames('tab-content', 'editor-container', {
             '-active': activeTab === 0
           })}>
-            <GraphQLEditor schemaPrefix={fakeIDL} mode="idl" onEdit={this.onEdit} value={value}/>
+            <GraphQLEditor
+              schemaPrefix={fakeIDL}
+              mode="idl"
+              onEdit={this.onEdit}
+              onCommand={this.saveUserIDL}
+              value={value}
+            />
             <div className="action-panel">
               <a className="material-button" onClick={this.saveUserIDL}
                  disabled={!dirty}>

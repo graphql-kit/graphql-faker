@@ -84,9 +84,9 @@ function runServer(schemaIDL, extensionIDL, optionsCB) {
       ));
 
       return optionsPromise.then(options => ({
-        ...options,
         schema,
         graphiql: true,
+        ...options,
       }));
     });
   }));

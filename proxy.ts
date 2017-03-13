@@ -5,12 +5,12 @@ import {
   print,
   visit,
   TypeInfo,
+  printSchema,
   extendSchema,
   visitWithTypeInfo,
   buildClientSchema,
   introspectionQuery,
 } from 'graphql';
-import { printIntrospectionSchema } from 'graphql/utilities';
 
 import { fakeSchema } from './fake_schema';
 
@@ -22,7 +22,7 @@ export function proxyMiddleware(url) {
     //TODO: check for errors
     //TODO: handle scenario when type extended with a new interface
     const introspectionSchema = buildClientSchema(introspection.data);
-    const introspectionIDL = printIntrospectionSchema(introspectionSchema);
+    const introspectionIDL = printSchema(introspectionSchema);
 
     return [introspectionIDL, (serverSchema, extensionIDL, request, params) => {
       const extensionAST = parse(extensionIDL);
@@ -33,13 +33,13 @@ export function proxyMiddleware(url) {
       //TODO copy headers
       const originalQuery = params.query;
       if (!originalQuery)
-        return { };
+        return { schema };
 
       const query = stripQuery(schema, originalQuery, extensionFields);
       //TODO: also cleanup params
       return remoteServer(query, params.variables).then(responce => {
         //TODO proxy error
-        return {rootValue: responce.data};
+        return {schema, rootValue: responce.data};
       });
     }];
   })

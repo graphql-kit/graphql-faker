@@ -73,8 +73,8 @@ function runServer(idl, optionsCB) {
 
   app.use('/graphql', graphqlHTTP(request => {
     return (graphqlHTTP as any).getGraphQLParams(request).then(params => {
-      //Dirty hack untill graphql-express will be split into multiple middlewares:
-      //https://github.com/graphql/express-graphql/issues/113
+      // Dirty hack until graphql-express is splitted into multiple middlewares:
+      // https://github.com/graphql/express-graphql/issues/113
       if (params.operationName === 'null')
         params.operationName = null;
       if (params.raw === false)

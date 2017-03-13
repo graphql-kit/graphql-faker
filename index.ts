@@ -32,7 +32,7 @@ const argv = require('yargs')
 
 const log = console.log;
 
-let inputFile = argv._[0] || 'schema.fake.graphql';
+let inputFile = argv._[0] || './schema.fake.graphql';
 
 const fakeDefinitionIDL = fs.readFileSync(path.join(__dirname, 'fake_definition.graphql'), 'utf-8');
 let userIDL;
@@ -48,7 +48,7 @@ const bodyParser = require('body-parser');
 
 function saveIDL(idl) {
   fs.writeFileSync(inputFile, idl);
-  log(`${chalk.green('✔')} schema saved to "${inputFile}"`);
+  log(`${chalk.green('✚')} schema saved to ${chalk.magenta(inputFile)} on ${(new Date()).toLocaleString()}`);
 }
 
 if (argv.e) {
@@ -107,7 +107,8 @@ function runServer(idl, optionsCB) {
 
   app.listen(argv.port);
 
-  log(`\n${chalk.green('✔')} Your GraphQL Fake API is ready to use. Here are your links:
+  log(`\n${chalk.green('✔')} Your GraphQL Fake API is ready to use 🚀
+  Here are your links:
 
   ${chalk.blue('❯')} GraphQL API:\t http://localhost:${argv.port}/graphql
   ${chalk.blue('❯')} Interactive Editor:\t http://localhost:${argv.port}/editor

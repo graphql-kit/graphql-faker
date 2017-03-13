@@ -19,7 +19,7 @@ import 'codemirror-graphql/jump';
 import 'codemirror-graphql/mode';
 
 import { GraphQLSchema } from 'graphql';
-import { GraphQLNonNull, GraphQLList, buildSchema } from 'graphql';
+import { GraphQLNonNull, GraphQLList, buildSchema, parse, extendSchema } from 'graphql';
 
 
 export default class GraphQLEditor extends React.Component {
@@ -33,6 +33,7 @@ export default class GraphQLEditor extends React.Component {
     onCommand: PropTypes.func,
     editorTheme: PropTypes.string,
     mode: PropTypes.string,
+    extendMode: PropTypes.bool,
     schemaPrefix: PropTypes.string
   }
 
@@ -42,10 +43,12 @@ export default class GraphQLEditor extends React.Component {
     this._schema = null;
   }
 
-  tryBuildSchema(idl) {
+  tryBuildSchema(schemaIDL, extensionIDL) {
     // TODO: add throttling
     try {
-      this._schema = buildSchema(idl);
+      this._schema = buildSchema(schemaIDL);
+      if (extensionIDL)
+          this._schema = extendSchema(this._schema, parse(extensionIDL));
     } catch(e) {
       // skip error here
     }
@@ -53,8 +56,15 @@ export default class GraphQLEditor extends React.Component {
 
   get schema() {
     if (this.props.mode === 'idl') {
-      let fullIDL = (this.props.schemaPrefix || '') + '\n' +  this.props.value;
-      this.tryBuildSchema(fullIDL);
+      let schemaIDL, extensionIDL;
+      if (this.props.extendMode) {
+        //console.log()
+        schemaIDL = (this.props.schemaPrefix || '');
+        extensionIDL = this.props.value;
+      } else {
+        schemaIDL = (this.props.schemaPrefix || '') + this.props.value;
+      }
+      this.tryBuildSchema(schemaIDL, extensionIDL);
       return this._schema;
     } else {
       return this.props.schema;

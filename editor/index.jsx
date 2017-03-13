@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
-import { buildSchema } from 'graphql/utilities';
+import { buildSchema, extendSchema, parse } from 'graphql';
 
 import fakeIDL from 'raw-loader!../fake_definition.graphql';
 import GraphQLEditor from './editor/GraphQLEditor';
@@ -35,9 +35,9 @@ class FakeEditor extends React.Component {
 
   componentDidMount() {
     fetch('/user-idl')
-      .then(response => response.text())
-      .then(text => {
-        this.updateValue(text);
+      .then(response => response.json())
+      .then(idls => {
+        this.updateValue(idls);
       });
 
     window.onbeforeunload = () => {
@@ -53,10 +53,13 @@ class FakeEditor extends React.Component {
     }).then(response => response.json());
   }
 
-  updateValue(userIDL) {
+  updateValue({schemaIDL, extensionIDL}) {
+    let value = extensionIDL || schemaIDL;
+    this.proxiedSchemaIDL = extensionIDL ? schemaIDL : null;
     this.setState({
-      value: userIDL,
-      cachedValue: userIDL
+      value,
+      cachedValue: value,
+      extendMode: !!extensionIDL
     });
   }
 
@@ -68,10 +71,20 @@ class FakeEditor extends React.Component {
     })
   }
 
-  validateIdl(idl) {
-    let fullIdl = idl + '\n' + fakeIDL;
+  validateIdl(value) {
+    let extensionIDL;
+    let schemaIDL;
+    if (this.props.extendMode) {
+      extensionIDL = value;
+      schemaIDL = this.proxiedSchemaIDL;
+    } else {
+      schemaIDL = value;
+    }
+    let fullIdl = schemaIDL + '\n' + fakeIDL;
     try {
       let schema = buildSchema(fullIdl);
+      if (extensionIDL)
+        schema = extendSchema(schema, parse(extensionIDL));
       this.setState(prevState => ({...prevState, schema: schema}));
       return true;
     } catch(e) {
@@ -115,8 +128,8 @@ class FakeEditor extends React.Component {
   }
 
   render() {
-    let { value, activeTab, dirty } = this.state;
-
+    let { value, activeTab, dirty, extendMode } = this.state;
+    let prefixIDL = fakeIDL + (this.proxiedSchemaIDL || '');
     return (
       <div className="faker-editor-container">
         <nav>
@@ -141,8 +154,9 @@ class FakeEditor extends React.Component {
             '-active': activeTab === 0
           })}>
             <GraphQLEditor
-              schemaPrefix={fakeIDL}
+              schemaPrefix={prefixIDL}
               mode="idl"
+              extendMode={!!extendMode}
               onEdit={this.onEdit}
               onCommand={this.saveUserIDL}
               value={value}

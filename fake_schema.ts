@@ -11,7 +11,7 @@ import {
   GraphQLList,
   GraphQLNonNull,
   GraphQLEnumType,
-  GraphQLLeafType,
+  GraphQLLeafType
 } from 'graphql';
 
 import {
@@ -20,6 +20,10 @@ import {
   typeFakers,
   fakeValue,
 } from './fake';
+
+import {
+  throwIfProxiedError
+} from './proxy';
 
 interface GraphQLAppliedDiretives {
   isApplied(directiveName: string): boolean;
@@ -81,13 +85,12 @@ export function fakeSchema(schema) {
     _.each(objectType.getFields(), field => {
       const type = field.type as GraphQLOutputType;
       const fakeResolver = getResolver(type, field);
-
-      return field.resolve = (source,x,y, info) => {
-        const key = info.path && info.path.key;
-        if (source && typeof source[key] !== 'undefined')
+      return field.resolve = (source, _, context, resolveInfo) => {
+        const key = resolveInfo.path && resolveInfo.path.key;
+        if (source && typeof source[key] !== 'undefined') {
+          if (source[key] === null) throwIfProxiedError(context, resolveInfo);
           return source[key];
-        // TODO handle @examples on object fields
-
+        }
         return fakeResolver();
       }
     });

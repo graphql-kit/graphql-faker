@@ -33,7 +33,9 @@ const argv = require('yargs')
 const log = console.log;
 
 let inputFile = argv._[0];
-let ouputFile = inputFile || './schema.fake.graphql';
+let ouputFile = inputFile || argv.extend ?
+  './schema_extension.faker.graphql' :
+  './schema.faker.graphql';
 
 const fakeDefinitionIDL = fs.readFileSync(path.join(__dirname, 'fake_definition.graphql'), 'utf-8');
 let userIDL;

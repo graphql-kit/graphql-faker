@@ -10,7 +10,18 @@ import {
   visitWithTypeInfo,
   buildClientSchema,
   introspectionQuery,
+  GraphQLError,
+  GraphQLFormattedError,
+  responsePathAsArray,
+  GraphQLResolveInfo
 } from 'graphql';
+
+import { startsWith} from './utils';
+
+interface GraphQLResponse {
+  data: any;
+  errors?: [GraphQLFormattedError]
+}
 
 import { fakeSchema } from './fake_schema';
 
@@ -40,11 +51,46 @@ export function proxyMiddleware(url) {
       // TODO: also cleanup params
       return remoteServer(query, params.variables).then(response => {
         // TODO proxy error
-        return {schema, rootValue: response.data, errors: response.errors};
+        return {
+          schema,
+          rootValue: response.data,
+          context: { errors: response.errors },
+          formatError
+        };
       });
     }];
   })
 }
+
+function getOriginalErrorPath(e: Error) {
+  if (!(e instanceof ProxiedError)) return;
+  return e.proxiedError && e.proxiedError.path;
+}
+
+export function formatError(error: GraphQLError): GraphQLFormattedError {
+  if (!error) throw Error('Received null or undefined error.');
+  return {
+    message: error.message,
+    locations: error.locations || [],
+    path: getOriginalErrorPath(error.originalError) || error.path || []
+  };
+}
+
+export class ProxiedError extends Error {
+  proxiedError: GraphQLFormattedError;
+  constructor(originalError: GraphQLFormattedError) {
+    super(originalError.message);
+    this.proxiedError = originalError;
+  }
+}
+
+export function throwIfProxiedError(context:any, resolveInfo:GraphQLResolveInfo):void {
+  let path = responsePathAsArray(resolveInfo.path);
+  if (!context.errors) return;
+  let error = context.errors.find(error => startsWith(error.path, path));
+  if (error) throw new ProxiedError(error);
+}
+
 
 function getExtensionFields(extensionAST) {
   const extensionFields = {};

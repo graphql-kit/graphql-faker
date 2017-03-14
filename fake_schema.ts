@@ -81,9 +81,13 @@ export function fakeSchema(schema) {
     _.each(objectType.getFields(), field => {
       const type = field.type as GraphQLOutputType;
       const fakeResolver = getResolver(type, field);
-      return field.resolve = (source) => {
-        if (source && typeof source[field.name] !== 'undefined')
-          return source[field.name];
+
+      return field.resolve = (source,x,y, info) => {
+        const key = info.path && info.path.key;
+        if (source && typeof source[key] !== 'undefined')
+          return source[key];
+        // TODO handle @examples on object fields
+
         return fakeResolver();
       }
     });
@@ -98,6 +102,8 @@ export function fakeSchema(schema) {
       return abstractTypeResolver(type);
     if (isLeafType(type))
       return getLeafResolver(type, field);
+    // TODO: error on fake directive
+    // TODO: handle @examples
     return () => ({});
   }
 

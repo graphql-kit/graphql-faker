@@ -8,11 +8,3 @@ export function existsSync(filePath){
   }
   return true;
 };
-
-export function startsWith(array, withArray):boolean {
-  if (array.length < withArray.length) return false;
-  for (let i = 0; i < withArray.length; i++) {
-    if (array[i] !== withArray[i]) return false;
-  }
-  return true;
-}

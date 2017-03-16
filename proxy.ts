@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import * as graphqlFetch from 'graphql-fetch';
 import {
   Kind,
@@ -11,17 +12,7 @@ import {
   buildClientSchema,
   introspectionQuery,
   GraphQLError,
-  GraphQLFormattedError,
-  responsePathAsArray,
-  GraphQLResolveInfo
 } from 'graphql';
-
-import { startsWith} from './utils';
-
-interface GraphQLResponse {
-  data: any;
-  errors?: [GraphQLFormattedError]
-}
 
 import { fakeSchema } from './fake_schema';
 
@@ -48,49 +39,40 @@ export function proxyMiddleware(url) {
         return { schema };
 
       const query = stripQuery(schema, originalQuery, extensionFields);
-      // TODO: also cleanup params
+
       return remoteServer(query, params.variables).then(response => {
-        // TODO proxy error
-        return {
-          schema,
-          rootValue: response.data,
-          context: { errors: response.errors },
-          formatError
-        };
+        // TODO: also cleanup params
+        const rootValue = response.data;
+        // TODO proxy global errors
+        const [globalErrors, localErrors] = splitErrors(response.errors);
+        injectLocalErrors(rootValue, localErrors);
+
+        return { schema, rootValue };
       });
     }];
   })
 }
 
-function getOriginalErrorPath(e: Error) {
-  if (!(e instanceof ProxiedError)) return;
-  return e.proxiedError && e.proxiedError.path;
+function splitErrors(errors) {
+  const global = [];
+  const local = [];
+
+  for (const error of (errors || []))
+    (error.path ? local : global).push(error);
+  return [global, local];
 }
 
-export function formatError(error: GraphQLError): GraphQLFormattedError {
-  if (!error) throw Error('Received null or undefined error.');
-  return {
-    message: error.message,
-    locations: error.locations || [],
-    path: getOriginalErrorPath(error.originalError) || error.path || []
-  };
+function injectLocalErrors(rootValue, errors) {
+  (errors || []).forEach(error =>
+    _.set(rootValue, error.path, new GraphQLError(
+      error.message,
+      null, //TODO: pass location
+      null,
+      null,
+      error.path
+    ))
+  );
 }
-
-export class ProxiedError extends Error {
-  proxiedError: GraphQLFormattedError;
-  constructor(originalError: GraphQLFormattedError) {
-    super(originalError.message);
-    this.proxiedError = originalError;
-  }
-}
-
-export function throwIfProxiedError(context:any, resolveInfo:GraphQLResolveInfo):void {
-  let path = responsePathAsArray(resolveInfo.path);
-  if (!context.errors) return;
-  let error = context.errors.find(error => startsWith(error.path, path));
-  if (error) throw new ProxiedError(error);
-}
-
 
 function getExtensionFields(extensionAST) {
   const extensionFields = {};

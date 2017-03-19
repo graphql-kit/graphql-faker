@@ -12,9 +12,17 @@ import {
   buildClientSchema,
   introspectionQuery,
   GraphQLError,
+  DocumentNode,
 } from 'graphql';
 
 import { fakeSchema } from './fake_schema';
+
+type RequestInfo = {
+  document: DocumentNode,
+  variables?: {[name: string]: any};
+  operationName?: string;
+  result?: any;
+};
 
 export function proxyMiddleware(url) {
   const remoteServer = graphqlFetch(url) as
@@ -26,29 +34,29 @@ export function proxyMiddleware(url) {
     const introspectionSchema = buildClientSchema(introspection.data);
     const introspectionIDL = printSchema(introspectionSchema);
 
-    return [introspectionIDL, (serverSchema, extensionIDL, request, params) => {
+    return [introspectionIDL, (serverSchema, extensionIDL) => {
       const extensionAST = parse(extensionIDL);
       const extensionFields = getExtensionFields(extensionAST);
       const schema = extendSchema(serverSchema, extensionAST);
       fakeSchema(schema);
 
-      // TODO fail if params.operationName set
-      // TODO copy headers
-      const originalQuery = params.query;
-      if (!originalQuery)
-        return { schema };
+      return {
+        schema,
+        rootValue: (info: RequestInfo) => {
+          // TODO fail if params.operationName set
+          // TODO copy headers
+          const query = stripQuery(schema, info.document, extensionFields);
 
-      const query = stripQuery(schema, originalQuery, extensionFields);
-
-      return remoteServer(query, params.variables).then(response => {
-        // TODO: also cleanup params
-        const rootValue = response.data;
-        // TODO proxy global errors
-        const [globalErrors, localErrors] = splitErrors(response.errors);
-        injectLocalErrors(rootValue, localErrors);
-
-        return { schema, rootValue };
-      });
+          return remoteServer(query, info.variables).then(response => {
+            // TODO: also cleanup params
+            const rootValue = response.data;
+            // TODO proxy global errors
+            const [globalErrors, localErrors] = splitErrors(response.errors);
+            injectLocalErrors(rootValue, localErrors);
+            return rootValue;
+          });
+        },
+      };
     }];
   })
 }
@@ -94,8 +102,7 @@ const typenameAST = {
   },
 };
 
-function stripQuery(schema, query, extensionFields) {
-  const queryAST = parse(query);
+function stripQuery(schema, queryAST, extensionFields) {
   const typeInfo = new TypeInfo(schema);
 
   // TODO: inline all fragments

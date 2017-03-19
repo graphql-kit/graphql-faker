@@ -34,7 +34,7 @@
     "body-parser": "^1.17.1",
     "chalk": "^1.1.3",
     "express": "^4.14.1",
-    "express-graphql": "^0.6.3",
+    "express-graphql": "github:apis-guru/express-graphql#rootValue_dist",
     "faker": "^4.1.0",
     "graphql": "github:apis-guru/graphql-js#directives-fork-dist",
     "graphql-fetch": "^1.0.1",

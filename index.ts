@@ -72,26 +72,13 @@ function buildServerSchema(idl) {
 function runServer(schemaIDL, extensionIDL, optionsCB) {
   const app = express();
 
-  app.use('/graphql', graphqlHTTP(request => {
-    return (graphqlHTTP as any).getGraphQLParams(request).then(params => {
-      // Dirty hack until graphql-express is splitted into multiple middlewares:
-      // https://github.com/graphql/express-graphql/issues/113
-      if (params.operationName === 'null')
-        params.operationName = null;
-      if (params.raw === false)
-        params.raw = undefined;
-      request.body = params;
+  app.use('/graphql', graphqlHTTP(() => {
+    const schema = buildServerSchema(schemaIDL);
 
-      const schema = buildServerSchema(schemaIDL);
-      const optionsPromise = new Promise(resolve => resolve(
-        optionsCB(schema, extensionIDL, request, params)
-      ));
-
-      return optionsPromise.then(options => ({
-        ...options,
-        graphiql: true,
-      }));
-    });
+    return {
+      ...optionsCB(schema, extensionIDL),
+      graphiql: true,
+    };
   }));
 
   app.get('/user-idl', (req, res) => {

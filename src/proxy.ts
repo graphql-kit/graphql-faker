@@ -11,7 +11,6 @@ import {
   visitWithTypeInfo,
   buildClientSchema,
   introspectionQuery,
-  GraphQLError,
   DocumentNode,
 } from 'graphql';
 
@@ -30,7 +29,6 @@ export function proxyMiddleware(url) {
 
   return remoteServer(introspectionQuery).then(introspection => {
     // TODO: check for errors
-    // TODO: handle scenario when type extended with a new interface
     const introspectionSchema = buildClientSchema(introspection.data);
     const introspectionIDL = printSchema(introspectionSchema);
 
@@ -48,7 +46,6 @@ export function proxyMiddleware(url) {
           const query = stripQuery(schema, info.document, extensionFields);
 
           return remoteServer(query, info.variables).then(response => {
-            // TODO: also cleanup params
             const rootValue = response.data;
             // TODO proxy global errors
             const [, localErrors] = splitErrors(response.errors);
@@ -72,13 +69,9 @@ function splitErrors(errors) {
 
 function injectLocalErrors(rootValue, errors) {
   (errors || []).forEach(error =>
-    set(rootValue, error.path, new GraphQLError(
-      error.message,
-      null, //TODO: pass location
-      null,
-      null,
-      error.path
-    ))
+    // Recreate root value up to a place where original error was thrown
+    // and place error as field value.
+    set(rootValue, error.path, new Error(error.message))
   );
 }
 

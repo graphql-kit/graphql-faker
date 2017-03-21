@@ -2,7 +2,6 @@ import {
   Kind,
   isLeafType,
   isAbstractType,
-  GraphQLError,
   GraphQLObjectType,
   GraphQLScalarType,
   GraphQLAbstractType,
@@ -85,11 +84,8 @@ export function fakeSchema(schema) {
         if (!source || typeof source[key] === 'undefined')
           return fakeResolver();
 
-        const value = source[key];
-        if (value instanceof GraphQLError)
-          throw value;
-        else
-          return value;
+        // Can be value or Error instance injected in proxy
+        return source[key];
       }
     };
   }

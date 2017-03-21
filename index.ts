@@ -32,26 +32,30 @@ const argv = require('yargs')
 
 const log = console.log;
 
-let inputFile = argv._[0];
-let ouputFile = inputFile || argv.extend ?
+let fileArg = argv._[0];
+let fileName = fileArg || (argv.extend ?
   './schema_extension.faker.graphql' :
-  './schema.faker.graphql';
+  './schema.faker.graphql');
 
 const fakeDefinitionIDL = fs.readFileSync(path.join(__dirname, 'fake_definition.graphql'), 'utf-8');
+
 let userIDL;
-if (inputFile && existsSync(inputFile)) {
-  userIDL = fs.readFileSync(inputFile, 'utf-8');
-} else {
+if (existsSync(fileName)) {
+  userIDL = fs.readFileSync(fileName, 'utf-8');
+} else if (!fileArg) {
   // different default IDLs for extend and non-extend modes
   let defaultFileName = argv.e ? 'default-extend.graphql' : 'default-schema.graphql';
   userIDL = fs.readFileSync(path.join(__dirname, defaultFileName), 'utf-8');
+} else {
+  log(chalk.red(`Input file ${fileName} not found`));
+  process.exit(1);
 }
 
 const bodyParser = require('body-parser');
 
 function saveIDL(idl) {
-  fs.writeFileSync(ouputFile, idl);
-  log(`${chalk.green('✚')} schema saved to ${chalk.magenta(ouputFile)} on ${(new Date()).toLocaleString()}`);
+  fs.writeFileSync(fileName, idl);
+  log(`${chalk.green('✚')} schema saved to ${chalk.magenta(fileName)} on ${(new Date()).toLocaleString()}`);
 }
 
 if (argv.e) {
@@ -115,6 +119,11 @@ function runServer(schemaIDL, extensionIDL, optionsCB) {
   ${chalk.blue('❯')} Interactive Editor:\t http://localhost:${argv.port}/editor
 
   `);
+
+  if (!fileArg) {
+    log(chalk.yellow(`Default file ${chalk.magenta(fileName)} is used. ` +
+    `Specify [file] parameter to change.`));
+  }
 
   if (argv.open) {
     setTimeout(() => opn(`http://localhost:${argv.port}/editor`), 500);

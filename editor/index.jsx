@@ -71,7 +71,7 @@ class FakeEditor extends React.Component {
     })
   }
 
-  validateIdl(value) {
+  updateIdl(value) {
     let extensionIDL;
     let schemaIDL;
     if (this.state.extendMode) {
@@ -85,7 +85,7 @@ class FakeEditor extends React.Component {
       let schema = buildSchema(fullIdl);
       if (extensionIDL)
         schema = extendSchema(schema, parse(extensionIDL));
-      this.setState(prevState => ({...prevState, schema: schema}));
+      this.setState(prevState => ({...prevState, schema: schema, error: null}));
       return true;
     } catch(e) {
       this.setState(prevState => ({...prevState, error: e.message}));
@@ -105,7 +105,7 @@ class FakeEditor extends React.Component {
     let { value, dirty } = this.state;
     if (!dirty) return;
 
-    if (!this.validateIdl(value)) return;
+    if (!this.updateIdl(value)) return;
 
     this.postIDL(value).then(res => {
       if (res.ok) {
@@ -124,7 +124,12 @@ class FakeEditor extends React.Component {
   }
 
   onEdit = (val) => {
-    this.setState(prevState => ({...prevState, value: val, dirty: val !== this.state.cachedValue}))
+    this.updateIdl(val);
+    this.setState(prevState => ({
+      ...prevState,
+      value: val,
+      dirty: val !== this.state.cachedValue
+    }))
   }
 
   render() {

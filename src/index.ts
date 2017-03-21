@@ -26,11 +26,17 @@ const argv = require('yargs')
   .describe('e', 'URL to existing GraphQL server to extend')
   .alias('o', 'open')
   .describe('o', 'Open page with IDL editor and GraphiQL in browser')
+  .alias('H', 'header')
+  .describe('H', 'Specify headers to the proxied server in curl format')
+  .nargs('H', 1)
+  .implies('header', 'extend')
   .help('h')
   .alias('h', 'help')
   .argv
 
 const log = console.log;
+
+// log(argv.header) // <- array here
 
 let fileArg = argv._[0];
 let fileName = fileArg || (argv.extend ?

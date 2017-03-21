@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import * as set from 'lodash/set.js';
 import * as graphqlFetch from 'graphql-fetch';
 import {
   Kind,
@@ -72,7 +72,7 @@ function splitErrors(errors) {
 
 function injectLocalErrors(rootValue, errors) {
   (errors || []).forEach(error =>
-    _.set(rootValue, error.path, new GraphQLError(
+    set(rootValue, error.path, new GraphQLError(
       error.message,
       null, //TODO: pass location
       null,

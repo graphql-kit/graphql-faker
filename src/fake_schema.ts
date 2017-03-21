@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import {
   Kind,
   isLeafType,
@@ -68,20 +67,20 @@ export function fakeSchema(schema) {
   const jsonType = schema.getTypeMap()['examples__JSON'];
   jsonType.parseLiteral = astToJSON;
 
-  _.each(schema.getTypeMap(), type => {
+  for (let type of Object.values(schema.getTypeMap())) {
     if (type instanceof GraphQLScalarType && !stdTypeNames.includes(type.name))
       type.serialize = (value => value);
     if (type instanceof GraphQLObjectType && !type.name.startsWith('__'))
       addFakeProperties(type);
     if (isAbstractType(type))
       type.resolveType = (obj => obj.__typename);
-  });
+  };
 
   function addFakeProperties(objectType:GraphQLObjectType) {
-    _.each(objectType.getFields(), field => {
+    for (let field of Object.values(objectType.getFields())) {
       const type = field.type as GraphQLOutputType;
       const fakeResolver = getResolver(type, field);
-      return field.resolve = (source, _, _0, resolveInfo) => {
+      field.resolve = (source, _, _0, resolveInfo) => {
         const key = resolveInfo.path && resolveInfo.path.key;
         if (!source || typeof source[key] === 'undefined')
           return fakeResolver();
@@ -92,7 +91,7 @@ export function fakeSchema(schema) {
         else
           return value;
       }
-    });
+    };
   }
 
   function getResolver(type:GraphQLOutputType, field) {

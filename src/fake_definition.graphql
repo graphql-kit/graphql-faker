@@ -42,6 +42,7 @@ enum fake__Types {
   zipCode
   city
   streetName
+  # Configure address with option `useFullAddress`
   streetAddress
   secondaryAddress
   county
@@ -55,6 +56,7 @@ enum fake__Types {
   colorName
   productCategory
   productName
+  # Localized money amound. Configure with options `minMoney` and `maxMoney`
   money
   productMaterial
   product
@@ -84,8 +86,12 @@ enum fake__Types {
   hackerAbbr
   hackerPhrase
 
+  # an image url. Configure image with options: `imageCategory`,
+  # `imageWidth`, `imageHeight` and `randomizeImageUrl`
   imageUrl
+  # a URL for an avatar
   avatarUrl
+  # configure email provider with option: `emailProvider`
   email
   url
   domainName
@@ -94,8 +100,10 @@ enum fake__Types {
   userAgent
   colorHex
   macAddress
+  # configure password with option `passwordLength`
   password
 
+  # Lorem Ipsum text. Configure size with option `loremSize`
   lorem
 
   firstName
@@ -140,20 +148,30 @@ enum fake__loremSize {
 }
 
 input fake__options {
-  # APplied only to address
+  # Only for `type: streetAddress`
   useFullAddress: Boolean
+  # Only for type `money`
   minMoney: Float
+  # Only for type `money`
   maxMoney: Float
+  # Only for type `imageUrl`
   imageWidth: Int
+  # Only for type `imageUrl`
   imageHeight: Int
+  # Only for type `imageUrl`
   imageCategory: fake__imageCategory
+  # Only for type `imageUrl` or `avatarUrl`
   randomizeImageUrl: Boolean
+  # Only for type `email`
   emailProvider: String
+  # Only for type `password`
   passwordLength: Int
+  # Only for type `lorem`
   loremSize: fake__loremSize
 }
 
 directive @fake(type:fake__Types!, options: fake__options = {}, locale:fake__Locale) on FIELD_DEFINITION | SCALAR
+
 
 scalar examples__JSON
 directive @examples(values: [examples__JSON]!) on FIELD_DEFINITION | SCALAR

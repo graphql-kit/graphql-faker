@@ -36,7 +36,8 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 
-# default output schema file
-*.graphql
-!default-schema.graphql
-!default-extend.graphql
+# graphql files on the root dir
+/*.graphql
+
+# es5 output dir
+/dist/

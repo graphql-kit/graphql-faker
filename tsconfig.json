@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
     "inlineSources": true,
-    "inlineSourceMap": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "module": "commonjs",
     "target": "es5",
     "noImplicitAny": false,
     "sourceMap": true,
-    "outDir": ".tmp",
+    "outDir": "dist",
     "pretty": true,
     "moduleResolution": "node",
     "lib": ["es2017"]
@@ -17,6 +16,7 @@
   "exclude": [
     "node_modules",
     ".tmp",
-    "dist"
+    "dist",
+    "lib"
   ]
 }

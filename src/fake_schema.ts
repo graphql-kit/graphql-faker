@@ -3,7 +3,6 @@ import {
   Kind,
   isLeafType,
   isAbstractType,
-  getNamedType,
   GraphQLError,
   GraphQLObjectType,
   GraphQLScalarType,

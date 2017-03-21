@@ -25,19 +25,19 @@ export const typeFakers = {
   },
   'String': {
     defaultOptions: {},
-    generator: (options) => {
+    generator: () => {
       return () => 'string';
     }
   },
   'Boolean': {
     defaultOptions: {},
-    generator: (options) => {
+    generator: () => {
       return () => faker.random.boolean();
     }
   },
   'ID': {
     defaultOptions: {},
-    generator: (options) => {
+    generator: () => {
       return () =>
         new Buffer(
           faker.random.number({max: 9999999999}).toString()

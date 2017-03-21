@@ -85,7 +85,7 @@ function runServer(schemaIDL, extensionIDL, optionsCB) {
     };
   }));
 
-  app.get('/user-idl', (req, res) => {
+  app.get('/user-idl', (_, res) => {
     res.status(200).json({
       schemaIDL,
       extensionIDL

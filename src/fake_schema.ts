@@ -81,7 +81,7 @@ export function fakeSchema(schema) {
     _.each(objectType.getFields(), field => {
       const type = field.type as GraphQLOutputType;
       const fakeResolver = getResolver(type, field);
-      return field.resolve = (source, _, context, resolveInfo) => {
+      return field.resolve = (source, _, _0, resolveInfo) => {
         const key = resolveInfo.path && resolveInfo.path.key;
         if (!source || typeof source[key] === 'undefined')
           return fakeResolver();

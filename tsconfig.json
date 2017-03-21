@@ -6,6 +6,8 @@
     "module": "commonjs",
     "target": "es5",
     "noImplicitAny": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "sourceMap": true,
     "outDir": "dist",
     "pretty": true,

@@ -51,7 +51,7 @@ export function proxyMiddleware(url) {
             // TODO: also cleanup params
             const rootValue = response.data;
             // TODO proxy global errors
-            const [globalErrors, localErrors] = splitErrors(response.errors);
+            const [, localErrors] = splitErrors(response.errors);
             injectLocalErrors(rootValue, localErrors);
             return rootValue;
           });

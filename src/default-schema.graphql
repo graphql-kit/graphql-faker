@@ -1,42 +1,32 @@
-# This is sample IDL schema for GraphQL Faker
-# This schema describes simple API with two entities
+# This is sample IDL schema for GraphQL Faker.
 #
 # There are two directives you can use to enhance fake data:
-#
 #   - @fake
 #   - @examples
+# Each directive has autocompletion working so start by typing @
 #
-# Each directive has autocompletion working so just press @
-#
-# Press save or Cmd+Enter to save the results and update the server
-#
-# Switch to GraphiQL on the right panel to immidiatelly test your changes
-# This tool also supports extending existing APIs. Check out our repository for details.
+# Press save or Cmd+Enter to apply the changes and update server. Switch to GraphiQL
+# on the right panel to immidiatelly test your changes.
+# This tool also supports extending existing APIs. Check graphql-faker --help
 #
 # Developed with ❤️ by APIs.guru | https://github.com/APIs-guru/graphql-faker
 
-type Person {
+type Company {
+  name: String @fake(type:companyName)
+  industry: String @examples(values: ["IT", "Manufactury", "Medicine", "Media"])
+  employees: [Employee!]
+}
+
+type Employee {
   firstName: String @fake(type: firstName, locale:en_CA)
   lastName: String @fake(type: lastName, locale:en_CA)
   address: String @fake(type:streetAddress, options: { useFullAddress: true })
-  gender: Gender
-  friends: [Person!]
+  subordinates: [Employee!]
   company: Company
 }
 
-type Company {
-  name: String @fake(type:companyName)
-  size: String @examples(values: ["small", "big", "huge"])
-  employees: [Person!]
-}
-
-enum Gender {
-  Male
-	Female
-}
-
 type Query {
-  allPeople: [Person!]
-	person(id: String): Person
+	employee(id: ID): Employee
+  company(id: ID): Company
   allCompanies: [Company!]
 }

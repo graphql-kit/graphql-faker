@@ -56,7 +56,7 @@ enum fake__Types {
   colorName
   productCategory
   productName
-  # Localized money amound. Configure with options `minMoney` and `maxMoney`
+  # Sum of money. Configure with options `minMoney` and `maxMoney`
   money
   productMaterial
   product
@@ -86,12 +86,12 @@ enum fake__Types {
   hackerAbbr
   hackerPhrase
 
-  # an image url. Configure image with options: `imageCategory`,
+  # An image url. Configure image with options: `imageCategory`,
   # `imageWidth`, `imageHeight` and `randomizeImageUrl`
   imageUrl
-  # a URL for an avatar
+  # An URL for an avatar
   avatarUrl
-  # configure email provider with option: `emailProvider`
+  # Configure email provider with option: `emailProvider`
   email
   url
   domainName
@@ -100,7 +100,7 @@ enum fake__Types {
   userAgent
   colorHex
   macAddress
-  # configure password with option `passwordLength`
+  # Configure password with option `passwordLength`
   password
 
   # Lorem Ipsum text. Configure size with option `loremSize`
@@ -160,7 +160,7 @@ input fake__options {
   imageHeight: Int
   # Only for type `imageUrl`
   imageCategory: fake__imageCategory
-  # Only for type `imageUrl` or `avatarUrl`
+  # Only for type `imageUrl`
   randomizeImageUrl: Boolean
   # Only for type `email`
   emailProvider: String

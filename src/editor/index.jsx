@@ -61,6 +61,7 @@ class FakeEditor extends React.Component {
       cachedValue: value,
       extendMode: !!extensionIDL
     });
+    this.updateIdl(value, true);
   }
 
   postIDL(idl) {
@@ -71,7 +72,7 @@ class FakeEditor extends React.Component {
     })
   }
 
-  updateIdl(value) {
+  updateIdl(value, noError) {
     let extensionIDL;
     let schemaIDL;
     if (this.state.extendMode) {
@@ -88,6 +89,7 @@ class FakeEditor extends React.Component {
       this.setState(prevState => ({...prevState, schema: schema, error: null}));
       return true;
     } catch(e) {
+      if (noError) return;
       this.setState(prevState => ({...prevState, error: e.message}));
       return false;
     }
@@ -146,7 +148,8 @@ class FakeEditor extends React.Component {
               '-active': activeTab === 0,
               '-dirty': dirty
             })}> <EditIcon/> </li>
-            <li onClick={() => this.switchTab(1)} className={classNames({
+            <li onClick={() => this.state.schema && this.switchTab(1)} className={classNames({
+              '-disabled': !this.state.schema,
               '-active': activeTab === 1
             })}> <ConsoleIcon/> </li>
             <li className="-pulldown -link">
@@ -180,7 +183,7 @@ class FakeEditor extends React.Component {
           <div className={classNames('tab-content', {
             '-active': activeTab === 1
           })}>
-            <GraphiQL fetcher={this.fetcher} schema={this.state.schema}/>
+            {this.state.schema && <GraphiQL fetcher={this.fetcher} schema={this.state.schema}/>}
           </div>
         </div>
       </div>

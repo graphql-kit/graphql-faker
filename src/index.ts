@@ -39,11 +39,11 @@ const argv = require('yargs')
   $0 ./my-idl.grqphql --open
 
   # Extend real data from SWAPI with faked based on extension IDL
-  $0 ./ext-swapi.grqphql -e http://swapi.graphene-python.org/graphql
+  $0 ./ext-swapi.grqphql --extend http://swapi.apis.guru/
 
   # Extend real data from GitHub API with faked based on extension IDL
-  $0 ./ext-gh.graphql -e https://api.github.com/graphql \\
-  -H “Authorization: bearer <TOKEN>"`)
+  $0 ./ext-gh.graphql --extend https://api.github.com/graphql \\
+  --header "Authorization: bearer <TOKEN>"`)
   .argv
 
 const log = console.log;
@@ -69,13 +69,10 @@ const fakeDefinitionIDL = fs.readFileSync(path.join(__dirname, 'fake_definition.
 let userIDL;
 if (existsSync(fileName)) {
   userIDL = fs.readFileSync(fileName, 'utf-8');
-} else if (!fileArg) {
+} else {
   // different default IDLs for extend and non-extend modes
   let defaultFileName = argv.e ? 'default-extend.graphql' : 'default-schema.graphql';
   userIDL = fs.readFileSync(path.join(__dirname, defaultFileName), 'utf-8');
-} else {
-  log(chalk.red(`Input file ${fileName} not found`));
-  process.exit(1);
 }
 
 const bodyParser = require('body-parser');

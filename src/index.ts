@@ -27,7 +27,8 @@ const argv = require('yargs')
   .alias('o', 'open')
   .describe('o', 'Open page with IDL editor and GraphiQL in browser')
   .alias('H', 'header')
-  .describe('H', 'Specify headers to the proxied server in curl format')
+  .describe('H', 'Specify headers to the proxied server in curl format,' +
+     'for e.g.: "Authorization: bearer XXXXXXXXX"')
   .nargs('H', 1)
   .implies('header', 'extend')
   .help('h')
@@ -47,7 +48,16 @@ const argv = require('yargs')
 
 const log = console.log;
 
-// log(argv.header) // <- array here
+let headers = {};
+if (argv.header) {
+  const headerStrings = Array.isArray(argv.header) ? argv.header : [argv.header];
+  for (var str of headerStrings) {
+    const index = str.indexOf(':');
+    const name = str.substr(0, index);
+    const value = str.substr(index + 1).trim();
+    headers[name] = value;
+  }
+}
 
 let fileArg = argv._[0];
 let fileName = fileArg || (argv.extend ?
@@ -77,7 +87,7 @@ function saveIDL(idl) {
 
 if (argv.e) {
   // run in proxy mode
-  proxyMiddleware(argv.e)
+  proxyMiddleware(argv.e, headers)
     .then(([schemaIDL, cb]) => runServer(schemaIDL, userIDL, cb));
 } else {
   runServer(userIDL, null, schema => {

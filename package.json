@@ -40,9 +40,10 @@
     "express": "^4.14.1",
     "express-graphql": "github:apis-guru/express-graphql#rootValue_dist",
     "faker": "^4.1.0",
+    "fetchql": "^2.0.1",
     "graphql": "github:apis-guru/graphql-js#directives-fork-dist",
-    "graphql-fetch": "^1.0.1",
     "lodash": "^4.17.4",
+    "node-fetch": "^1.6.3",
     "opn": "^4.0.2",
     "yargs": "^7.0.2"
   }

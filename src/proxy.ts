@@ -1,5 +1,7 @@
+global['fetch'] = require('node-fetch');
+
 import * as set from 'lodash/set.js';
-import * as graphqlFetch from 'graphql-fetch';
+import * as FetchQL from 'fetchql';
 import {
   Kind,
   parse,
@@ -23,11 +25,10 @@ type RequestInfo = {
   result?: any;
 };
 
-export function proxyMiddleware(url) {
-  const remoteServer = graphqlFetch(url) as
-    (query:String, vars?:any, opts?:any) => Promise<any>;
+export function proxyMiddleware(url, headers) {
+  const remoteServer = new FetchQL({url, headers});
 
-  return remoteServer(introspectionQuery).then(introspection => {
+  return remoteServer.query({query: introspectionQuery}).then(introspection => {
     // TODO: check for errors
     const introspectionSchema = buildClientSchema(introspection.data);
     const introspectionIDL = printSchema(introspectionSchema);
@@ -44,8 +45,14 @@ export function proxyMiddleware(url) {
           // TODO fail if params.operationName set
           // TODO copy headers
           const query = stripQuery(schema, info.document, extensionFields);
+          const variables = info.variables;
+          const operationName = info.operationName;
 
-          return remoteServer(query, info.variables).then(response => {
+          return remoteServer.query({
+            query,
+            variables,
+            operationName,
+          }).then(response => {
             const rootValue = response.data;
             // TODO proxy global errors
             const [, localErrors] = splitErrors(response.errors);

@@ -124,7 +124,7 @@ class FakeEditor extends React.Component {
   }
 
   onEdit = (val) => {
-    this.updateIdl(val);
+    if (this.state.error) this.updateIdl(val);
     this.setState(prevState => ({
       ...prevState,
       value: val,

@@ -16,7 +16,7 @@ import * as opn from 'opn';
 
 const DEFAULT_PORT = 9002;
 const argv = require('yargs')
-  .usage('$0 [file]')
+  .usage('Usage: $0 [file]')
   .alias('p', 'port')
   .nargs('p', 1)
   .describe('p', 'HTTP Port')
@@ -32,6 +32,17 @@ const argv = require('yargs')
   .implies('header', 'extend')
   .help('h')
   .alias('h', 'help')
+  .epilog(`Examples:
+
+  # Mock GraphQL API based on IDL and open interactive editor
+  $0 ./my-idl.grqphql --open
+
+  # Extend real data from SWAPI with faked based on extension IDL
+  $0 ./ext-swapi.grqphql -e http://swapi.graphene-python.org/graphql
+
+  # Extend real data from GitHub API with faked based on extension IDL
+  $0 ./ext-gh.graphql -e https://api.github.com/graphql \\
+  -H “Authorization: bearer <TOKEN>"`)
   .argv
 
 const log = console.log;

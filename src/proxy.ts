@@ -128,11 +128,19 @@ function stripQuery(schema, queryAST, extensionFields) {
       const typeName = typeInfo.getParentType().name;
       const fieldName = typeInfo.getFieldDef().name;
 
+      // TODO: uncomment after fragment fix
+      //if (fieldName.startsWith('__'))
+      //  return null;
       if ((extensionFields[typeName] || []).includes(fieldName))
         return null;
     },
     [Kind.SELECTION_SET]: {
       leave(node) {
+        //HACK: remove
+        const typeName = typeInfo.getParentType().name;
+        if (typeName.startsWith('__'))
+          return;
+
         return {
           kind: node.kind,
           selections: [

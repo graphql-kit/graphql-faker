@@ -1,5 +1,6 @@
 global['fetch'] = require('node-fetch');
 
+import {Response} from 'node-fetch';
 import * as set from 'lodash/set.js';
 import * as FetchQL from 'fetchql';
 import {
@@ -27,9 +28,25 @@ type RequestInfo = {
 
 export function proxyMiddleware(url, headers) {
   const remoteServer = new FetchQL({url, headers});
+  const errorPrefix = `Can't get introspection from ${url}:\n`;
 
-  return remoteServer.query({query: introspectionQuery}).then(introspection => {
-    // TODO: check for errors
+  return remoteServer.query({query: introspectionQuery})
+  .catch(errors => {
+    if (errors[0].stack instanceof Response) {
+      const errResponce = errors[0].stack;
+      return errResponce.text().then(body => { throw Error(
+        errorPrefix +`${errResponce.status} ${errResponce.statusText}\n${body}`
+      )});
+    }
+    return {errors};
+  })
+  .then(introspection => {
+    if (introspection.errors) {
+      throw Error(
+        errorPrefix + JSON.stringify(introspection.errors, null, 2)
+      );
+    }
+
     const introspectionSchema = buildClientSchema(introspection.data);
     const introspectionIDL = printSchema(introspectionSchema);
 

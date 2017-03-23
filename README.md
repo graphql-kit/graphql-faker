@@ -8,6 +8,7 @@
 Mock your future API or extend the existing API with realistic data from [faker.js](https://github.com/Marak/faker.js). __No coding required__.
 All you need is to write [GraphQL IDL](https://www.graph.cool/docs/faq/graphql-schema-definition-idl-kr84dktnp0/). Don't worry, we will provide you with examples in our IDL editor.
 
+In the GIF bellow we add fields to types inside real GitHub API and you can make queries from GraphiQL, Apollo, Relay, etc. and receive __real data mixed with mock data.__
 ![demo-gif](./docs/demo.gif)
 
 ## How does it work?

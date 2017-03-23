@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import {
+  Source,
   buildSchema,
 } from 'graphql';
 
@@ -29,7 +30,7 @@ const argv = require('yargs')
   .alias('o', 'open')
   .describe('o', 'Open page with IDL editor and GraphiQL in browser')
   .alias('H', 'header')
-  .describe('H', 'Specify headers to the proxied server in curl format,' +
+  .describe('H', 'Specify headers to the proxied server in cURL format,' +
      'for e.g.: "Authorization: bearer XXXXXXXXX"')
   .nargs('H', 1)
   .implies('header', 'extend')
@@ -66,28 +67,44 @@ let fileName = fileArg || (argv.extend ?
   './schema_extension.faker.graphql' :
   './schema.faker.graphql');
 
-const fakeDefinitionIDL = fs.readFileSync(path.join(__dirname, 'fake_definition.graphql'), 'utf-8');
+const fakeDefinitionIDL = readIDL(path.join(__dirname, 'fake_definition.graphql'));
 
 let userIDL;
 if (existsSync(fileName)) {
-  userIDL = fs.readFileSync(fileName, 'utf-8');
+  userIDL = readIDL(fileName);
 } else {
   // different default IDLs for extend and non-extend modes
   let defaultFileName = argv.e ? 'default-extend.graphql' : 'default-schema.graphql';
-  userIDL = fs.readFileSync(path.join(__dirname, defaultFileName), 'utf-8');
+  userIDL = readIDL(path.join(__dirname, defaultFileName));
 }
 
 const bodyParser = require('body-parser');
 
+function readIDL(filepath) {
+  return new Source(
+    fs.readFileSync(filepath, 'utf-8'),
+    filepath
+  );
+}
+
 function saveIDL(idl) {
   fs.writeFileSync(fileName, idl);
   log(`${chalk.green('✚')} schema saved to ${chalk.magenta(fileName)} on ${(new Date()).toLocaleString()}`);
+  return new Source(idl, fileName);
 }
 
 if (argv.e) {
   // run in proxy mode
-  proxyMiddleware(argv.e, headers)
-    .then(([schemaIDL, cb]) => runServer(schemaIDL, userIDL, cb));
+  const url = argv.e;
+  proxyMiddleware(url, headers)
+    .then(([schemaIDL, cb]) => {
+      schemaIDL = new Source(schemaIDL, `Inrospection from "${url}"`);
+      runServer(schemaIDL, userIDL, cb)
+    })
+    .catch(error => {
+      log(chalk.red(error.stack));
+      process.exit(1);
+    });
 } else {
   runServer(userIDL, null, schema => {
     fakeSchema(schema)
@@ -96,7 +113,10 @@ if (argv.e) {
 }
 
 function buildServerSchema(idl) {
-  return buildSchema(idl + '\n' + fakeDefinitionIDL);
+  return buildSchema(new Source(
+    idl.body + '\n' + fakeDefinitionIDL.body,
+    idl.name
+  ).body);
 }
 
 function runServer(schemaIDL, extensionIDL, optionsCB) {
@@ -113,8 +133,8 @@ function runServer(schemaIDL, extensionIDL, optionsCB) {
 
   app.get('/user-idl', (_, res) => {
     res.status(200).json({
-      schemaIDL,
-      extensionIDL
+      schemaIDL: schemaIDL.body,
+      extensionIDL: extensionIDL && extensionIDL.body,
     });
   });
 
@@ -123,11 +143,10 @@ function runServer(schemaIDL, extensionIDL, optionsCB) {
   app.post('/user-idl', (req, res) => {
     try {
       if (extensionIDL === null)
-        schemaIDL = req.body;
+        schemaIDL = saveIDL(req.body);
       else
-        extensionIDL = req.body;
+        extensionIDL = saveIDL(req.body);
 
-      saveIDL(req.body);
       res.status(200).send('ok');
     } catch(err) {
       res.status(500).send(err.message)

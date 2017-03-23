@@ -42,7 +42,6 @@ export function proxyMiddleware(url, headers) {
       return {
         schema,
         rootValue: (info: RequestInfo) => {
-          // TODO fail if params.operationName set
           // TODO copy headers
           const query = stripQuery(schema, info.document, extensionFields);
           const variables = info.variables;
@@ -106,7 +105,7 @@ function stripQuery(schema, queryAST, extensionFields) {
   const typeInfo = new TypeInfo(schema);
 
   // TODO: inline all fragments
-  // FIXME: Do something with field alias
+  // TODO: remove unussed params from query definition
   const changedAST = visit(queryAST, visitWithTypeInfo(typeInfo, {
     [Kind.FIELD]: () => {
       const typeName = typeInfo.getParentType().name;

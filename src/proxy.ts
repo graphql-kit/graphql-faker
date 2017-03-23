@@ -68,10 +68,12 @@ export function proxyMiddleware(url, headers) {
             query,
             variables,
             operationName,
-          }).then(response => {
+          }).catch(errors => ({errors}))
+          .then(response => {
             const rootValue = response.data;
+            const [globalErrors, localErrors] = splitErrors(response.errors);
             // TODO proxy global errors
-            const [, localErrors] = splitErrors(response.errors);
+            console.error('Global Errors:\n', globalErrors);
             injectLocalErrors(rootValue, localErrors);
             return rootValue;
           });

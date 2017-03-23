@@ -31,20 +31,20 @@ const argv = require('yargs')
   .describe('o', 'Open page with IDL editor and GraphiQL in browser')
   .alias('H', 'header')
   .describe('H', 'Specify headers to the proxied server in cURL format,' +
-     'for e.g.: "Authorization: bearer XXXXXXXXX"')
+     'e.g.: "Authorization: bearer XXXXXXXXX"')
   .nargs('H', 1)
   .implies('header', 'extend')
   .help('h')
   .alias('h', 'help')
   .epilog(`Examples:
 
-  # Mock GraphQL API based on IDL and open interactive editor
-  $0 ./my-idl.grqphql --open
+  # Mock GraphQL API based on example IDL and open interactive editor
+  $0 --open
 
-  # Extend real data from SWAPI with faked based on extension IDL
+  # Extend real data from SWAPI with faked data based on extension IDL
   $0 ./ext-swapi.grqphql --extend http://swapi.apis.guru/
 
-  # Extend real data from GitHub API with faked based on extension IDL
+  # Extend real data from GitHub API with faked data based on extension IDL
   $0 ./ext-gh.graphql --extend https://api.github.com/graphql \\
   --header "Authorization: bearer <TOKEN>"`)
   .argv

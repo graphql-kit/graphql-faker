@@ -32,6 +32,8 @@ export function proxyMiddleware(url, headers) {
 
   return remoteServer.query({query: introspectionQuery})
   .catch(errors => {
+    if (!Array.isArray(errors))
+      return {errors: [errors]};
     if (errors[0].stack instanceof Response) {
       const errResponce = errors[0].stack;
       return errResponce.text().then(body => { throw Error(

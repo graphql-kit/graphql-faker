@@ -5,17 +5,16 @@
 #   - @fake
 #   - @examples
 #
-# For example:
-# extend type Person {
-#   pet: Pet
-# }
-#
-# type Pet {
-#   name: String @fake(type:firstName)
-#   image: String @fake(type:imageUrl, options: {imageCategory:cats})
-# }
-#
 # Press save or Cmd+Enter to apply the changes and update server. Switch to GraphiQL
 # on the right panel to immidiatelly test your changes.
 #
 # Developed with ❤️ by APIs.guru | https://github.com/APIs-guru/graphql-faker
+
+extend type <RootTypeName> {
+  pet: Pet
+}
+
+type Pet {
+  name: String @fake(type:firstName)
+  image: String @fake(type:imageUrl, options: {imageCategory:cats})
+}

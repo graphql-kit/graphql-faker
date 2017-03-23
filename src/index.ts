@@ -119,8 +119,13 @@ function buildServerSchema(idl) {
   ).body);
 }
 
-function runServer(schemaIDL, extensionIDL, optionsCB) {
+function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
   const app = express();
+
+  if (extensionIDL) {
+    const schema = buildServerSchema(schemaIDL);
+    extensionIDL.body = extensionIDL.body.replace('<RootTypeName>', schema.getQueryType().name);
+  }
 
   app.use('/graphql', graphqlHTTP(() => {
     const schema = buildServerSchema(schemaIDL);

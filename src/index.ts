@@ -160,8 +160,8 @@ function runServer(schemaIDL, extensionIDL, optionsCB) {
   log(`\n${chalk.green('✔')} Your GraphQL Fake API is ready to use 🚀
   Here are your links:
 
-  ${chalk.blue('❯')} GraphQL API:\t http://localhost:${argv.port}/graphql
   ${chalk.blue('❯')} Interactive Editor:\t http://localhost:${argv.port}/editor
+  ${chalk.blue('❯')} GraphQL API:\t http://localhost:${argv.port}/graphql
 
   `);
 

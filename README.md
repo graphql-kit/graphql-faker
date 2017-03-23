@@ -1,6 +1,9 @@
 ![GraphQL Faker logo](./docs/faker-logo-text.png)
 
 # GraphQL Faker
+[![npm](https://img.shields.io/npm/v/graphql-faker.svg)](https://www.npmjs.com/package/graphql-faker) [![David](https://img.shields.io/david/APIs-guru/graphql-faker.svg)](https://david-dm.org/APIs-guru/graphql-faker)
+[![David](https://img.shields.io/david/dev/APIs-guru/graphql-faker.svg)](https://david-dm.org/APIs-guru/graphql-faker?type=dev)
+[![npm](https://img.shields.io/npm/l/graphql-faker.svg)](https://github.com/APIs-guru/graphql-faker/blob/master/LICENSE)
 
 Mock your future API or extend the existing API with realistic data from [faker.js](https://github.com/Marak/faker.js). __No coding required__.
 All you need is to write [GraphQL IDL](https://www.graph.cool/docs/faq/graphql-schema-definition-idl-kr84dktnp0/). Don't worry, we will provide you with examples in our IDL editor.

@@ -7,7 +7,7 @@ All you need is to write [GraphQL IDL](https://www.graph.cool/docs/faq/graphql-s
 
 ![demo-gif](./docs/demo.gif)
 
-## How does it work
+## How does it work?
 We use `@fake` directive to let you specify how to fake data. And if 60+ fakers is not enough for you, just use `@examples` directive to provide examples. Just add a directive to any field or custom scalar definition:
 
     type Person {
@@ -35,15 +35,17 @@ or
 
 ## TL;DR
 
-Mock GraphQL API based on IDL and open interactive editor:
+Mock GraphQL API based on example IDL and open interactive editor:
 
-    graphql-faker ./my-idl.grqphql --open
+    graphql-faker --open
 
-Extend real data from SWAPI with faked based on extension IDL:
+__Note:__ You can specify non-existing IDL file names - Faker will use example IDL which you can edit in interactive editor.
+
+Extend real data from SWAPI with faked data based on extension IDL:
 
     graphql-faker ./ext-swapi.grqphql --extend http://swapi.apis.guru
 
-Extend real data from GitHub API with faked based on extension IDL (you can get token [here](https://developer.github.com/early-access/graphql/guides/accessing-graphql/#generating-an-oauth-token)):
+Extend real data from GitHub API with faked data based on extension IDL (you can get token [here](https://developer.github.com/early-access/graphql/guides/accessing-graphql/#generating-an-oauth-token)):
 
     graphql-faker ./ext-gh.graphql --extend https://api.github.com/graphql \
     --header "Authorization: bearer <TOKEN>"
@@ -52,9 +54,11 @@ Extend real data from GitHub API with faked based on extension IDL (you can get 
 
     graphql-faker [options] [IDL file]
 
+`[IDL file]` - path to file with [IDL](https://www.graph.cool/docs/faq/graphql-schema-definition-idl-kr84dktnp0/). If this argument is omited Faker uses default file name.
+
 ### Options
  * `-p`, `--port`     HTTP Port [default: `9002`]
  * `-e`, `--extend`   URL to existing GraphQL server to extend
  * `-o`, `--open`     Open page with IDL editor and GraphiQL in browser
- * `-H`, `--header`   Specify headers to the proxied server in cURL format, for e.g.: `Authorization: bearer XXXXXXXXX`
+ * `-H`, `--header`   Specify headers to the proxied server in cURL format, e.g.: `Authorization: bearer XXXXXXXXX`
  * `-h`, `--help`     Show help

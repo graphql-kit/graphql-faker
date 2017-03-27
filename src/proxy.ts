@@ -1,8 +1,7 @@
-global['fetch'] = require('node-fetch');
-
-import {Response} from 'node-fetch';
+import fetch from 'node-fetch';
+import {Headers} from 'node-fetch';
 import * as set from 'lodash/set.js';
-import * as FetchQL from 'fetchql';
+
 import {
   Kind,
   parse,
@@ -27,28 +26,9 @@ type RequestInfo = {
 };
 
 export function proxyMiddleware(url, headers) {
-  const remoteServer = new FetchQL({url, headers});
-  const errorPrefix = `Can't get introspection from ${url}:\n`;
+  const remoteServer = requestFactory(url, headers);
 
-  return remoteServer.query({query: introspectionQuery})
-  .catch(errors => {
-    if (!Array.isArray(errors))
-      return {errors: [errors]};
-    if (errors[0].stack instanceof Response) {
-      const errResponce = errors[0].stack;
-      return errResponce.text().then(body => { throw Error(
-        errorPrefix +`${errResponce.status} ${errResponce.statusText}\n${body}`
-      )});
-    }
-    return {errors};
-  })
-  .then(introspection => {
-    if (introspection.errors) {
-      throw Error(
-        errorPrefix + JSON.stringify(introspection.errors, null, 2)
-      );
-    }
-
+  return getIntrospection().then(introspection => {
     const introspectionSchema = buildClientSchema(introspection.data);
     const introspectionIDL = printSchema(introspectionSchema);
 
@@ -66,11 +46,7 @@ export function proxyMiddleware(url, headers) {
           const variables = info.variables;
           const operationName = info.operationName;
 
-          return remoteServer.query({
-            query,
-            variables,
-            operationName,
-          }).catch(errors => ({errors}))
+          return remoteServer(query, variables, operationName)
           .then(response => {
             const rootValue = response.data;
             const [globalErrors, localErrors] = splitErrors(response.errors);
@@ -84,7 +60,19 @@ export function proxyMiddleware(url, headers) {
         },
       };
     }];
-  })
+  });
+
+  function getIntrospection() {
+    return remoteServer(introspectionQuery)
+      .then(introspection => {
+        if (introspection.errors)
+          throw Error(JSON.stringify(introspection.errors, null, 2));
+        return introspection;
+      })
+      .catch(error => {
+        throw Error(`Can't get introspection from ${url}:\n${error.message}`);
+      })
+  }
 }
 
 function splitErrors(errors) {
@@ -159,4 +147,27 @@ function stripQuery(schema, queryAST, extensionFields) {
   }), null);
 
   return print(changedAST);
+}
+
+function requestFactory(url, headersObj) {
+  return (query, variables?, operationName?) => {
+    return fetch(url, {
+      method: 'POST',
+      headers: new Headers({
+        "content-type": 'application/json',
+        ...headersObj,
+      }),
+      body: JSON.stringify({
+        operationName,
+        query,
+        variables,
+      })
+    }).then(responce => {
+      if (responce.ok)
+        return responce.json();
+      return responce.text().then(body => {
+        throw Error(`${responce.status} ${responce.statusText}\n${body}`);
+      });
+    });
+  }
 }

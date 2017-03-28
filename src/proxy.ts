@@ -38,6 +38,7 @@ export function proxyMiddleware(url, headers) {
       const schema = extendSchema(serverSchema, extensionAST);
       fakeSchema(schema);
 
+      //TODO: proxy extensions
       return {
         schema,
         rootValue: (info: RequestInfo) => {
@@ -47,16 +48,7 @@ export function proxyMiddleware(url, headers) {
           const operationName = info.operationName;
 
           return remoteServer(query, variables, operationName)
-          .then(response => {
-            const rootValue = response.data;
-            const [globalErrors, localErrors] = splitErrors(response.errors);
-            // TODO proxy global errors
-            if (globalErrors.length !== 0)
-              console.error('Global Errors:\n', globalErrors);
-
-            injectLocalErrors(rootValue, localErrors);
-            return rootValue;
-          });
+            .then(buildRootValue);
         },
       };
     }];
@@ -75,21 +67,24 @@ export function proxyMiddleware(url, headers) {
   }
 }
 
-function splitErrors(errors) {
-  const global = [];
-  const local = [];
+function buildRootValue(response) {
+  const rootValue = response.data;
+  const globalErrors = [];
 
-  for (const error of (errors || []))
-    (error.path ? local : global).push(error);
-  return [global, local];
-}
+  for (const error of (response.errors || [])) {
+    if (!error.path)
+      globalErrors.push(error);
 
-function injectLocalErrors(rootValue, errors) {
-  (errors || []).forEach(error =>
     // Recreate root value up to a place where original error was thrown
     // and place error as field value.
     set(rootValue, error.path, new Error(error.message))
-  );
+  }
+
+  // TODO proxy global errors
+  if (globalErrors.length !== 0)
+    console.error('Global Errors:\n', globalErrors);
+
+  return rootValue;
 }
 
 function getExtensionFields(extensionAST) {

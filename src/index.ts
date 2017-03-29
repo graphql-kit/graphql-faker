@@ -2,7 +2,9 @@
 
 import {
   Source,
-  buildSchema,
+  parse,
+  concatAST,
+  buildASTSchema,
 } from 'graphql';
 
 import * as fs from 'fs';
@@ -67,7 +69,7 @@ let fileName = fileArg || (argv.extend ?
   './schema_extension.faker.graphql' :
   './schema.faker.graphql');
 
-const fakeDefinitionIDL = readIDL(path.join(__dirname, 'fake_definition.graphql'));
+const fakeDefinitionAST = readAST(path.join(__dirname, 'fake_definition.graphql'));
 
 let userIDL;
 if (existsSync(fileName)) {
@@ -85,6 +87,10 @@ function readIDL(filepath) {
     fs.readFileSync(filepath, 'utf-8'),
     filepath
   );
+}
+
+function readAST(filepath) {
+  return parse(readIDL(filepath));
 }
 
 function saveIDL(idl) {
@@ -113,10 +119,8 @@ if (argv.e) {
 }
 
 function buildServerSchema(idl) {
-  return buildSchema(new Source(
-    idl.body + '\n' + fakeDefinitionIDL.body,
-    idl.name
-  ).body);
+  var ast = concatAST([parse(idl), fakeDefinitionAST]);
+  return buildASTSchema(ast);
 }
 
 function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {

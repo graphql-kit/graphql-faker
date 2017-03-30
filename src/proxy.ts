@@ -10,9 +10,11 @@ import {
   TypeInfo,
   printSchema,
   extendSchema,
+  isAbstractType,
   visitWithTypeInfo,
   buildClientSchema,
   introspectionQuery,
+  separateOperations,
   DocumentNode,
 } from 'graphql';
 
@@ -43,9 +45,11 @@ export function proxyMiddleware(url, headers) {
         schema,
         rootValue: (info: RequestInfo) => {
           // TODO copy headers
-          const query = stripQuery(schema, info.document, extensionFields);
-          const variables = info.variables;
           const operationName = info.operationName;
+          const variables = info.variables;
+          const query = stripQuery(
+            schema, info.document, operationName, extensionFields
+          );
 
           return remoteServer(query, variables, operationName)
             .then(buildRootValue);
@@ -99,49 +103,53 @@ function getExtensionFields(extensionAST) {
   return extensionFields;
 }
 
-const typenameAST = {
-  kind: Kind.FIELD,
-  name: {
-    kind: Kind.NAME,
-    value: '__typename',
-  },
-};
+function injectTypename(node) {
+  return {
+    ...node,
+    selections: [
+      ...node.selections,
+      {
+        kind: Kind.FIELD,
+        name: {
+          kind: Kind.NAME,
+          value: '__typename',
+        },
+      },
+    ],
+  };
+}
 
-function stripQuery(schema, queryAST, extensionFields) {
+function stripQuery(schema, queryAST, operationName, extensionFields) {
   const typeInfo = new TypeInfo(schema);
 
-  // TODO: inline all fragments
-  // TODO: remove unussed params from query definition
   const changedAST = visit(queryAST, visitWithTypeInfo(typeInfo, {
     [Kind.FIELD]: () => {
       const typeName = typeInfo.getParentType().name;
       const fieldName = typeInfo.getFieldDef().name;
 
-      // TODO: uncomment after fragment fix
-      //if (fieldName.startsWith('__'))
-      //  return null;
+      if (fieldName.startsWith('__'))
+        return null;
       if ((extensionFields[typeName] || []).includes(fieldName))
         return null;
     },
     [Kind.SELECTION_SET]: {
       leave(node) {
-        //HACK: remove
-        const typeName = typeInfo.getParentType().name;
-        if (typeName.startsWith('__'))
-          return;
-
-        return {
-          kind: node.kind,
-          selections: [
-            ...node.selections,
-            typenameAST,
-          ],
-        };
+        const type = typeInfo.getParentType()
+        if (isAbstractType(type) || node.selections.length === 0)
+          return injectTypename(node);
       }
     },
   }), null);
 
-  return print(changedAST);
+  return print(extractOperation(changedAST, operationName));
+}
+
+function extractOperation(queryAST, operationName) {
+  // TODO: remove unussed params from query definition
+  const operations = separateOperations(queryAST);
+  if (operationName)
+    return operations[operationName];
+  return Object.values(operations)[0];
 }
 
 function requestFactory(url, headersObj) {

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import 'core-js/shim';
+
 import {
   Source,
   parse,

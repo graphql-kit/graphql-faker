@@ -37,6 +37,7 @@
   "dependencies": {
     "body-parser": "^1.17.1",
     "chalk": "^1.1.3",
+    "core-js": "^2.4.1",
     "express": "^4.14.1",
     "express-graphql": "github:apis-guru/express-graphql#rootValue_dist",
     "faker": "^4.1.0",

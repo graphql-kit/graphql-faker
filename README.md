@@ -1,4 +1,11 @@
 ![GraphQL Faker logo](./docs/faker-logo-text.png)
+# HOW TO RUN
+
+```
+npm install
+npm run build:all
+npm run start
+```
 
 # GraphQL Faker
 [![npm](https://img.shields.io/npm/v/graphql-faker.svg)](https://www.npmjs.com/package/graphql-faker) [![David](https://img.shields.io/david/APIs-guru/graphql-faker.svg)](https://david-dm.org/APIs-guru/graphql-faker)

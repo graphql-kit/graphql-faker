@@ -28,6 +28,7 @@ No need to remember or read any docs. Autocompletion is included!
 + Runs as a local server (can be called from browser, cURL, your app, etc.)
 + Interactive editor with autocompletion for directives with GraphiQL embeded
 + ✨ Support for proxying existing GraphQL API and extending it with faked data
+![Extend mode diagram](./docs/extend-mode.gif)
 
 ## Install
 

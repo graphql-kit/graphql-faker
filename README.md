@@ -1,15 +1,4 @@
 ![GraphQL Faker logo](./docs/faker-logo-text.png)
-# Purpose of this release
-
-Forked from https://github.com/APIs-guru/graphql-faker, added CORS for less integration problems with custom apps in development.
-
-# HOW TO RUN
-
-```
-npm install
-npm run build:all
-npm run start
-```
 
 # GraphQL Faker
 [![npm](https://img.shields.io/npm/v/graphql-faker.svg)](https://www.npmjs.com/package/graphql-faker) [![David](https://img.shields.io/david/APIs-guru/graphql-faker.svg)](https://david-dm.org/APIs-guru/graphql-faker)
@@ -78,3 +67,10 @@ Extend real data from GitHub API with faked data based on extension IDL (you can
  * `-o`, `--open`     Open page with IDL editor and GraphiQL in browser
  * `-H`, `--header`   Specify headers to the proxied server in cURL format, e.g.: `Authorization: bearer XXXXXXXXX`
  * `-h`, `--help`     Show help
+ 
+# Development
+```sh
+npm install
+npm run build:all
+npm run start
+```

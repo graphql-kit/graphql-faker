@@ -1,4 +1,15 @@
 ![GraphQL Faker logo](./docs/faker-logo-text.png)
+# Purpose of this release
+
+Forked from https://github.com/APIs-guru/graphql-faker, added CORS for less integration problems with custom apps in development.
+
+# HOW TO RUN
+
+```
+npm install
+npm run build:all
+npm run start
+```
 
 # GraphQL Faker
 [![npm](https://img.shields.io/npm/v/graphql-faker.svg)](https://www.npmjs.com/package/graphql-faker) [![David](https://img.shields.io/david/APIs-guru/graphql-faker.svg)](https://david-dm.org/APIs-guru/graphql-faker)

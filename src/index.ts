@@ -21,6 +21,8 @@ import { existsSync } from './utils';
 
 import * as opn from 'opn';
 
+const cors = require('cors');
+
 const DEFAULT_PORT = 9002;
 const argv = require('yargs')
   .usage('Usage: $0 [file]')
@@ -133,7 +135,7 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
     extensionIDL.body = extensionIDL.body.replace('<RootTypeName>', schema.getQueryType().name);
   }
 
-  app.use('/graphql', graphqlHTTP(() => {
+  app.use('/graphql', cors(), graphqlHTTP(() => {
     const schema = buildServerSchema(schemaIDL);
 
     return {

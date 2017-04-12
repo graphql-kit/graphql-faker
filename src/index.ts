@@ -40,6 +40,12 @@ const argv = require('yargs')
      'e.g.: "Authorization: bearer XXXXXXXXX"')
   .nargs('H', 1)
   .implies('header', 'extend')
+  .alias('co', 'cors-origin')
+  .nargs('co', 1)
+  .describe('co', 'CORS: Define Access-Control-Allow-Origin header')
+  .alias('cc', 'cors-credentials')
+  .boolean('cc')
+  .describe('cc', 'CORS: Allows Access-Control-Allow-Credentials header in the response')
   .help('h')
   .alias('h', 'help')
   .epilog(`Examples:
@@ -74,6 +80,14 @@ let fileName = fileArg || (argv.extend ?
   './schema.faker.graphql');
 
 const fakeDefinitionAST = readAST(path.join(__dirname, 'fake_definition.graphql'));
+const corsOptions = {}
+
+if (argv.cc) {
+  corsOptions['credentials'] =  argv.cc
+}
+if (argv.co) {
+  corsOptions['origin'] =  argv.co
+}
 
 let userIDL;
 if (existsSync(fileName)) {
@@ -134,8 +148,8 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
     const schema = buildServerSchema(schemaIDL);
     extensionIDL.body = extensionIDL.body.replace('<RootTypeName>', schema.getQueryType().name);
   }
-
-  app.use('/graphql', cors(), graphqlHTTP(() => {
+  app.options('/graphql', cors(corsOptions))
+  app.use('/graphql', cors(corsOptions), graphqlHTTP(() => {
     const schema = buildServerSchema(schemaIDL);
 
     return {

@@ -6,6 +6,7 @@ import {
   GraphQLScalarType,
   GraphQLAbstractType,
   GraphQLOutputType,
+  GraphQLInputObjectType,
   GraphQLList,
   GraphQLNonNull,
   GraphQLEnumType,
@@ -61,8 +62,8 @@ function astToJSON(ast) {
   }
 }
 
-
 export function fakeSchema(schema) {
+  const mutationTypeName = (schema.getMutationType() || {}).name;
   const jsonType = schema.getTypeMap()['examples__JSON'];
   jsonType.parseLiteral = astToJSON;
 
@@ -76,18 +77,52 @@ export function fakeSchema(schema) {
   };
 
   function addFakeProperties(objectType:GraphQLObjectType) {
-    for (let field of Object.values(objectType.getFields())) {
-      const type = field.type as GraphQLOutputType;
-      const fakeResolver = getResolver(type, field);
-      field.resolve = (source, _0, _1, resolveInfo) => {
-        const key = resolveInfo.path && resolveInfo.path.key;
-        if (!source || typeof source[key] === 'undefined')
-          return fakeResolver();
+    const isMutation = (objectType.name === mutationTypeName);
 
-        // Can be value or Error instance injected in proxy
-        return source[key];
-      }
-    };
+    for (let field of Object.values(objectType.getFields())) {
+      if (isMutation && isRelayMutation(field))
+        field.resolve = getRelayMutationResolver();
+      else
+        field.resolve = getFieldResolver(field);
+    }
+  }
+
+  function isRelayMutation(field) {
+    const args = field.args;
+    if (args.length !== 1 || args[0].name !== 'input')
+      return false;
+
+    const inputType = args[0].type;
+    // TODO: check presence of 'clientMutationId'
+    return (
+      inputType instanceof GraphQLNonNull &&
+      inputType.ofType instanceof GraphQLInputObjectType &&
+      field.type instanceof GraphQLObjectType
+    );
+  }
+
+  function getFieldResolver(field) {
+    const type = field.type as GraphQLOutputType;
+    const fakeResolver = getResolver(type, field);
+    return (source, _0, _1, info) => {
+      const value = getCurrentSourceProperty(source, info.path);
+      return (value !== undefined) ? value : fakeResolver();
+    }
+  }
+
+  function getRelayMutationResolver() {
+    return (source, args, _1, info) => {
+      const value = getCurrentSourceProperty(source, info.path);
+      if (value instanceof Error)
+        return value;
+      return {...args['input'], ...value};
+    }
+  }
+
+  // get value or Error instance injected by the proxy
+  function getCurrentSourceProperty(source, path) {
+    const key = path && path.key;
+    return source && source[key];
   }
 
   function getResolver(type:GraphQLOutputType, field) {

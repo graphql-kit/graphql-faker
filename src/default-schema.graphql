@@ -13,7 +13,7 @@
 
 type Company {
   name: String @fake(type:companyName)
-  industry: String @examples(values: ["IT", "Manufactury", "Medicine", "Media"])
+  industry: String @examples(values: ["IT", "Manufacturing", "Medicine", "Media"])
   employees: [Employee!]
 }
 

@@ -6,7 +6,7 @@
 # Each directive has autocompletion working so start by typing @
 #
 # Press save or Cmd+Enter to apply the changes and update server. Switch to GraphiQL
-# on the right panel to immidiatelly test your changes.
+# on the left panel to immediately test your changes.
 # This tool also supports extending existing APIs. Check graphql-faker --help
 #
 # Developed with ❤️ by APIs.guru | https://github.com/APIs-guru/graphql-faker

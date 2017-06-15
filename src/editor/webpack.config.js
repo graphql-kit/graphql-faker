@@ -7,7 +7,7 @@ function root(args) {
 }
 
 module.exports = {
-  devtool: 'cheap-source-map',
+  devtool: 'source-map',
 
   performance: {
     hints: false

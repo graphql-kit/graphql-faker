@@ -12,8 +12,9 @@ import {
 import * as fs from 'fs';
 import * as path from 'path';
 import * as express from 'express';
-import * as graphqlHTTP from 'express-graphql';
+import { graphqlExpress as graphqlHTTP } from 'graphql-server-express';
 import * as chalk from 'chalk';
+import * as bodyParser from 'body-parser';
 
 import { fakeSchema } from './fake_schema';
 import { proxyMiddleware } from './proxy';
@@ -144,7 +145,7 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
     extensionIDL.body = extensionIDL.body.replace('<RootTypeName>', schema.getQueryType().name);
   }
   app.options('/graphql', cors(corsOptions))
-  app.use('/graphql', cors(corsOptions), graphqlHTTP(() => {
+  app.use('/graphql', cors(corsOptions), bodyParser.json(), graphqlHTTP(() => {
     const schema = buildServerSchema(schemaIDL);
 
     return {

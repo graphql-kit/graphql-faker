@@ -68,8 +68,11 @@ export function fakeSchema(schema) {
   jsonType.parseLiteral = astToJSON;
 
   for (let type of Object.values(schema.getTypeMap())) {
-    if (type instanceof GraphQLScalarType && !stdTypeNames.includes(type.name))
+    if (type instanceof GraphQLScalarType && !stdTypeNames.includes(type.name)) {
       type.serialize = (value => value);
+      type.parseLiteral = astToJSON;
+      type.parseValue = astToJSON;
+    }
     if (type instanceof GraphQLObjectType && !type.name.startsWith('__'))
       addFakeProperties(type);
     if (isAbstractType(type))

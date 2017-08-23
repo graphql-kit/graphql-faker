@@ -11,6 +11,7 @@ import {
   printSchema,
   extendSchema,
   isAbstractType,
+  getOperationAST,
   visitWithTypeInfo,
   buildClientSchema,
   introspectionQuery,
@@ -141,11 +142,30 @@ function stripQuery(schema, queryAST, operationName, extensionFields) {
     },
   }), null);
 
-  return print(extractOperation(changedAST, operationName));
+  const operation = extractOperation(changedAST, operationName);
+  removeUnusedVariables(operation);
+  return print(operation);
+}
+
+function removeUnusedVariables(queryAST) {
+  const operation = getOperationAST(queryAST);
+  if (!operation.variableDefinitions) {
+    return;
+  }
+
+  const seenVariables = {}
+  visit(queryAST, {
+    [Kind.VARIABLE]: (node) => {
+      seenVariables[node.name.value] = true;
+    },
+  }, null);
+
+  operation.variableDefinitions = operation.variableDefinitions.filter(
+    def => !seenVariables[def.variable.name.value]
+  );
 }
 
 function extractOperation(queryAST, operationName) {
-  // TODO: remove unussed params from query definition
   const operations = separateOperations(queryAST);
   if (operationName)
     return operations[operationName];

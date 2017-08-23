@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import {Headers} from 'node-fetch';
-import * as set from 'lodash/set.js';
+const set = require('lodash/set');
 
 import {
   Kind,

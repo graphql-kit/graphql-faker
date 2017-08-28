@@ -140,7 +140,7 @@ function stripQuery(schema, queryAST, operationName, extensionFields) {
           return injectTypename(node);
       }
     },
-  }), null);
+  }));
 
   const operation = extractOperation(changedAST, operationName);
   removeUnusedVariables(operation);
@@ -158,7 +158,7 @@ function removeUnusedVariables(queryAST) {
     [Kind.VARIABLE]: (node) => {
       seenVariables[node.name.value] = true;
     },
-  }, null);
+  });
 
   operation.variableDefinitions = operation.variableDefinitions.filter(
     def => !seenVariables[def.variable.name.value]

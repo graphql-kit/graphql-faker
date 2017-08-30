@@ -11,7 +11,6 @@ import {
   printSchema,
   extendSchema,
   isAbstractType,
-  getOperationAST,
   visitWithTypeInfo,
   buildClientSchema,
   introspectionQuery,
@@ -142,27 +141,32 @@ function stripQuery(schema, queryAST, operationName, extensionFields) {
     },
   }));
 
-  const operation = extractOperation(changedAST, operationName);
-  removeUnusedVariables(operation);
+  let operation = extractOperation(changedAST, operationName);
+  operation = removeUnusedVariables(operation);
   return print(operation);
 }
 
 function removeUnusedVariables(queryAST) {
-  const operation = getOperationAST(queryAST);
-  if (!operation.variableDefinitions) {
-    return;
-  }
-
   const seenVariables = {}
   visit(queryAST, {
+    [Kind.VARIABLE_DEFINITION]: () => false,
     [Kind.VARIABLE]: (node) => {
       seenVariables[node.name.value] = true;
     },
   });
 
-  operation.variableDefinitions = operation.variableDefinitions.filter(
-    def => !seenVariables[def.variable.name.value]
-  );
+  // Need to second visit to account for variables used in fragments
+  // so we make modification only when we seen all variables.
+  return visit(queryAST, {
+    [Kind.OPERATION_DEFINITION]: {
+      leave(node) {
+        const variableDefinitions = node.variableDefinitions.filter(
+          def => seenVariables[def.variable.name.value]
+        );
+        return { ...node, variableDefinitions };
+      },
+    },
+  });
 }
 
 function extractOperation(queryAST, operationName) {

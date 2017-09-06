@@ -71,7 +71,7 @@ export function fakeSchema(schema) {
     if (type instanceof GraphQLScalarType && !stdTypeNames.includes(type.name)) {
       type.serialize = (value => value);
       type.parseLiteral = astToJSON;
-      type.parseValue = astToJSON;
+      type.parseValue = (x => x);
     }
     if (type instanceof GraphQLObjectType && !type.name.startsWith('__'))
       addFakeProperties(type);

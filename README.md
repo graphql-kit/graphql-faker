@@ -62,7 +62,7 @@ Extend real data from GitHub API with faked data based on extension IDL (you can
 `[IDL file]` - path to file with [IDL](https://www.graph.cool/docs/faq/graphql-schema-definition-idl-kr84dktnp0/). If this argument is omited Faker uses default file name.
 
 ### Options
- * `-p`, `--port`     HTTP Port [default: `9002`]
+ * `-p`, `--port`     HTTP Port [default: `env.PORT` or `9002`]
  * `-e`, `--extend`   URL to existing GraphQL server to extend
  * `-o`, `--open`     Open page with IDL editor and GraphiQL in browser
  * `-H`, `--header`   Specify headers to the proxied server in cURL format, e.g.: `Authorization: bearer XXXXXXXXX`

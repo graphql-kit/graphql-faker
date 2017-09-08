@@ -23,7 +23,7 @@ import * as opn from 'opn';
 
 const cors = require('cors');
 
-const DEFAULT_PORT = 9002;
+const DEFAULT_PORT = process.env.PORT || 9002;
 const argv = require('yargs')
   .usage('Usage: $0 [file]')
   .alias('p', 'port')

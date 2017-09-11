@@ -34,7 +34,7 @@ export function proxyMiddleware(url, headers) {
     const introspectionSchema = buildClientSchema(introspection.data);
     const introspectionIDL = printSchema(introspectionSchema);
 
-    return [introspectionIDL, (serverSchema, extensionIDL) => {
+    return [introspectionIDL, (serverSchema, extensionIDL, headers) => {
       const extensionAST = parse(extensionIDL);
       const extensionFields = getExtensionFields(extensionAST);
       const schema = extendSchema(serverSchema, extensionAST);
@@ -51,7 +51,7 @@ export function proxyMiddleware(url, headers) {
             schema, info.document, operationName, extensionFields
           );
 
-          return remoteServer(query, variables, operationName)
+          return remoteServer(query, variables, operationName, headers)
             .then(buildRootValue);
         },
       };
@@ -177,18 +177,21 @@ function extractOperation(queryAST, operationName) {
 }
 
 function requestFactory(url, headersObj) {
-  return (query, variables?, operationName?) => {
+  return (query, variables?, operationName?, headers?) => {
+    const body = JSON.stringify({
+      operationName,
+      query,
+      variables
+    });
     return fetch(url, {
       method: 'POST',
       headers: new Headers({
         "content-type": 'application/json',
+        ...(headers || {}),
         ...headersObj,
+        "content-length": body.length
       }),
-      body: JSON.stringify({
-        operationName,
-        query,
-        variables,
-      })
+      body
     }).then(responce => {
       if (responce.ok)
         return responce.json();

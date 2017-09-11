@@ -144,14 +144,15 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
     extensionIDL.body = extensionIDL.body.replace('<RootTypeName>', schema.getQueryType().name);
   }
   app.options('/graphql', cors(corsOptions))
-  app.use('/graphql', cors(corsOptions), graphqlHTTP(() => {
-    const schema = buildServerSchema(schemaIDL);
-
-    return {
-      ...optionsCB(schema, extensionIDL),
-      graphiql: true,
-    };
-  }));
+  app.use('/graphql', cors(corsOptions), function (req, res) {
+    graphqlHTTP(() => {
+      const schema = buildServerSchema(schemaIDL);
+      return {
+        ...optionsCB(schema, extensionIDL, req.headers),
+        graphiql: true,
+      };
+    })(req, res);
+  });
 
   app.get('/user-idl', (_, res) => {
     res.status(200).json({

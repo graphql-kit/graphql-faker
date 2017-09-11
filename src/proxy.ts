@@ -159,7 +159,7 @@ function removeUnusedVariables(queryAST) {
   return visit(queryAST, {
     [Kind.OPERATION_DEFINITION]: {
       leave(node) {
-        const variableDefinitions = node.variableDefinitions.filter(
+        const variableDefinitions = (node.variableDefinitions || []).filter(
           def => seenVariables[def.variable.name.value]
         );
         return { ...node, variableDefinitions };

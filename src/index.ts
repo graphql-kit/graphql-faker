@@ -22,6 +22,7 @@ import { existsSync } from './utils';
 import * as opn from 'opn';
 
 const cors = require('cors');
+const pick = require('lodash/pick');
 
 const DEFAULT_PORT = process.env.PORT || 9002;
 const argv = require('yargs')
@@ -40,6 +41,12 @@ const argv = require('yargs')
      'e.g.: "Authorization: bearer XXXXXXXXX"')
   .nargs('H', 1)
   .implies('header', 'extend')
+  .describe(
+    'forward-headers',
+    'Headers that should be forwarded to the proxied server'
+  )
+  .array('forward-headers')
+  .implies('forward-headers', 'extend')
   .alias('co', 'cors-origin')
   .nargs('co', 1)
   .describe('co', 'CORS: Define Access-Control-Allow-Origin header')
@@ -70,6 +77,10 @@ if (argv.header) {
     headers[name] = value;
   }
 }
+
+const forwardHeaderNames = (argv.forwardHeaders || []).map(
+  str => str.toLowerCase()
+);
 
 let fileArg = argv._[0];
 let fileName = fileArg || (argv.extend ?
@@ -144,11 +155,11 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
     extensionIDL.body = extensionIDL.body.replace('<RootTypeName>', schema.getQueryType().name);
   }
   app.options('/graphql', cors(corsOptions))
-  app.use('/graphql', cors(corsOptions), graphqlHTTP(() => {
+  app.use('/graphql', cors(corsOptions), graphqlHTTP(req => {
     const schema = buildServerSchema(schemaIDL);
-
+    const forwardHeaders = pick(req.headers, forwardHeaderNames);
     return {
-      ...optionsCB(schema, extensionIDL),
+      ...optionsCB(schema, extensionIDL, forwardHeaders),
       graphiql: true,
     };
   }));

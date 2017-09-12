@@ -46,7 +46,6 @@ const argv = require('yargs')
     'Headers that should be forwarded to the proxied server'
   )
   .array('forward-headers')
-  .default('forward-headers', [])
   .implies('forward-headers', 'extend')
   .alias('co', 'cors-origin')
   .nargs('co', 1)

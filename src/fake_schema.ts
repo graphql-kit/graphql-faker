@@ -105,9 +105,12 @@ export function fakeSchema(schema) {
   }
 
   function getFieldResolver(field) {
-    const type = field.type as GraphQLOutputType;
-    const fakeResolver = getResolver(type, field);
+    const fakeResolver = getResolver(field.type, field);
     return (source, _0, _1, info) => {
+      if (source && source.$example && source[field.name]) {
+        return source[field.name];
+      }
+
       const value = getCurrentSourceProperty(source, info.path);
       return (value !== undefined) ? value : fakeResolver();
     }
@@ -124,8 +127,7 @@ export function fakeSchema(schema) {
 
   // get value or Error instance injected by the proxy
   function getCurrentSourceProperty(source, path) {
-    const key = path && path.key;
-    return source && source[key];
+    return source && source[path!.key];
   }
 
   function getResolver(type:GraphQLOutputType, field) {
@@ -133,18 +135,44 @@ export function fakeSchema(schema) {
       return getResolver(type.ofType, field);
     if (type instanceof GraphQLList)
       return arrayResolver(getResolver(type.ofType, field));
+
     if (isAbstractType(type))
       return abstractTypeResolver(type);
-    if (isLeafType(type))
-      return getLeafResolver(type, field);
-    // TODO: error on fake directive
-    // TODO: handle @examples
-    return () => ({});
+
+    return fieldResolver(type, field);
   }
+
 
   function abstractTypeResolver(type:GraphQLAbstractType) {
     const possibleTypes = schema.getPossibleTypes(type);
     return () => ({__typename: getRandomItem(possibleTypes)});
+  }
+}
+
+function fieldResolver(type:GraphQLOutputType, field) {
+  const directiveToArgs = {
+    ...getFakeDirectives(type),
+    ...getFakeDirectives(field),
+  };
+  const {fake, examples} = directiveToArgs;
+
+
+  if (isLeafType(type)) {
+    if (examples)
+      return () => getRandomItem(examples.values)
+    if (fake) {
+      return () => fakeValue(fake.type, fake.options, fake.locale);
+    }
+    return getLeafResolver(type);
+  } else {
+    // TODO: error on fake directive
+    if (examples) {
+      return () => ({
+        ...getRandomItem(examples.values),
+        $example: true,
+      });
+    }
+    return () => ({});
   }
 }
 
@@ -172,18 +200,7 @@ function getFakeDirectives(object: any) {
   return result;
 }
 
-function getLeafResolver(type:GraphQLLeafType, field) {
-  const directiveToArgs = {
-    ...getFakeDirectives(type),
-    ...getFakeDirectives(field),
-  };
-
-  let {fake, examples} = directiveToArgs;
-  if (examples)
-    return () => getRandomItem(examples.values)
-  if (fake)
-    return () => fakeValue(fake.type, fake.options, fake.locale);
-
+function getLeafResolver(type:GraphQLLeafType) {
   if (type instanceof GraphQLEnumType) {
     const values = type.getValues().map(x => x.value);
     return () => getRandomItem(values);

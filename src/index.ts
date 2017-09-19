@@ -188,7 +188,15 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
 
   app.use('/editor', express.static(path.join(__dirname, 'editor')));
 
-  app.listen(argv.port);
+  const server = app.listen(argv.port);
+
+  const shutdown = () => {
+    server.close();
+    process.exit(0);
+  });
+
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
 
   log(`\n${chalk.green('✔')} Your GraphQL Fake API is ready to use 🚀
   Here are your links:

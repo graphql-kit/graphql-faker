@@ -12,7 +12,10 @@
     "outDir": "dist",
     "pretty": true,
     "moduleResolution": "node",
-    "lib": ["es2017"]
+    "lib": [
+      "es2017",
+      "esnext.asynciterable"
+    ]
   },
   "compileOnSave": false,
   "exclude": [

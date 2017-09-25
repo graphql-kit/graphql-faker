@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import {Headers} from 'node-fetch';
-const set = require('lodash/set');
+import {set as pathSet} from 'lodash';
 
 import {
   Kind,
@@ -80,7 +80,7 @@ function buildRootValue(response) {
 
     // Recreate root value up to a place where original error was thrown
     // and place error as field value.
-    set(rootValue, error.path, new Error(error.message))
+    pathSet(rootValue, error.path, new Error(error.message))
   }
 
   // TODO proxy global errors

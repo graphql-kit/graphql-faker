@@ -14,18 +14,18 @@ import * as path from 'path';
 import * as express from 'express';
 import * as graphqlHTTP from 'express-graphql';
 import * as chalk from 'chalk';
+import * as opn from 'opn';
+import * as cors from 'cors';
+import * as bodyParser from 'body-parser';
+import { pick } from 'lodash';
+import * as yargs from 'yargs';
 
 import { fakeSchema } from './fake_schema';
 import { proxyMiddleware } from './proxy';
 import { existsSync } from './utils';
 
-import * as opn from 'opn';
-
-const cors = require('cors');
-const pick = require('lodash/pick');
-
 const DEFAULT_PORT = process.env.PORT || 9002;
-const argv = require('yargs')
+const argv = yargs
   .usage('Usage: $0 [file]')
   .alias('p', 'port')
   .nargs('p', 1)
@@ -103,8 +103,6 @@ if (existsSync(fileName)) {
   let defaultFileName = argv.e ? 'default-extend.graphql' : 'default-schema.graphql';
   userIDL = readIDL(path.join(__dirname, defaultFileName));
 }
-
-const bodyParser = require('body-parser');
 
 function readIDL(filepath) {
   return new Source(

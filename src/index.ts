@@ -191,7 +191,7 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
   const shutdown = () => {
     server.close();
     process.exit(0);
-  });
+  };
 
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);

@@ -1,20 +1,18 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import classNames from 'classnames';
-import { buildSchema, extendSchema, parse } from 'graphql';
-
-import fakeIDL from 'raw-loader!../fake_definition.graphql';
-import GraphQLEditor from './editor/GraphQLEditor';
-import GraphiQL from 'graphiql';
-
-import fetch from 'isomorphic-fetch'
-
-import { EditIcon, ConsoleIcon, GithubIcon } from './icons';
-
 import './css/app.css';
 import './css/codemirror.css';
 import './editor/editor.css';
 import 'graphiql/graphiql.css';
+
+import classNames from 'classnames';
+import GraphiQL from 'graphiql';
+import { buildSchema, extendSchema, parse } from 'graphql';
+import fetch from 'isomorphic-fetch';
+import fakeIDL from 'raw-loader!../fake_definition.graphql';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import GraphQLEditor from './editor/GraphQLEditor';
+import { ConsoleIcon, EditIcon, GithubIcon } from './icons';
 
 // const fakeSchema = buildSchema(fakeIDL + ' schema { query: QueryType } type QueryType { a: String }');
 
@@ -29,8 +27,8 @@ class FakeEditor extends React.Component {
       dirty: false,
       error: null,
       status: null,
-      schema: undefined
-    }
+      schema: undefined,
+    };
   }
 
   componentDidMount() {
@@ -41,15 +39,15 @@ class FakeEditor extends React.Component {
       });
 
     window.onbeforeunload = () => {
-      if (this.state.dirty) return 'You have unsaved changes. Exit?'
+      if (this.state.dirty) return 'You have unsaved changes. Exit?';
     };
   }
 
   fetcher(url, options) {
-    const baseUrl = window.location.href.match(/(.*)\/editor/)[1]
+    const baseUrl = window.location.href.match(/(.*)\/editor/)[1];
     return fetch(baseUrl + url, {
       credentials: 'include',
-      ...options
+      ...options,
     });
   }
 
@@ -57,17 +55,17 @@ class FakeEditor extends React.Component {
     return this.fetcher('/graphql', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(graphQLParams)
+      body: JSON.stringify(graphQLParams),
     }).then(response => response.json());
   }
 
-  updateValue({schemaIDL, extensionIDL}) {
+  updateValue({ schemaIDL, extensionIDL }) {
     let value = extensionIDL || schemaIDL;
     this.proxiedSchemaIDL = extensionIDL ? schemaIDL : null;
     this.setState({
       value,
       cachedValue: value,
-      extendMode: !!extensionIDL
+      extendMode: !!extensionIDL,
     });
     this.updateIdl(value, true);
   }
@@ -76,8 +74,8 @@ class FakeEditor extends React.Component {
     return this.fetcher('/user-idl', {
       method: 'post',
       headers: { 'Content-Type': 'text/plain' },
-      body: idl
-    })
+      body: idl,
+    });
   }
 
   updateIdl(value, noError) {
@@ -92,22 +90,25 @@ class FakeEditor extends React.Component {
     let fullIdl = schemaIDL + '\n' + fakeIDL;
     try {
       let schema = buildSchema(fullIdl);
-      if (extensionIDL)
-        schema = extendSchema(schema, parse(extensionIDL));
-      this.setState(prevState => ({...prevState, schema: schema, error: null}));
+      if (extensionIDL) schema = extendSchema(schema, parse(extensionIDL));
+      this.setState(prevState => ({
+        ...prevState,
+        schema: schema,
+        error: null,
+      }));
       return true;
-    } catch(e) {
+    } catch (e) {
       if (noError) return;
-      this.setState(prevState => ({...prevState, error: e.message}));
+      this.setState(prevState => ({ ...prevState, error: e.message }));
       return false;
     }
   }
 
   setStatus(status, delay) {
-    this.setState(prevState => ({...prevState, status: status}));
+    this.setState(prevState => ({ ...prevState, status: status }));
     if (!delay) return;
     setTimeout(() => {
-      this.setState(prevState => ({...prevState, status: null}));
+      this.setState(prevState => ({ ...prevState, status: null }));
     }, delay);
   }
 
@@ -120,27 +121,35 @@ class FakeEditor extends React.Component {
     this.postIDL(value).then(res => {
       if (res.ok) {
         this.setStatus('Saved!', 2000);
-        return this.setState(prevState => ({...prevState, cachedValue: value, dirty: false, error: null}));
+        return this.setState(prevState => ({
+          ...prevState,
+          cachedValue: value,
+          dirty: false,
+          error: null,
+        }));
       } else {
         res.text().then(errorMessage => {
-          return this.setState(prevState => ({...prevState, error: errorMessage}));
+          return this.setState(prevState => ({
+            ...prevState,
+            error: errorMessage,
+          }));
         });
       }
     });
-  }
+  };
 
   switchTab(tab) {
-    this.setState(prevState => ({...prevState, activeTab: tab}));
+    this.setState(prevState => ({ ...prevState, activeTab: tab }));
   }
 
-  onEdit = (val) => {
+  onEdit = val => {
     if (this.state.error) this.updateIdl(val);
     this.setState(prevState => ({
       ...prevState,
       value: val,
-      dirty: val !== this.state.cachedValue
-    }))
-  }
+      dirty: val !== this.state.cachedValue,
+    }));
+  };
 
   render() {
     let { value, activeTab, dirty, extendMode } = this.state;
@@ -149,26 +158,46 @@ class FakeEditor extends React.Component {
       <div className="faker-editor-container">
         <nav>
           <div className="logo">
-            <a href="https://github.com/APIs-guru/graphql-faker" target="_blank"> <img src="./logo.svg"/> </a>
+            <a href="https://github.com/APIs-guru/graphql-faker" target="_blank">
+              {' '}
+              <img src="./logo.svg" />{' '}
+            </a>
           </div>
           <ul>
-            <li onClick={() => this.switchTab(0)} className={classNames({
-              '-active': activeTab === 0,
-              '-dirty': dirty
-            })}> <EditIcon/> </li>
-            <li onClick={() => this.state.schema && this.switchTab(1)} className={classNames({
-              '-disabled': !this.state.schema,
-              '-active': activeTab === 1
-            })}> <ConsoleIcon/> </li>
+            <li
+              onClick={() => this.switchTab(0)}
+              className={classNames({
+                '-active': activeTab === 0,
+                '-dirty': dirty,
+              })}
+            >
+              {' '}
+              <EditIcon />{' '}
+            </li>
+            <li
+              onClick={() => this.state.schema && this.switchTab(1)}
+              className={classNames({
+                '-disabled': !this.state.schema,
+                '-active': activeTab === 1,
+              })}
+            >
+              {' '}
+              <ConsoleIcon />{' '}
+            </li>
             <li className="-pulldown -link">
-              <a href="https://github.com/APIs-guru/graphql-faker" target="_blank"> <GithubIcon /> </a>
+              <a href="https://github.com/APIs-guru/graphql-faker" target="_blank">
+                {' '}
+                <GithubIcon />{' '}
+              </a>
             </li>
           </ul>
         </nav>
         <div className="tabs-container">
-          <div className={classNames('tab-content', 'editor-container', {
-            '-active': activeTab === 0
-          })}>
+          <div
+            className={classNames('tab-content', 'editor-container', {
+              '-active': activeTab === 0,
+            })}
+          >
             <GraphQLEditor
               schemaPrefix={prefixIDL}
               mode="idl"
@@ -178,9 +207,8 @@ class FakeEditor extends React.Component {
               value={value}
             />
             <div className="action-panel">
-              <a className="material-button" onClick={this.saveUserIDL}
-                 disabled={!dirty}>
-                 <span> Save </span>
+              <a className="material-button" onClick={this.saveUserIDL} disabled={!dirty}>
+                <span> Save </span>
               </a>
               <div className="status-bar">
                 <span className="status"> {this.state.status} </span>
@@ -188,14 +216,18 @@ class FakeEditor extends React.Component {
               </div>
             </div>
           </div>
-          <div className={classNames('tab-content', {
-            '-active': activeTab === 1
-          })}>
-            {this.state.schema && <GraphiQL fetcher={(e) => this.graphQLFetcher(e)} schema={this.state.schema}/>}
+          <div
+            className={classNames('tab-content', {
+              '-active': activeTab === 1,
+            })}
+          >
+            {this.state.schema && (
+              <GraphiQL fetcher={e => this.graphQLFetcher(e)} schema={this.state.schema} />
+            )}
           </div>
         </div>
       </div>
-    )
+    );
   }
 }
 

@@ -10,7 +10,7 @@ module.exports = {
   devtool: 'cheap-source-map',
 
   performance: {
-    hints: false
+    hints: false,
   },
   devServer: {
     contentBase: root('.'),
@@ -19,17 +19,17 @@ module.exports = {
     stats: 'errors-only',
     proxy: {
       '/user-idl': 'http://localhost:9002',
-      '/graphql': 'http://localhost:9002'
-    }
+      '/graphql': 'http://localhost:9002',
+    },
   },
   resolve: {
-    extensions: ['.jsx', '.js', '.json']
+    extensions: ['.jsx', '.js', '.json'],
   },
   entry: ['./index.jsx'],
   output: {
     path: root('.'),
     filename: 'main.js',
-    sourceMapFilename: '[file].map'
+    sourceMapFilename: '[file].map',
   },
   module: {
     rules: [
@@ -39,11 +39,8 @@ module.exports = {
         exclude: /node_modules/,
         options: {
           presets: ['es2015', 'react'],
-          plugins: [
-            'transform-class-properties',
-            'transform-object-rest-spread'
-          ]
-        }
+          plugins: ['transform-class-properties', 'transform-object-rest-spread'],
+        },
       },
       {
         test: /\.css$/,
@@ -54,24 +51,24 @@ module.exports = {
               loader: 'css-loader',
               options: {
                 sourceMap: true,
-                minimize: true
+                minimize: true,
               },
             },
-            'postcss-loader?sourceMap'
-          ]
-        })
-      }
-    ]
+            'postcss-loader?sourceMap',
+          ],
+        }),
+      },
+    ],
   },
 
   plugins: [
     new webpack.LoaderOptionsPlugin({
       minimize: true,
-      debug: false
+      debug: false,
     }),
     new ExtractTextPlugin({
       filename: 'main.css',
-      allChunks: true
-    })
-  ]
-}
+      allChunks: true,
+    }),
+  ],
+};

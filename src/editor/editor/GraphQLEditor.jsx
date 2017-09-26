@@ -1,29 +1,25 @@
-import React, { PropTypes } from 'react';
-
-import marked from 'marked';
-import CodeMirror from 'codemirror';
-
-import 'codemirror/addon/hint/show-hint';
+import 'codemirror-graphql/hint';
+import 'codemirror-graphql/info';
+import 'codemirror-graphql/jump';
+import 'codemirror-graphql/lint';
+import 'codemirror-graphql/mode';
 import 'codemirror/addon/comment/comment';
-import 'codemirror/addon/edit/matchbrackets';
 import 'codemirror/addon/edit/closebrackets';
-import 'codemirror/addon/fold/foldgutter';
+import 'codemirror/addon/edit/matchbrackets';
 import 'codemirror/addon/fold/brace-fold';
+import 'codemirror/addon/fold/foldgutter';
+import 'codemirror/addon/hint/show-hint';
 import 'codemirror/addon/lint/lint';
 import 'codemirror/keymap/sublime';
 import 'codemirror/keymap/sublime';
-import 'codemirror-graphql/hint';
-import 'codemirror-graphql/lint';
-import 'codemirror-graphql/info';
-import 'codemirror-graphql/jump';
-import 'codemirror-graphql/mode';
 
+import CodeMirror from 'codemirror';
 import { GraphQLSchema } from 'graphql';
-import { GraphQLNonNull, GraphQLList, buildSchema, parse, extendSchema } from 'graphql';
-
+import { buildSchema, extendSchema, GraphQLList, GraphQLNonNull, parse } from 'graphql';
+import marked from 'marked';
+import React, { PropTypes } from 'react';
 
 export default class GraphQLEditor extends React.Component {
-
   static propTypes = {
     schema: PropTypes.instanceOf(GraphQLSchema),
     value: PropTypes.string,
@@ -34,8 +30,8 @@ export default class GraphQLEditor extends React.Component {
     editorTheme: PropTypes.string,
     mode: PropTypes.string,
     extendMode: PropTypes.bool,
-    schemaPrefix: PropTypes.string
-  }
+    schemaPrefix: PropTypes.string,
+  };
 
   constructor(props) {
     super(props);
@@ -48,8 +44,8 @@ export default class GraphQLEditor extends React.Component {
     try {
       this._schema = buildSchema(schemaIDL);
       if (extensionIDL)
-          this._schema = extendSchema(this._schema, parse(extensionIDL));
-    } catch(e) {
+        this._schema = extendSchema(this._schema, parse(extensionIDL));
+    } catch (e) {
       // skip error here
     }
   }
@@ -59,7 +55,7 @@ export default class GraphQLEditor extends React.Component {
       let schemaIDL, extensionIDL;
       if (this.props.extendMode) {
         //console.log()
-        schemaIDL = (this.props.schemaPrefix || '');
+        schemaIDL = this.props.schemaPrefix || '';
         extensionIDL = this.props.value;
       } else {
         schemaIDL = (this.props.schemaPrefix || '') + this.props.value;
@@ -83,7 +79,7 @@ export default class GraphQLEditor extends React.Component {
       matchBrackets: true,
       showCursorWhenSelecting: true,
       foldGutter: {
-        minFoldSize: 4
+        minFoldSize: 4,
       },
       lint: {
         schema: this.props.schema,
@@ -96,13 +92,13 @@ export default class GraphQLEditor extends React.Component {
       info: {
         schema: this.props.schema,
         renderDescription: text => marked(text, { sanitize: true }),
-        onClick: reference => this.props.onClickReference(reference)
+        onClick: reference => this.props.onClickReference(reference),
       },
       jump: {
         schema: this.props.schema,
         onClick: reference => this.props.onClickReference(reference),
       },
-      gutters: [ 'CodeMirror-linenumbers', 'CodeMirror-foldgutter' ],
+      gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
       extraKeys: {
         'Cmd-Space': () => this.editor.showHint({ completeSingle: true }),
         'Ctrl-Space': () => this.editor.showHint({ completeSingle: true }),
@@ -123,7 +119,7 @@ export default class GraphQLEditor extends React.Component {
         'Ctrl-Right': 'goSubwordRight',
         'Alt-Left': 'goGroupLeft',
         'Alt-Right': 'goGroupRight',
-      }
+      },
     });
 
     this.editor.on('change', this._onEdit.bind(this));
@@ -135,7 +131,9 @@ export default class GraphQLEditor extends React.Component {
     return (
       <div
         className="graphql-editor"
-        ref={node => { this._node = node; }}
+        ref={node => {
+          this._node = node;
+        }}
       />
     );
   }
@@ -148,8 +146,10 @@ export default class GraphQLEditor extends React.Component {
     if (this.props.schema !== prevProps.schema) {
       this.updateSchema();
     }
-    if (this.props.value !== prevProps.value &&
-        (this.props.value !== this.cachedValue)) {
+    if (
+      this.props.value !== prevProps.value &&
+      this.props.value !== this.cachedValue
+    ) {
       this.cachedValue = this.props.value;
       this.editor.setValue(this.props.value);
       if (this.props.mode === 'idl') {
@@ -176,7 +176,6 @@ export default class GraphQLEditor extends React.Component {
     this.editor.off('hasCompletion', this._onHasCompletion);
     this.editor = null;
   }
-
 
   _onKeyUp(cm, event) {
     const code = event.keyCode;
@@ -205,11 +204,10 @@ export default class GraphQLEditor extends React.Component {
    * Render a custom UI for CodeMirror's hint which includes additional info
    * about the type and description for the selected context.
    */
-  _onHasCompletion (cm, data) {
+  _onHasCompletion(cm, data) {
     onHasCompletion(cm, data);
   }
 }
-
 
 /**
  * Render a custom UI for CodeMirror's hint which includes additional info
@@ -242,36 +240,40 @@ function onHasCompletion(cm, data, onHintInformationRender) {
       // When CodeMirror attempts to remove the hint UI, we detect that it was
       // removed and in turn remove the information nodes.
       let onRemoveFn;
-      hintsUl.addEventListener('DOMNodeRemoved', onRemoveFn = event => {
-        if (event.target === hintsUl) {
-          hintsUl.removeEventListener('DOMNodeRemoved', onRemoveFn);
-          information = null;
-          deprecation = null;
-          onRemoveFn = null;
-        }
-      });
+      hintsUl.addEventListener(
+        'DOMNodeRemoved',
+        (onRemoveFn = event => {
+          if (event.target === hintsUl) {
+            hintsUl.removeEventListener('DOMNodeRemoved', onRemoveFn);
+            information = null;
+            deprecation = null;
+            onRemoveFn = null;
+          }
+        }),
+      );
     }
 
     // Now that the UI has been set up, add info to information.
-    const description = ctx.description ?
-      marked(ctx.description, { sanitize: true }) :
-      'Self descriptive.';
-    const type = ctx.type ?
-      '<span class="infoType">' + renderType(ctx.type) + '</span>' :
-      '';
+    const description = ctx.description
+      ? marked(ctx.description, { sanitize: true })
+      : 'Self descriptive.';
+    const type = ctx.type
+      ? '<span class="infoType">' + renderType(ctx.type) + '</span>'
+      : '';
 
-    information.innerHTML = '<div class="content">' +
-      (description.slice(0, 3) === '<p>' ?
-        '<p>' + type + description.slice(3) :
-        type + description) + '</div>';
+    information.innerHTML =
+      '<div class="content">' +
+      (description.slice(0, 3) === '<p>'
+        ? '<p>' + type + description.slice(3)
+        : type + description) +
+      '</div>';
 
     if (ctx.isDeprecated) {
-      const reason = ctx.deprecationReason ?
-        marked(ctx.deprecationReason, { sanitize: true }) :
-        '';
+      const reason = ctx.deprecationReason
+        ? marked(ctx.deprecationReason, { sanitize: true })
+        : '';
       deprecation.innerHTML =
-        '<span class="deprecation-label">Deprecated</span>' +
-        reason;
+        '<span class="deprecation-label">Deprecated</span>' + reason;
       deprecation.style.display = 'block';
     } else {
       deprecation.style.display = 'none';

@@ -171,14 +171,14 @@ nav > .logo {
   width: 100%;
 }
 
-.material-button[disabled],
-.material-button[disabled]:hover {
+.material-button.-disabled,
+.material-button.-disabled:hover {
   background-color: #5d795a;
   cursor: default;
   user-select: none;
 }
 
-.material-button[disabled]:active::before {
+.material-button.-disabled:active::before {
   display: none;
 }
 

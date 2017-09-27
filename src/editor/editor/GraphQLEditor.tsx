@@ -13,30 +13,34 @@ import 'codemirror/addon/lint/lint';
 import 'codemirror/keymap/sublime';
 import 'codemirror/keymap/sublime';
 
-import CodeMirror from 'codemirror';
+import * as CodeMirror from 'codemirror';
+
 import { GraphQLSchema } from 'graphql';
 import { buildSchema, extendSchema, GraphQLList, GraphQLNonNull, parse } from 'graphql';
 import marked from 'marked';
-import React, { PropTypes } from 'react';
+import * as React from 'react';
+import { PropTypes } from 'react';
 
-export default class GraphQLEditor extends React.Component {
-  static propTypes = {
-    schema: PropTypes.instanceOf(GraphQLSchema),
-    value: PropTypes.string,
-    onEdit: PropTypes.func,
-    onHintInformationRender: PropTypes.func,
-    onClickReference: PropTypes.func,
-    onCommand: PropTypes.func,
-    editorTheme: PropTypes.string,
-    mode: PropTypes.string,
-    extendMode: PropTypes.bool,
-    schemaPrefix: PropTypes.string,
-  };
+type GraphQLEditorProps = {
+  value: string;
+  onEdit: (val: string) => void,
+  onCommand: () => void;
+  extendMode: boolean;
+  schemaPrefix: string;
+};
+
+export default class GraphQLEditor extends React.Component<GraphQLEditorProps> {
+  cachedValue: string;
+  editor: CodeMirror | undefined;
+  ignoreChangeEvent: boolean;
+  _schema: GraphQLSchema | null;
+  _node: any;
 
   constructor(props) {
     super(props);
-    this.cachedValue = props.value || '';
+    this.cachedValue = props.value;
     this._schema = null;
+    this.ignoreChangeEvent = false;
   }
 
   tryBuildSchema(schemaIDL, extensionIDL) {
@@ -51,29 +55,24 @@ export default class GraphQLEditor extends React.Component {
   }
 
   get schema() {
-    if (this.props.mode === 'idl') {
-      let schemaIDL, extensionIDL;
-      if (this.props.extendMode) {
-        //console.log()
-        schemaIDL = this.props.schemaPrefix || '';
-        extensionIDL = this.props.value;
-      } else {
-        schemaIDL = (this.props.schemaPrefix || '') + this.props.value;
-      }
-      this.tryBuildSchema(schemaIDL, extensionIDL);
-      return this._schema;
+    let schemaIDL, extensionIDL;
+    if (this.props.extendMode) {
+      schemaIDL = this.props.schemaPrefix;
+      extensionIDL = this.props.value;
     } else {
-      return this.props.schema;
+      schemaIDL = this.props.schemaPrefix + this.props.value;
     }
+    this.tryBuildSchema(schemaIDL, extensionIDL);
+    return this._schema;
   }
 
   componentDidMount() {
-    this.editor = CodeMirror(this._node, {
+    const editor = CodeMirror(this._node, {
       value: this.props.value || '',
       lineNumbers: true,
       tabSize: 2,
       mode: 'graphql',
-      theme: this.props.editorTheme || 'graphiql',
+      theme: 'graphiql',
       keyMap: 'sublime',
       autoCloseBrackets: true,
       matchBrackets: true,
@@ -82,28 +81,26 @@ export default class GraphQLEditor extends React.Component {
         minFoldSize: 4,
       },
       lint: {
-        schema: this.props.schema,
+        schema: this.schema,
       },
       hintOptions: {
-        schema: this.props.schema,
+        schema: this.schema,
         closeOnUnfocus: false,
         completeSingle: false,
       },
       info: {
-        schema: this.props.schema,
+        schema: this.schema,
         renderDescription: text => marked(text, { sanitize: true }),
-        onClick: reference => this.props.onClickReference(reference),
       },
       jump: {
-        schema: this.props.schema,
-        onClick: reference => this.props.onClickReference(reference),
+        schema: this.schema,
       },
       gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
       extraKeys: {
-        'Cmd-Space': () => this.editor.showHint({ completeSingle: true }),
-        'Ctrl-Space': () => this.editor.showHint({ completeSingle: true }),
-        'Alt-Space': () => this.editor.showHint({ completeSingle: true }),
-        'Shift-Space': () => this.editor.showHint({ completeSingle: true }),
+        'Cmd-Space': () => editor.showHint({ completeSingle: true }),
+        'Ctrl-Space': () => editor.showHint({ completeSingle: true }),
+        'Alt-Space': () => editor.showHint({ completeSingle: true }),
+        'Shift-Space': () => editor.showHint({ completeSingle: true }),
         'Cmd-Enter': () => {
           if (this.props.onCommand) {
             this.props.onCommand();
@@ -122,9 +119,10 @@ export default class GraphQLEditor extends React.Component {
       },
     });
 
-    this.editor.on('change', this._onEdit.bind(this));
-    this.editor.on('keyup', this._onKeyUp.bind(this));
-    this.editor.on('hasCompletion', this._onHasCompletion.bind(this));
+    editor.on('change', this._onEdit.bind(this));
+    editor.on('keyup', this._onKeyUp.bind(this));
+    editor.on('hasCompletion', this._onHasCompletion.bind(this));
+    this.editor = editor;
   }
 
   render() {
@@ -143,20 +141,14 @@ export default class GraphQLEditor extends React.Component {
     // user-input changes which could otherwise result in an infinite
     // event loop.
     this.ignoreChangeEvent = true;
-    if (this.props.schema !== prevProps.schema) {
-      this.updateSchema();
-    }
     if (
       this.props.value !== prevProps.value &&
       this.props.value !== this.cachedValue
     ) {
-      this.cachedValue = this.props.value;
-      this.editor.setValue(this.props.value);
-      if (this.props.mode === 'idl') {
-        this.updateSchema();
+      if (this.props.value !== this.cachedValue) {
+        this.cachedValue = this.props.value;
+        this.editor.setValue(this.props.value);
       }
-    }
-    if (this.props.value !== prevProps.value && this.props.mode === 'idl') {
       this.updateSchema();
     }
     this.ignoreChangeEvent = false;
@@ -213,9 +205,7 @@ export default class GraphQLEditor extends React.Component {
  * Render a custom UI for CodeMirror's hint which includes additional info
  * about the type and description for the selected context.
  */
-function onHasCompletion(cm, data, onHintInformationRender) {
-  const CodeMirror = require('codemirror');
-
+function onHasCompletion(cm, data, onHintInformationRender?) {
   let information;
   let deprecation;
 

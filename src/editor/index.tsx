@@ -3,22 +3,33 @@ import './css/codemirror.css';
 import './editor/editor.css';
 import 'graphiql/graphiql.css';
 
-import classNames from 'classnames';
-import GraphiQL from 'graphiql';
-import { buildSchema, extendSchema, parse } from 'graphql';
-import fetch from 'isomorphic-fetch';
-import fakeIDL from 'raw-loader!../fake_definition.graphql';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import * as classNames from 'classnames';
+import * as GraphiQL from 'graphiql';
+import { buildSchema, extendSchema, GraphQLSchema, parse } from 'graphql';
+import * as fetch from 'isomorphic-fetch';
+import * as fakeIDL from 'raw-loader!../fake_definition.graphql';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 import GraphQLEditor from './editor/GraphQLEditor';
 import { ConsoleIcon, EditIcon, GithubIcon } from './icons';
 
-// const fakeSchema = buildSchema(fakeIDL + ' schema { query: QueryType } type QueryType { a: String }');
+type FakeEditorState = {
+  value: string | null;
+  cachedValue: string | null;
+  activeTab: number;
+  dirty: boolean;
+  error: string | null;
+  status: string | null;
+  schema?: GraphQLSchema;
+  extendMode?: boolean;
+};
 
-class FakeEditor extends React.Component {
-  constructor() {
-    super();
+class FakeEditor extends React.Component<any, FakeEditorState> {
+  proxiedSchemaIDL: string;
+
+  constructor(props) {
+    super(props);
 
     this.state = {
       value: null,
@@ -43,8 +54,9 @@ class FakeEditor extends React.Component {
     };
   }
 
-  fetcher(url, options) {
-    const baseUrl = window.location.href.match(/(.*)\/editor/)[1];
+  fetcher(url, options = {}) {
+    const {protocol, host} = window.location;
+    const baseUrl = `${protocol}//${host}`;
     return fetch(baseUrl + url, {
       credentials: 'include',
       ...options,
@@ -78,7 +90,7 @@ class FakeEditor extends React.Component {
     });
   }
 
-  updateIdl(value, noError) {
+  updateIdl(value, noError = false) {
     let extensionIDL;
     let schemaIDL;
     if (this.state.extendMode) {
@@ -200,14 +212,17 @@ class FakeEditor extends React.Component {
           >
             <GraphQLEditor
               schemaPrefix={prefixIDL}
-              mode="idl"
               extendMode={!!extendMode}
               onEdit={this.onEdit}
               onCommand={this.saveUserIDL}
-              value={value}
+              value={value || ''}
             />
             <div className="action-panel">
-              <a className="material-button" onClick={this.saveUserIDL} disabled={!dirty}>
+              <a
+                className={classNames("material-button", {
+                  '-disabled': !dirty,
+                })}
+                onClick={this.saveUserIDL}>
                 <span> Save </span>
               </a>
               <div className="status-bar">

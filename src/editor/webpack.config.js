@@ -23,9 +23,9 @@ module.exports = {
     },
   },
   resolve: {
-    extensions: ['.jsx', '.js', '.json'],
+    extensions: ['.jsx', '.js', '.tsx', 'ts', '.json'],
   },
-  entry: ['./index.jsx'],
+  entry: ['./index.tsx'],
   output: {
     path: root('.'),
     filename: 'main.js',
@@ -34,13 +34,9 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /.jsx?$/,
-        loader: 'babel-loader',
+        test: /.[jt]sx?$/,
+        loader: 'awesome-typescript-loader',
         exclude: /node_modules/,
-        options: {
-          presets: ['es2015', 'react'],
-          plugins: ['transform-class-properties', 'transform-object-rest-spread'],
-        },
       },
       {
         test: /\.css$/,

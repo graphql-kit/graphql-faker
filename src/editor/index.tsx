@@ -220,8 +220,8 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
           >
             <GraphQLEditor
               schema={dirtySchema || schema}
-              onEdit={() => this.onEdit}
-              onCommand={() => this.saveUserIDL()}
+              onEdit={this.onEdit.bind(this)}
+              onCommand={this.saveUserIDL.bind(this)}
               value={value || ''}
             />
             <div className="action-panel">
@@ -229,7 +229,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
                 className={classNames("material-button", {
                   '-disabled': !dirty,
                 })}
-                onClick={() => this.saveUserIDL()}>
+                onClick={this.saveUserIDL.bind(this)}>
                 <span> Save </span>
               </a>
               <div className="status-bar">

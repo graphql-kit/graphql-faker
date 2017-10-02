@@ -19,6 +19,7 @@
   },
   "compileOnSave": false,
   "exclude": [
+    "src/editor",
     "node_modules",
     ".tmp",
     "dist",

@@ -126,7 +126,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     }, delay);
   }
 
-  saveUserIDL() {
+  saveUserIDL = () => {
     let { value, dirty } = this.state;
     if (!dirty) return;
 
@@ -157,7 +157,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     this.setState(prevState => ({ ...prevState, activeTab: tab }));
   }
 
-  onEdit(val) {
+  onEdit = (val) => {
     if (this.state.error) this.updateIdl(val);
     let dirtySchema = null as GraphQLSchema | null;
     try {
@@ -220,8 +220,8 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
           >
             <GraphQLEditor
               schema={dirtySchema || schema}
-              onEdit={this.onEdit.bind(this)}
-              onCommand={this.saveUserIDL.bind(this)}
+              onEdit={this.onEdit}
+              onCommand={this.saveUserIDL}
               value={value || ''}
             />
             <div className="action-panel">
@@ -229,7 +229,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
                 className={classNames("material-button", {
                   '-disabled': !dirty,
                 })}
-                onClick={this.saveUserIDL.bind(this)}>
+                onClick={this.saveUserIDL}>
                 <span> Save </span>
               </a>
               <div className="status-bar">

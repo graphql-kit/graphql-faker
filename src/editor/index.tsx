@@ -21,12 +21,12 @@ type FakeEditorState = {
   dirty: boolean;
   error: string | null;
   status: string | null;
-  schema?: GraphQLSchema;
-  extendMode?: boolean;
+  schema: GraphQLSchema | null;
+  dirtySchema: GraphQLSchema | null;
+  proxiedSchemaIDL: string | null;
 };
 
 class FakeEditor extends React.Component<any, FakeEditorState> {
-  proxiedSchemaIDL: string;
 
   constructor(props) {
     super(props);
@@ -36,17 +36,19 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       cachedValue: null,
       activeTab: 0,
       dirty: false,
+      dirtySchema: null,
       error: null,
       status: null,
-      schema: undefined,
+      schema: null,
+      proxiedSchemaIDL: null,
     };
   }
 
   componentDidMount() {
     this.fetcher('/user-idl')
       .then(response => response.json())
-      .then(idls => {
-        this.updateValue(idls);
+      .then(IDLs => {
+        this.updateValue(IDLs);
       });
 
     window.onbeforeunload = () => {
@@ -73,11 +75,12 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
 
   updateValue({ schemaIDL, extensionIDL }) {
     let value = extensionIDL || schemaIDL;
-    this.proxiedSchemaIDL = extensionIDL ? schemaIDL : null;
+    const proxiedSchemaIDL = extensionIDL ? schemaIDL : null;
+
     this.setState({
       value,
       cachedValue: value,
-      extendMode: !!extensionIDL,
+      proxiedSchemaIDL,
     });
     this.updateIdl(value, true);
   }
@@ -90,22 +93,21 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     });
   }
 
-  updateIdl(value, noError = false) {
-    let extensionIDL;
-    let schemaIDL;
-    if (this.state.extendMode) {
-      extensionIDL = value;
-      schemaIDL = this.proxiedSchemaIDL;
+  buildSchema(value) {
+    if (this.state.proxiedSchemaIDL) {
+      let schema = buildSchema(this.state.proxiedSchemaIDL + '\n' + fakeIDL);
+      return extendSchema(schema, parse(value));
     } else {
-      schemaIDL = value;
+      return buildSchema(value + '\n' + fakeIDL);
     }
-    let fullIdl = schemaIDL + '\n' + fakeIDL;
+  }
+
+  updateIdl(value, noError = false) {
     try {
-      let schema = buildSchema(fullIdl);
-      if (extensionIDL) schema = extendSchema(schema, parse(extensionIDL));
+      const schema = this.buildSchema(value);
       this.setState(prevState => ({
         ...prevState,
-        schema: schema,
+        schema,
         error: null,
       }));
       return true;
@@ -124,7 +126,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     }, delay);
   }
 
-  saveUserIDL = () => {
+  saveUserIDL() {
     let { value, dirty } = this.state;
     if (!dirty) return;
 
@@ -137,6 +139,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
           ...prevState,
           cachedValue: value,
           dirty: false,
+          dirtySchema: null,
           error: null,
         }));
       } else {
@@ -154,18 +157,23 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     this.setState(prevState => ({ ...prevState, activeTab: tab }));
   }
 
-  onEdit = val => {
+  onEdit(val) {
     if (this.state.error) this.updateIdl(val);
+    let dirtySchema = null as GraphQLSchema | null;
+    try {
+      dirtySchema = this.buildSchema(val);
+    } catch(_) { }
+
     this.setState(prevState => ({
       ...prevState,
       value: val,
       dirty: val !== this.state.cachedValue,
+      dirtySchema,
     }));
   };
 
   render() {
-    let { value, activeTab, dirty, extendMode } = this.state;
-    let prefixIDL = fakeIDL + (this.proxiedSchemaIDL || '');
+    let { value, activeTab, schema , dirty, dirtySchema } = this.state;
     return (
       <div className="faker-editor-container">
         <nav>
@@ -211,10 +219,9 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
             })}
           >
             <GraphQLEditor
-              schemaPrefix={prefixIDL}
-              extendMode={!!extendMode}
-              onEdit={this.onEdit}
-              onCommand={this.saveUserIDL}
+              schema={dirtySchema || schema}
+              onEdit={() => this.onEdit}
+              onCommand={() => this.saveUserIDL()}
               value={value || ''}
             />
             <div className="action-panel">
@@ -222,7 +229,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
                 className={classNames("material-button", {
                   '-disabled': !dirty,
                 })}
-                onClick={this.saveUserIDL}>
+                onClick={() => this.saveUserIDL()}>
                 <span> Save </span>
               </a>
               <div className="status-bar">

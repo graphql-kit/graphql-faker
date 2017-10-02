@@ -15,60 +15,37 @@ import 'codemirror/keymap/sublime';
 
 import * as CodeMirror from 'codemirror';
 
-import { GraphQLSchema } from 'graphql';
-import { buildSchema, extendSchema, GraphQLList, GraphQLNonNull, parse } from 'graphql';
+import { GraphQLSchema, GraphQLList, GraphQLNonNull } from 'graphql';
 import marked from 'marked';
 import * as React from 'react';
-import { PropTypes } from 'react';
 
 type GraphQLEditorProps = {
   value: string;
+  schema: GraphQLSchema | null;
   onEdit: (val: string) => void,
   onCommand: () => void;
-  extendMode: boolean;
-  schemaPrefix: string;
 };
 
 export default class GraphQLEditor extends React.Component<GraphQLEditorProps> {
+  editor: CodeMirror;
   cachedValue: string;
-  editor: CodeMirror | undefined;
   ignoreChangeEvent: boolean;
-  _schema: GraphQLSchema | null;
   _node: any;
 
   constructor(props) {
     super(props);
-    this.cachedValue = props.value;
-    this._schema = null;
     this.ignoreChangeEvent = false;
-  }
 
-  tryBuildSchema(schemaIDL, extensionIDL) {
-    // TODO: add throttling
-    try {
-      this._schema = buildSchema(schemaIDL);
-      if (extensionIDL)
-        this._schema = extendSchema(this._schema, parse(extensionIDL));
-    } catch (e) {
-      // skip error here
-    }
-  }
-
-  get schema() {
-    let schemaIDL, extensionIDL;
-    if (this.props.extendMode) {
-      schemaIDL = this.props.schemaPrefix;
-      extensionIDL = this.props.value;
-    } else {
-      schemaIDL = this.props.schemaPrefix + this.props.value;
-    }
-    this.tryBuildSchema(schemaIDL, extensionIDL);
-    return this._schema;
+    // Keep a cached version of the value, this cache will be updated when the
+    // editor is updated, which can later be used to protect the editor from
+    // unnecessary updates during the update lifecycle.
+    this.cachedValue = props.value;
   }
 
   componentDidMount() {
+    const { schema, value } = this.props;
     const editor = CodeMirror(this._node, {
-      value: this.props.value || '',
+      value,
       lineNumbers: true,
       tabSize: 2,
       mode: 'graphql',
@@ -81,19 +58,19 @@ export default class GraphQLEditor extends React.Component<GraphQLEditorProps> {
         minFoldSize: 4,
       },
       lint: {
-        schema: this.schema,
+        schema,
       },
       hintOptions: {
-        schema: this.schema,
+        schema,
         closeOnUnfocus: false,
         completeSingle: false,
       },
       info: {
-        schema: this.schema,
+        schema,
         renderDescription: text => marked(text, { sanitize: true }),
       },
       jump: {
-        schema: this.schema,
+        schema,
       },
       gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
       extraKeys: {
@@ -141,35 +118,33 @@ export default class GraphQLEditor extends React.Component<GraphQLEditorProps> {
     // user-input changes which could otherwise result in an infinite
     // event loop.
     this.ignoreChangeEvent = true;
-    if (
-      this.props.value !== prevProps.value &&
-      this.props.value !== this.cachedValue
-    ) {
-      if (this.props.value !== this.cachedValue) {
-        this.cachedValue = this.props.value;
-        this.editor.setValue(this.props.value);
-      }
-      this.updateSchema();
+
+    const { value, schema } = this.props;
+
+    if (schema != prevProps.schema) {
+      this.editor.options.lint.schema = schema;
+      this.editor.options.hintOptions.schema = schema;
+      this.editor.options.info.schema = schema;
+      this.editor.options.jump.schema = schema;
+      CodeMirror.signal(this.editor, 'change', this.editor);
     }
+
+    if (value !== prevProps.value && value !== this.cachedValue) {
+      this.cachedValue = value;
+      this.editor.setValue(value);
+    }
+
     this.ignoreChangeEvent = false;
   }
 
-  updateSchema() {
-    this.editor.options.lint.schema = this.schema;
-    this.editor.options.hintOptions.schema = this.schema;
-    this.editor.options.info.schema = this.schema;
-    this.editor.options.jump.schema = this.schema;
-    CodeMirror.signal(this.editor, 'change', this.editor);
-  }
-
   componentWillUnmount() {
-    this.editor.off('change', this._onEdit);
-    this.editor.off('keyup', this._onKeyUp);
+    this.editor.off('change', () => this._onEdit);
+    this.editor.off('keyup', () => this._onKeyUp);
     this.editor.off('hasCompletion', this._onHasCompletion);
     this.editor = null;
   }
 
-  _onKeyUp(cm, event) {
+  _onKeyUp(_, event) {
     const code = event.keyCode;
     if (
       (code >= 65 && code <= 90) || // letters
@@ -186,9 +161,7 @@ export default class GraphQLEditor extends React.Component<GraphQLEditorProps> {
   _onEdit() {
     if (!this.ignoreChangeEvent) {
       this.cachedValue = this.editor.getValue();
-      if (this.props.onEdit) {
-        this.props.onEdit(this.cachedValue);
-      }
+      this.props.onEdit(this.cachedValue);
     }
   }
 

@@ -57,8 +57,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   }
 
   fetcher(url, options = {}) {
-    const {protocol, host} = window.location;
-    const baseUrl = `${protocol}//${host}`;
+    const baseUrl = '..'
     return fetch(baseUrl + url, {
       credentials: 'include',
       ...options,

@@ -171,7 +171,8 @@ input fake__options {
   passwordLength: Int
   # Only for type `lorem`
   loremSize: fake__loremSize
-  # Only for types `pastDate`, `futureDate`, `recentDate`
+  # Only for types `*Date`. Example value: `YYYY MM DD`.
+  # [Full Specification](http://momentjs.com/docs/#/displaying/format/)
   dateFormat: String
 }
 

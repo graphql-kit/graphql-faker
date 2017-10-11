@@ -16,7 +16,7 @@ import 'codemirror/keymap/sublime';
 import * as CodeMirror from 'codemirror';
 
 import { GraphQLSchema, GraphQLList, GraphQLNonNull } from 'graphql';
-import marked from 'marked';
+import * as marked from 'marked';
 import * as React from 'react';
 
 type GraphQLEditorProps = {

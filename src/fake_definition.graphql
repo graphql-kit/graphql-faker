@@ -70,8 +70,11 @@ enum fake__Types {
   dbCollation
   dbEngine
 
+  # Configure date format with option `dateFormat`
   pastDate
+  # Configure date format with option `dateFormat`
   futureDate
+  # Configure date format with option `dateFormat`
   recentDate
 
   financeAccountName
@@ -168,6 +171,8 @@ input fake__options {
   passwordLength: Int
   # Only for type `lorem`
   loremSize: fake__loremSize
+  # Only for types `pastDate`, `futureDate`, `recentDate`
+  dateFormat: String
 }
 
 directive @fake(type:fake__Types!, options: fake__options = {}, locale:fake__Locale) on FIELD_DEFINITION | SCALAR

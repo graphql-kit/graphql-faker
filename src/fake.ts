@@ -1,5 +1,6 @@
 //import * as faker from 'faker';
 const faker = require('faker');
+const moment = require('moment');
 
 export function getRandomInt(min:number, max:number) {
   return faker.random.number({min, max});
@@ -83,9 +84,27 @@ const fakeFunctions = {
   dbCollation: () => faker.database.collation(),
   dbEngine: () => faker.database.engine(),
 
-  pastDate: () => faker.date.past(),
-  futureDate: () => faker.date.future(),
-  recentDate: () => faker.date.recent(),
+  pastDate: {
+    args: ['dateFormat'],
+    func: (dateFormat) => {
+      const date = faker.date.past()
+      return (dateFormat !== undefined ? moment(date).format(dateFormat) : date)
+    }
+  },
+  futureDate: {
+    args: ['dateFormat'],
+    func: (dateFormat) => {
+      const date = faker.date.future()
+      return (dateFormat !== undefined ? moment(date).format(dateFormat) : date)
+    }
+  },
+  recentDate: {
+    args: ['dateFormat'],
+    func: (dateFormat) => {
+      const date = faker.date.recent()
+      return (dateFormat !== undefined ? moment(date).format(dateFormat) : date)
+    }
+  },
 
   financeAccountName: () => faker.finance.accountName(),
   //TODO: investigate finance.mask

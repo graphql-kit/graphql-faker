@@ -47,6 +47,7 @@
     "faker": "^4.1.0",
     "graphql": "github:apis-guru/graphql-js#directives-fork-dist",
     "lodash": "^4.17.4",
+    "moment": "^2.19.0",
     "node-fetch": "^1.7.3",
     "opn": "^5.1.0",
     "yargs": "^9.0.1"

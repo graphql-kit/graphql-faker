@@ -1,6 +1,6 @@
 import './css/app.css';
 import './css/codemirror.css';
-import './editor/editor.css';
+import './GraphQLEditor/editor.css';
 import 'graphiql/graphiql.css';
 
 import * as classNames from 'classnames';
@@ -11,7 +11,7 @@ import * as fakeIDL from 'raw-loader!../fake_definition.graphql';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import GraphQLEditor from './editor/GraphQLEditor';
+import GraphQLEditor from './GraphQLEditor/GraphQLEditor';
 import { ConsoleIcon, EditIcon, GithubIcon } from './icons';
 
 type FakeEditorState = {

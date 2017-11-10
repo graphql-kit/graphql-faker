@@ -37,6 +37,10 @@ or
 
     yarn global add graphql-faker
 
+or
+
+    docker run -ti -p 9002:9002 graphql-faker # arguments (--open won't work with docker)
+
 
 ## TL;DR
 

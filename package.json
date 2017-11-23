@@ -28,7 +28,7 @@
     "@types/body-parser": "^1.16.5",
     "@types/cors": "^2.8.1",
     "@types/express": "^4.0.37",
-    "@types/express-graphql": "^0.0.34",
+    "@types/express-graphql": "^0.0.35",
     "@types/faker": "^4.1.1",
     "@types/graphql": "^0.11.4",
     "@types/lodash": "^4.14.53",
@@ -50,6 +50,6 @@
     "moment": "^2.19.0",
     "node-fetch": "^1.7.3",
     "opn": "^5.1.0",
-    "yargs": "^9.0.1"
+    "yargs": "^10.0.3"
   }
 }

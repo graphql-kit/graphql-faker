@@ -1,6 +1,9 @@
 import fetch from 'node-fetch';
 import {Headers} from 'node-fetch';
-import {set as pathSet} from 'lodash';
+import {
+  set as pathSet,
+  get as pathGet,
+} from 'lodash';
 
 import {
   Kind,
@@ -8,6 +11,7 @@ import {
   print,
   visit,
   TypeInfo,
+  formatError,
   printSchema,
   extendSchema,
   isAbstractType,
@@ -43,6 +47,10 @@ export function proxyMiddleware(url, headers) {
       //TODO: proxy extensions
       return {
         schema,
+        formatError: error => ({
+          ...formatError(error),
+          ...pathGet(error, 'originalError.extraProps', {}),
+        }),
         rootValue: (info: RequestInfo) => {
           const operationName = info.operationName;
           const variables = info.variables;
@@ -78,9 +86,13 @@ function buildRootValue(response) {
     if (!error.path)
       globalErrors.push(error);
 
+    const {message, locations: _1, path: _2, ...extraProps} = error;
+    const errorObj = new Error(error.message);
+    (errorObj as any).extraProps = extraProps;
+
     // Recreate root value up to a place where original error was thrown
     // and place error as field value.
-    pathSet(rootValue, error.path, new Error(error.message))
+    pathSet(rootValue, error.path, errorObj);
   }
 
   // TODO proxy global errors

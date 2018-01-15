@@ -66,5 +66,6 @@ module.exports = {
       filename: 'main.css',
       allChunks: true,
     }),
+    new webpack.IgnorePlugin(/\.js\.flow$/, /graphql-language-service-interface[\\/]dist$/)
   ],
 };

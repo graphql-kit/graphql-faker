@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -e ts --exec 'ts-node src/index.ts'",
     "debug": "ts-node --inspect --compilerOptions '{\"inlineSources\":true}' src/index.ts",
-    "build:editor": "cd src/editor && npm install && npm run build && cd -",
+    "build:editor": "cd src/editor && yarn && npm run build && cd -",
     "build:typescript": "tsc",
     "copy:graphql": "cp src/*.graphql dist/",
     "copy:editor": "mkdir -p dist/editor && cp src/editor/*.{html,js,css,svg} dist/editor",

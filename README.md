@@ -76,7 +76,7 @@ Extend real data from GitHub API with faked data based on extension IDL (you can
 
 # Development
 ```sh
-npm install
+yarn
 npm run build:all
 npm run start
 ```

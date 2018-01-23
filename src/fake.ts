@@ -48,14 +48,25 @@ export const typeFakers = {
 };
 
 const fakeFunctions = {
-  //TODO: add format arg
-  zipCode: () => faker.address.zipCode(),
-  city: () => faker.address.city(),
+  // Address section
+  zipCode: {
+    args: ['format'],
+    func: (format) => faker.address.zipCode(format)
+  },
+  city: {
+    args: ['format'],
+    func: (format) => faker.address.city(format)
+  },
+  cityPrefix: () => faker.address.cityPrefix(),
+  citySuffix: () => faker.address.citySuffix(),
   streetName: () => faker.address.streetName(),
   streetAddress: {
     args: ['useFullAddress'],
     func: (useFullAddress) => faker.address.streetAddress(useFullAddress),
   },
+  streetSuffix: () => faker.address.streetSuffix(),
+  streetPrefix: () => faker.address.streetPrefix(),
+  secondaryAddress: () => faker.address.secondaryAddress(),
   county: () => faker.address.county(),
   country: () => faker.address.country(),
   countryCode: () => faker.address.countryCode(),
@@ -64,26 +75,38 @@ const fakeFunctions = {
   latitude: () => faker.address.latitude(),
   longitude: () => faker.address.longitude(),
 
+  // Commerce section
   colorName: () => faker.commerce.color(),
   productCategory: () => faker.commerce.department(),
   productName: () => faker.commerce.productName(),
-  money: {
-    //TODO: add 'dec' and 'symbol'
-    args: ['minMoney', 'maxMoney'],
-    func: (min, max) => faker.commerce.price(min, max),
+  price: {
+    args: ['minMoney', 'maxMoney', 'dec', 'symbol'],
+    func: (min, max, dec, symbol) => faker.commerce.price(min, max, dec, symbol),
   },
+  productAdjective: () => faker.commerce.productAdjective(),
   productMaterial: () => faker.commerce.productMaterial(),
   product: () => faker.commerce.product(),
 
+  // Company section
+  companySuffixes: () => faker.company.suffixes(),
   companyName: () => faker.company.companyName(),
+  companySuffix: () => faker.company.companySuffix(),
   companyCatchPhrase: () => faker.company.catchPhrase(),
-  companyBS: () => faker.company.bs(),
+  companyBs: () => faker.company.bs(),
+  catchPhraseAdjective: () => faker.company.catchPhraseAdjective(),
+  catchPhraseDescriptor: () => faker.company.catchPhraseDescriptor(),
+  catchPhraseNoun: () => faker.company.catchPhraseNoun(),
+  companyBsAdjective: () => faker.company.bsAdjective(),
+  companyBsBuzz: () => faker.company.bsBuzz(),
+  companyBsNoun: () => faker.company.bsNoun(),
 
+  // Database section
   dbColumn: () => faker.database.column(),
   dbType: () => faker.database.type(),
   dbCollation: () => faker.database.collation(),
   dbEngine: () => faker.database.engine(),
 
+  // Date section
   pastDate: {
     args: ['dateFormat'],
     func: (dateFormat) => {
@@ -106,6 +129,7 @@ const fakeFunctions = {
     }
   },
 
+  // Finance section
   financeAccountName: () => faker.finance.accountName(),
   //TODO: investigate finance.mask
   financeTransactionType: () => faker.finance.transactionType(),
@@ -116,15 +140,18 @@ const fakeFunctions = {
   internationalBankAccountNumber: () => faker.finance.iban(),
   bankIdentifierCode: () => faker.finance.bic(),
 
+  // Hacker section
   hackerAbbr: () => faker.hacker.itAbbr(),
   hackerPhrase: () => faker.hacker.phrase(),
 
+  // Image section
   imageUrl: {
     args: ['imageHeight', 'imageWidth', 'imageCategory', 'randomizeImageUrl'],
     func: (height, width, category, randomize) =>
       faker.image.imageUrl(height, width, category, randomize, false),
   },
 
+  // Internet section
   avatarUrl: () => faker.internet.avatar(),
   email: {
     args: ['emailProvider'],
@@ -135,33 +162,47 @@ const fakeFunctions = {
   ipv4Address: () => faker.internet.ip(),
   ipv6Address: () => faker.internet.ipv6(),
   userAgent: () => faker.internet.userAgent(),
-  colorHex: () => faker.internet.color(),
+  colorHex: {
+    args: ['baseRed255', 'baseGreen255', 'baseBlue255'],
+    func: (baseRed255, baseGreen255, baseBlue255) => faker.internet.color(baseRed255, baseGreen255, baseBlue255)
+  },
   macAddress: () => faker.internet.mac(),
   password: {
     args: ['passwordLenth'],
     func: (len) => faker.internet.password(len),
   },
 
+  // Lorem section
   lorem: {
     args: ['loremSize'],
     func: (size) => faker.lorem[size || 'paragraphs'](),
   },
 
+  // Name section
   firstName: () => faker.name.firstName(),
   lastName: () => faker.name.lastName(),
   fullName: () => faker.name.findName(),
   jobTitle: () => faker.name.jobTitle(),
 
   //FIXME: phone number
-
+  // Random section
   uuid: () => faker.random.uuid(),
   word: () => faker.random.word(),
   words: () => faker.random.words(),
   locale: () => faker.random.locale(),
 
-  filename: () => faker.system.commonFileName(),
+  // System section
+  // TODO: Add ext and type
+  fileName: () => faker.system.fileName(),
+  commonFileName: () => faker.system.commonFileName(),
   mimeType: () => faker.system.mimeType(),
-  fileExtension: () => faker.system.fileExt(),
+  commonFileType: () => faker.system.commonFileType(),
+  commonFileExt: () => faker.system.commonFileExt(),
+  fileType: () => faker.system.fileType(),
+  fileExt: {
+    args: ['mimeType'],
+    func: (mimeType) => faker.system.fileExt(mimeType)
+  },
   semver: () => faker.system.semver(),
 };
 

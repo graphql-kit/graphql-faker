@@ -41,9 +41,13 @@ enum fake__Locale {
 enum fake__Types {
   zipCode
   city
+  cityPrefix
+  citySuffix
   streetName
   # Configure address with option `useFullAddress`
   streetAddress
+  streetSuffix
+  streetPrefix
   secondaryAddress
   county
   country
@@ -57,13 +61,20 @@ enum fake__Types {
   productCategory
   productName
   # Sum of money. Configure with options `minMoney` and `maxMoney`
-  money
+  price
   productMaterial
   product
+  productAdjective
 
+  companySuffixes
   companyName
+  companySuffix
   companyCatchPhrase
   companyBS
+  catchPhraseAdjective
+  catchPhraseDescriptor
+  catchPhraseNoun
+  bsAdjective
 
   dbColumn
   dbType
@@ -119,9 +130,13 @@ enum fake__Types {
   words
   locale
 
-  filename
+  fileName
+  commonFileName
   mimeType
-  fileExtension
+  commonFileType
+  commonFileExt
+  fileType
+  fileExt
   semver
 }
 
@@ -157,6 +172,10 @@ input fake__options {
   minMoney: Float
   # Only for type `money`
   maxMoney: Float
+  # Only for type `money`
+  dec: Int
+  # Only for type `money`
+  symbol: String
   # Only for type `imageUrl`
   imageWidth: Int
   # Only for type `imageUrl`
@@ -174,6 +193,16 @@ input fake__options {
   # Only for types `*Date`. Example value: `YYYY MM DD`.
   # [Full Specification](http://momentjs.com/docs/#/displaying/format/)
   dateFormat: String
+  # Only for types `zipCode, city`
+  format: String
+  # Only for type `colorHex`
+  baseRed255: Int
+  # Only for type `colorHex`
+  baseGreen255: Int
+  # Only for type `colorHex`
+  baseBlue255: Int
+  # Only for type `fileExt`
+  mimeType: String
 }
 
 directive @fake(type:fake__Types!, options: fake__options = {}, locale:fake__Locale) on FIELD_DEFINITION | SCALAR

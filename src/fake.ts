@@ -57,15 +57,11 @@ const fakeFunctions = {
     args: ['format'],
     func: (format) => faker.address.city(format)
   },
-  cityPrefix: () => faker.address.cityPrefix(),
-  citySuffix: () => faker.address.citySuffix(),
   streetName: () => faker.address.streetName(),
   streetAddress: {
     args: ['useFullAddress'],
     func: (useFullAddress) => faker.address.streetAddress(useFullAddress),
   },
-  streetSuffix: () => faker.address.streetSuffix(),
-  streetPrefix: () => faker.address.streetPrefix(),
   secondaryAddress: () => faker.address.secondaryAddress(),
   county: () => faker.address.county(),
   country: () => faker.address.country(),
@@ -88,17 +84,13 @@ const fakeFunctions = {
   product: () => faker.commerce.product(),
 
   // Company section
-  companySuffixes: () => faker.company.suffixes(),
   companyName: () => faker.company.companyName(),
-  companySuffix: () => faker.company.companySuffix(),
   companyCatchPhrase: () => faker.company.catchPhrase(),
-  companyBs: () => faker.company.bs(),
+  companyBS: () => faker.company.bs(),
   catchPhraseAdjective: () => faker.company.catchPhraseAdjective(),
   catchPhraseDescriptor: () => faker.company.catchPhraseDescriptor(),
   catchPhraseNoun: () => faker.company.catchPhraseNoun(),
-  companyBsAdjective: () => faker.company.bsAdjective(),
-  companyBsBuzz: () => faker.company.bsBuzz(),
-  companyBsNoun: () => faker.company.bsNoun(),
+  companyBSAdjective: () => faker.company.bsAdjective(),
 
   // Database section
   dbColumn: () => faker.database.column(),

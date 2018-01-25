@@ -41,13 +41,9 @@ enum fake__Locale {
 enum fake__Types {
   zipCode
   city
-  cityPrefix
-  citySuffix
   streetName
   # Configure address with option `useFullAddress`
   streetAddress
-  streetSuffix
-  streetPrefix
   secondaryAddress
   county
   country
@@ -66,15 +62,13 @@ enum fake__Types {
   product
   productAdjective
 
-  companySuffixes
   companyName
-  companySuffix
   companyCatchPhrase
   companyBS
   catchPhraseAdjective
   catchPhraseDescriptor
   catchPhraseNoun
-  bsAdjective
+  companyBSAdjective
 
   dbColumn
   dbType

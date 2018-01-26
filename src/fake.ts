@@ -48,14 +48,19 @@ export const typeFakers = {
 };
 
 const fakeFunctions = {
-  //TODO: add format arg
+  // Address section
   zipCode: () => faker.address.zipCode(),
   city: () => faker.address.city(),
+  // Skipped: faker.address.cityPrefix
+  // Skipped: faker.address.citySuffix
   streetName: () => faker.address.streetName(),
   streetAddress: {
     args: ['useFullAddress'],
     func: (useFullAddress) => faker.address.streetAddress(useFullAddress),
   },
+  // Skipped: faker.address.streetSuffix
+  // Skipped: faker.address.streetPrefix
+  secondaryAddress: () => faker.address.secondaryAddress(),
   county: () => faker.address.county(),
   country: () => faker.address.country(),
   countryCode: () => faker.address.countryCode(),
@@ -64,26 +69,38 @@ const fakeFunctions = {
   latitude: () => faker.address.latitude(),
   longitude: () => faker.address.longitude(),
 
+  // Commerce section
   colorName: () => faker.commerce.color(),
   productCategory: () => faker.commerce.department(),
   productName: () => faker.commerce.productName(),
   money: {
-    //TODO: add 'dec' and 'symbol'
-    args: ['minMoney', 'maxMoney'],
-    func: (min, max) => faker.commerce.price(min, max),
+    args: ['minMoney', 'maxMoney', 'decimalPlaces'],
+    func: (min, max, dec) => faker.commerce.price(min, max, dec),
   },
+  // Skipped: faker.commerce.productAdjective
   productMaterial: () => faker.commerce.productMaterial(),
   product: () => faker.commerce.product(),
 
+  // Company section
+  // Skipped: faker.company.companySuffixes
   companyName: () => faker.company.companyName(),
+  // Skipped: faker.company.companySuffix
   companyCatchPhrase: () => faker.company.catchPhrase(),
-  companyBS: () => faker.company.bs(),
+  companyBs: () => faker.company.bs(),
+  // Skipped: faker.company.catchPhraseAdjective
+  // Skipped: faker.company.catchPhraseDescriptor
+  // Skipped: faker.company.catchPhraseNoun
+  // Skipped: faker.company.companyBsAdjective
+  // Skipped: faker.company.companyBsBuzz
+  // Skipped: faker.company.companyBsNoun
 
+  // Database section
   dbColumn: () => faker.database.column(),
   dbType: () => faker.database.type(),
   dbCollation: () => faker.database.collation(),
   dbEngine: () => faker.database.engine(),
 
+  // Date section
   pastDate: {
     args: ['dateFormat'],
     func: (dateFormat) => {
@@ -106,6 +123,7 @@ const fakeFunctions = {
     }
   },
 
+  // Finance section
   financeAccountName: () => faker.finance.accountName(),
   //TODO: investigate finance.mask
   financeTransactionType: () => faker.finance.transactionType(),
@@ -116,15 +134,18 @@ const fakeFunctions = {
   internationalBankAccountNumber: () => faker.finance.iban(),
   bankIdentifierCode: () => faker.finance.bic(),
 
+  // Hacker section
   hackerAbbr: () => faker.hacker.itAbbr(),
   hackerPhrase: () => faker.hacker.phrase(),
 
+  // Image section
   imageUrl: {
     args: ['imageHeight', 'imageWidth', 'imageCategory', 'randomizeImageUrl'],
     func: (height, width, category, randomize) =>
       faker.image.imageUrl(height, width, category, randomize, false),
   },
 
+  // Internet section
   avatarUrl: () => faker.internet.avatar(),
   email: {
     args: ['emailProvider'],
@@ -135,32 +156,45 @@ const fakeFunctions = {
   ipv4Address: () => faker.internet.ip(),
   ipv6Address: () => faker.internet.ipv6(),
   userAgent: () => faker.internet.userAgent(),
-  colorHex: () => faker.internet.color(),
+  colorHex: {
+    args: ['baseColor'],
+    func: ({red255, green255, blue255}) => {
+      return faker.internet.color(red255, green255, blue255);
+    },
+  },
   macAddress: () => faker.internet.mac(),
   password: {
     args: ['passwordLenth'],
     func: (len) => faker.internet.password(len),
   },
 
+  // Lorem section
   lorem: {
     args: ['loremSize'],
     func: (size) => faker.lorem[size || 'paragraphs'](),
   },
 
+  // Name section
   firstName: () => faker.name.firstName(),
   lastName: () => faker.name.lastName(),
   fullName: () => faker.name.findName(),
   jobTitle: () => faker.name.jobTitle(),
 
   //FIXME: phone number
-
+  // Random section
   uuid: () => faker.random.uuid(),
   word: () => faker.random.word(),
   words: () => faker.random.words(),
   locale: () => faker.random.locale(),
 
+  // System section
+  // Skipped: faker.system.fileName
+  // TODO: Add ext and type
   filename: () => faker.system.commonFileName(),
   mimeType: () => faker.system.mimeType(),
+  // Skipped: faker.system.fileType
+  // Skipped: faker.system.commonFileType
+  // Skipped: faker.system.commonFileExt
   fileExtension: () => faker.system.fileExt(),
   semver: () => faker.system.semver(),
 };

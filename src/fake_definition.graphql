@@ -56,7 +56,7 @@ enum fake__Types {
   colorName
   productCategory
   productName
-  # Sum of money. Configure with options `minMoney` and `maxMoney`
+  # Sum of money. Configure with options `minMoney`/`maxMoney` and 'decimalPlaces'.
   money
   productMaterial
   product
@@ -101,6 +101,7 @@ enum fake__Types {
   ipv4Address
   ipv6Address
   userAgent
+  # Configure color with option: `baseColor`
   colorHex
   macAddress
   # Configure password with option `passwordLength`
@@ -150,13 +151,21 @@ enum fake__loremSize {
   paragraphs
 }
 
+input fake__color {
+  red255: Int = 0
+  green255: Int = 0
+  blue255: Int = 0
+}
+
 input fake__options {
-  # Only for `type: streetAddress`
+  # Only for type `streetAddress`
   useFullAddress: Boolean
   # Only for type `money`
   minMoney: Float
   # Only for type `money`
   maxMoney: Float
+  # Only for type `money`
+  decimalPlaces: Int
   # Only for type `imageUrl`
   imageWidth: Int
   # Only for type `imageUrl`
@@ -174,6 +183,8 @@ input fake__options {
   # Only for types `*Date`. Example value: `YYYY MM DD`.
   # [Full Specification](http://momentjs.com/docs/#/displaying/format/)
   dateFormat: String
+  # Only for type `colorHex`. [Details here](https://stackoverflow.com/a/43235/4989887)
+  baseColor: fake__color = { red255: 0, green255: 0, blue255: 0 }
 }
 
 directive @fake(type:fake__Types!, options: fake__options = {}, locale:fake__Locale) on FIELD_DEFINITION | SCALAR

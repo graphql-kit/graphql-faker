@@ -115,6 +115,8 @@ enum fake__Types {
   fullName
   jobTitle
 
+  phoneNumber
+
   uuid
   word
   words

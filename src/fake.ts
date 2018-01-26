@@ -180,7 +180,11 @@ const fakeFunctions = {
   fullName: () => faker.name.findName(),
   jobTitle: () => faker.name.jobTitle(),
 
-  //FIXME: phone number
+  // Phone section
+  phoneNumber: () => faker.phone.phoneNumber(),
+  // Skipped: faker.phone.phoneNumberFormat
+  // Skipped: faker.phone.phoneFormats
+
   // Random section
   uuid: () => faker.random.uuid(),
   word: () => faker.random.word(),

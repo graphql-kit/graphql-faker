@@ -31,10 +31,10 @@
     "@types/express-graphql": "^0.0.35",
     "@types/faker": "^4.1.1",
     "@types/graphql": "^0.11.4",
-    "@types/lodash": "^4.14.53",
-    "@types/yargs": "^8.0.2",
+    "@types/lodash": "^4.14.96",
+    "@types/yargs": "^10.0.1",
     "nodemon": "^1.12.1",
-    "ts-node": "^3.0.2",
+    "ts-node": "^4.1.0",
     "typescript": "^2.5.2"
   },
   "dependencies": {
@@ -50,6 +50,6 @@
     "moment": "^2.19.3",
     "node-fetch": "^1.7.3",
     "opn": "^5.1.0",
-    "yargs": "^10.0.3"
+    "yargs": "^11.0.0"
   }
 }

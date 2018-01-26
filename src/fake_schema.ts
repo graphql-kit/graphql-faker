@@ -86,7 +86,7 @@ export function fakeSchema(schema) {
       if (isMutation && isRelayMutation(field))
         field.resolve = getRelayMutationResolver();
       else
-        field.resolve = getFieldResolver(field);
+        field.resolve = getFieldResolver(field, objectType);
     }
   }
 
@@ -104,7 +104,7 @@ export function fakeSchema(schema) {
     );
   }
 
-  function getFieldResolver(field) {
+  function getFieldResolver(field, objectType) {
     const fakeResolver = getResolver(field.type, field);
     return (source, _0, _1, info) => {
       if (source && source.$example && source[field.name]) {
@@ -112,7 +112,7 @@ export function fakeSchema(schema) {
       }
 
       const value = getCurrentSourceProperty(source, info.path);
-      return (value !== undefined) ? value : fakeResolver();
+      return (value !== undefined) ? value : fakeResolver(objectType);
     }
   }
 

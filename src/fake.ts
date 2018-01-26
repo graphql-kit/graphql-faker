@@ -39,9 +39,9 @@ export const typeFakers = {
   'ID': {
     defaultOptions: {},
     generator: () => {
-      return () =>
+      return (parentType) =>
         new Buffer(
-          faker.random.number({max: 9999999999}).toString()
+          parentType.name + ':' + faker.random.number({max: 9999999999}).toString()
         ).toString('base64');
     }
   },

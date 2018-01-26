@@ -49,19 +49,17 @@ export const typeFakers = {
 
 const fakeFunctions = {
   // Address section
-  zipCode: {
-    args: ['format'],
-    func: (format) => faker.address.zipCode(format)
-  },
-  city: {
-    args: ['format'],
-    func: (format) => faker.address.city(format)
-  },
+  zipCode: () => faker.address.zipCode(),
+  city: () => faker.address.city(),
+  // Skipped: faker.address.cityPrefix
+  // Skipped: faker.address.citySuffix
   streetName: () => faker.address.streetName(),
   streetAddress: {
     args: ['useFullAddress'],
     func: (useFullAddress) => faker.address.streetAddress(useFullAddress),
   },
+  // Skipped: faker.address.streetSuffix
+  // Skipped: faker.address.streetPrefix
   secondaryAddress: () => faker.address.secondaryAddress(),
   county: () => faker.address.county(),
   country: () => faker.address.country(),
@@ -75,22 +73,26 @@ const fakeFunctions = {
   colorName: () => faker.commerce.color(),
   productCategory: () => faker.commerce.department(),
   productName: () => faker.commerce.productName(),
-  price: {
-    args: ['minMoney', 'maxMoney', 'dec', 'symbol'],
-    func: (min, max, dec, symbol) => faker.commerce.price(min, max, dec, symbol),
+  money: {
+    args: ['minMoney', 'maxMoney', 'decimalPlaces'],
+    func: (min, max, dec) => faker.commerce.price(min, max, dec),
   },
-  productAdjective: () => faker.commerce.productAdjective(),
+  // Skipped: faker.commerce.productAdjective
   productMaterial: () => faker.commerce.productMaterial(),
   product: () => faker.commerce.product(),
 
   // Company section
+  // Skipped: faker.company.companySuffixes
   companyName: () => faker.company.companyName(),
+  // Skipped: faker.company.companySuffix
   companyCatchPhrase: () => faker.company.catchPhrase(),
-  companyBS: () => faker.company.bs(),
-  catchPhraseAdjective: () => faker.company.catchPhraseAdjective(),
-  catchPhraseDescriptor: () => faker.company.catchPhraseDescriptor(),
-  catchPhraseNoun: () => faker.company.catchPhraseNoun(),
-  companyBSAdjective: () => faker.company.bsAdjective(),
+  companyBs: () => faker.company.bs(),
+  // Skipped: faker.company.catchPhraseAdjective
+  // Skipped: faker.company.catchPhraseDescriptor
+  // Skipped: faker.company.catchPhraseNoun
+  // Skipped: faker.company.companyBsAdjective
+  // Skipped: faker.company.companyBsBuzz
+  // Skipped: faker.company.companyBsNoun
 
   // Database section
   dbColumn: () => faker.database.column(),
@@ -155,8 +157,10 @@ const fakeFunctions = {
   ipv6Address: () => faker.internet.ipv6(),
   userAgent: () => faker.internet.userAgent(),
   colorHex: {
-    args: ['baseRed255', 'baseGreen255', 'baseBlue255'],
-    func: (baseRed255, baseGreen255, baseBlue255) => faker.internet.color(baseRed255, baseGreen255, baseBlue255)
+    args: ['baseColor'],
+    func: ({red255, green255, blue255}) => {
+      return faker.internet.color(red255, green255, blue255);
+    },
   },
   macAddress: () => faker.internet.mac(),
   password: {
@@ -184,17 +188,14 @@ const fakeFunctions = {
   locale: () => faker.random.locale(),
 
   // System section
+  // Skipped: faker.system.fileName
   // TODO: Add ext and type
-  fileName: () => faker.system.fileName(),
-  commonFileName: () => faker.system.commonFileName(),
+  filename: () => faker.system.commonFileName(),
   mimeType: () => faker.system.mimeType(),
-  commonFileType: () => faker.system.commonFileType(),
-  commonFileExt: () => faker.system.commonFileExt(),
-  fileType: () => faker.system.fileType(),
-  fileExt: {
-    args: ['mimeType'],
-    func: (mimeType) => faker.system.fileExt(mimeType)
-  },
+  // Skipped: faker.system.fileType
+  // Skipped: faker.system.commonFileType
+  // Skipped: faker.system.commonFileExt
+  fileExtension: () => faker.system.fileExt(),
   semver: () => faker.system.semver(),
 };
 

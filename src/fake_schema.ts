@@ -68,7 +68,7 @@ export function fakeSchema(schema: GraphQLSchema) {
   const jsonType = schema.getTypeMap()['examples__JSON'];
   jsonType['parseLiteral'] = astToJSON;
 
-  for (let type of Object.values(schema.getTypeMap())) {
+  for (const type of Object.values(schema.getTypeMap())) {
     if (type instanceof GraphQLScalarType && !stdTypeNames.includes(type.name)) {
       type.serialize = (value => value);
       type.parseLiteral = astToJSON;
@@ -83,7 +83,7 @@ export function fakeSchema(schema: GraphQLSchema) {
   function addFakeProperties(objectType:GraphQLObjectType) {
     const isMutation = (objectType === mutationType);
 
-    for (let field of Object.values(objectType.getFields())) {
+    for (const field of Object.values(objectType.getFields())) {
       if (isMutation && isRelayMutation(field))
         field.resolve = getRelayMutationResolver();
       else

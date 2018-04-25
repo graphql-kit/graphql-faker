@@ -70,7 +70,7 @@ const log = console.log;
 let headers = {};
 if (argv.header) {
   const headerStrings = Array.isArray(argv.header) ? argv.header : [argv.header];
-  for (var str of headerStrings) {
+  for (const str of headerStrings) {
     const index = str.indexOf(':');
     const name = str.substr(0, index);
     const value = str.substr(index + 1).trim();

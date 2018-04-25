@@ -2,6 +2,7 @@ import {
   Kind,
   isLeafType,
   isAbstractType,
+  GraphQLSchema,
   GraphQLObjectType,
   GraphQLScalarType,
   GraphQLAbstractType,
@@ -62,10 +63,10 @@ function astToJSON(ast) {
   }
 }
 
-export function fakeSchema(schema) {
-  const mutationTypeName = (schema.getMutationType() || {}).name;
+export function fakeSchema(schema: GraphQLSchema) {
+  const mutationType = schema.getMutationType();
   const jsonType = schema.getTypeMap()['examples__JSON'];
-  jsonType.parseLiteral = astToJSON;
+  jsonType['parseLiteral'] = astToJSON;
 
   for (let type of Object.values(schema.getTypeMap())) {
     if (type instanceof GraphQLScalarType && !stdTypeNames.includes(type.name)) {
@@ -80,7 +81,7 @@ export function fakeSchema(schema) {
   };
 
   function addFakeProperties(objectType:GraphQLObjectType) {
-    const isMutation = (objectType.name === mutationTypeName);
+    const isMutation = (objectType === mutationType);
 
     for (let field of Object.values(objectType.getFields())) {
       if (isMutation && isRelayMutation(field))

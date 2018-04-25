@@ -35,7 +35,7 @@
     "@types/yargs": "^10.0.1",
     "nodemon": "^1.12.1",
     "ts-node": "^4.1.0",
-    "typescript": "^2.5.2"
+    "typescript": "^2.8.3"
   },
   "dependencies": {
     "body-parser": "^1.18.1",

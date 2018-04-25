@@ -1,3 +1,4 @@
+src/editor/node_modules/
 !/lib
 !package.json
 !README.md

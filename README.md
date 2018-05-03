@@ -1,6 +1,7 @@
 ![GraphQL Faker logo](./docs/faker-logo-text.png)
 
 # GraphQL Faker
+
 [![npm](https://img.shields.io/npm/v/graphql-faker.svg)](https://www.npmjs.com/package/graphql-faker) [![David](https://img.shields.io/david/APIs-guru/graphql-faker.svg)](https://david-dm.org/APIs-guru/graphql-faker)
 [![David](https://img.shields.io/david/dev/APIs-guru/graphql-faker.svg)](https://david-dm.org/APIs-guru/graphql-faker?type=dev)
 [![npm](https://img.shields.io/npm/l/graphql-faker.svg)](https://github.com/APIs-guru/graphql-faker/blob/master/LICENSE)
@@ -12,6 +13,7 @@ In the GIF bellow we add fields to types inside real GitHub API and you can make
 ![demo-gif](./docs/demo.gif)
 
 ## How does it work?
+
 We use `@fake` directive to let you specify how to fake data. And if 60+ fakers is not enough for you, just use `@examples` directive to provide examples. Just add a directive to any field or custom scalar definition:
 
     type Person {
@@ -37,10 +39,7 @@ or
 
     yarn global add graphql-faker
 
-or
-
-    docker run -ti -p 9002:9002 graphql-faker # arguments (--open won't work with docker)
-
+or run it in a Docker container, see **Usage with Docker**
 
 ## TL;DR
 
@@ -66,6 +65,7 @@ Extend real data from GitHub API with faked data based on extension IDL (you can
 `[IDL file]` - path to file with [IDL](https://www.graph.cool/docs/faq/graphql-schema-definition-idl-kr84dktnp0/). If this argument is omited Faker uses default file name.
 
 ### Options
+
  * `-p`, `--port`          HTTP Port [default: `env.PORT` or `9002`]
  * `-e`, `--extend`        URL to existing GraphQL server to extend
  * `-o`, `--open`          Open page with IDL editor and GraphiQL in browser
@@ -74,7 +74,18 @@ Extend real data from GitHub API with faked data based on extension IDL (you can
  * `--co`, `--cors-origin` CORS: Specify the origin for the Access-Control-Allow-Origin header
  * `-h`, `--help`          Show help
 
+### Usage with Docker
+
+    docker run -p=9002:9002 apisguru/graphql-faker [options] [IDL file]
+
+To specify a custom file, mount a volume where the file is located to `/workdir`:
+
+    docker run -v=${PWD}:/workdir apisguru/graphql-faker path/to/schema.idl
+
+Because the process is running inside of the container, `--open` does not work.
+
 # Development
+
 ```sh
 yarn
 npm run build:all

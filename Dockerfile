@@ -1,14 +1,9 @@
 FROM node:8.8.1-alpine
 
-MAINTAINER James Kyburz "james.kyburz@gmail.com"
-
-RUN apk --no-cache add --virtual native-deps \
-  git && \
-  npm install graphql-faker -g &&\
-  npm cache clean --force &&\
-  apk del native-deps
-
 ENTRYPOINT ["node", "/usr/local/bin/graphql-faker"]
-CMD []
+WORKDIR /workdir
 
 EXPOSE 9002
+
+RUN yarn global add graphql-faker && \
+    yarn cache clean --force

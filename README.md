@@ -72,7 +72,7 @@ Extend real data from GitHub API with faked data based on extension IDL (you can
  * `-e`, `--extend`        URL to existing GraphQL server to extend
  * `-o`, `--open`          Open page with IDL editor and GraphiQL in browser
  * `-H`, `--header`        Specify headers to the proxied server in cURL format, e.g.: `Authorization: bearer XXXXXXXXX`
- * `--forward-headers`     Headers that should be forwarded to the proxied server
+ * `--forward-headers`     Specify which headers should be forwarded to the proxied server
  * `--co`, `--cors-origin` CORS: Specify the origin for the Access-Control-Allow-Origin header
  * `-h`, `--help`          Show help
 

@@ -43,7 +43,7 @@ const argv = yargs
   .implies('header', 'extend')
   .describe(
     'forward-headers',
-    'Headers that should be forwarded to the proxied server'
+    'Specify which headers should be forwarded to the proxied server'
   )
   .array('forward-headers')
   .implies('forward-headers', 'extend')

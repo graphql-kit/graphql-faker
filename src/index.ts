@@ -24,32 +24,46 @@ import { fakeSchema } from './fake_schema';
 import { proxyMiddleware } from './proxy';
 import { existsSync } from './utils';
 
-const DEFAULT_PORT = process.env.PORT || 9002;
 const argv = yargs
-  .usage('Usage: $0 [file]')
-  .alias('p', 'port')
-  .nargs('p', 1)
-  .describe('p', 'HTTP Port')
-  .default('p', DEFAULT_PORT)
-  .alias('e', 'extend')
-  .nargs('e', 1)
-  .describe('e', 'URL to existing GraphQL server to extend')
-  .alias('o', 'open')
-  .describe('o', 'Open page with IDL editor and GraphiQL in browser')
-  .alias('H', 'header')
-  .describe('H', 'Specify headers to the proxied server in cURL format,' +
-     'e.g.: "Authorization: bearer XXXXXXXXX"')
-  .nargs('H', 1)
-  .implies('header', 'extend')
-  .describe(
-    'forward-headers',
-    'Specify which headers should be forwarded to the proxied server'
-  )
-  .array('forward-headers')
-  .implies('forward-headers', 'extend')
-  .alias('co', 'cors-origin')
-  .nargs('co', 1)
-  .describe('co', 'CORS: Define Access-Control-Allow-Origin header')
+  .command('$0 [file]', '', cmd => cmd.options({
+    'port': {
+      alias: 'p',
+      describe: 'HTTP Port',
+      type: 'number',
+      requiresArg: true,
+      default: process.env.PORT || 9002,
+    },
+    'open': {
+      alias: 'o',
+      describe: 'Open page with IDL editor and GraphiQL in browser',
+      type: 'boolean',
+    },
+    'cors-origin': {
+      alias: 'co',
+      describe: 'CORS: Define Access-Control-Allow-Origin header',
+      type: 'string',
+      requiresArg: true,
+    },
+    'extend': {
+      alias: 'e',
+      describe: 'URL to existing GraphQL server to extend',
+      type: 'string',
+      requiresArg: true,
+    },
+    'header': {
+      alias: 'H',
+      describe: 'Specify headers to the proxied server in cURL format, e.g.: "Authorization: bearer XXXXXXXXX"',
+      type: 'string',
+      requiresArg: true,
+      implies: 'extend',
+    },
+    'forward-headers': {
+      describe: 'Specify which headers should be forwarded to the proxied server',
+      type: 'array',
+      implies: 'extend',
+    },
+  }))
+  .strict()
   .help('h')
   .alias('h', 'help')
   .epilog(`Examples:
@@ -64,6 +78,7 @@ const argv = yargs
   $0 ./ext-gh.graphql --extend https://api.github.com/graphql \\
   --header "Authorization: bearer <TOKEN>"`)
   .argv
+
 
 const log = console.log;
 
@@ -82,10 +97,15 @@ const forwardHeaderNames = (argv.forwardHeaders || []).map(
   str => str.toLowerCase()
 );
 
-let fileArg = argv._[0];
-let fileName = fileArg || (argv.extend ?
+const fileName = argv.file || (argv.extend ?
   './schema_extension.faker.graphql' :
   './schema.faker.graphql');
+
+
+if (!argv.file) {
+  log(chalk.yellow(`Default file ${chalk.magenta(fileName)} is used. ` +
+  `Specify [file] parameter to change.`));
+}
 
 const fakeDefinitionAST = readAST(path.join(__dirname, 'fake_definition.graphql'));
 const corsOptions = {}
@@ -203,11 +223,6 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
   ${chalk.blue('❯')} GraphQL API:\t http://localhost:${argv.port}/graphql
 
   `);
-
-  if (!fileArg) {
-    log(chalk.yellow(`Default file ${chalk.magenta(fileName)} is used. ` +
-    `Specify [file] parameter to change.`));
-  }
 
   if (argv.open) {
     setTimeout(() => opn(`http://localhost:${argv.port}/editor`), 500);

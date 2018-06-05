@@ -80,6 +80,10 @@ When specifying the `[IDL file]` after the `--forward-headers` option you need t
 ```
 graphql-faker --forward-headers Authorition -- ./temp.faker.graphql
 ```
+When you finish with an other option there is no need for the `--`:
+```
+graphql-faker --forward-headers Authorition --extend http://localhost:8091/graphql ./temp.faker.graphql
+```
 
 ### Usage with Docker
 

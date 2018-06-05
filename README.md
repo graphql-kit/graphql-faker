@@ -75,6 +75,15 @@ Extend real data from GitHub API with faked data based on extension IDL (you can
  * `--forward-headers`     Specify which headers should be forwarded to the proxied server
  * `--co`, `--cors-origin` CORS: Specify the origin for the Access-Control-Allow-Origin header
  * `-h`, `--help`          Show help
+ 
+When specifying the `[SDL file]` after the `--forward-headers` option you need to prefix it with `--` to clarify it's not another header. For example:
+```
+graphql-faker --extend http://example.com/graphql --forward-headers Authorition -- ./temp.faker.graphql
+```
+When you finish with an other option there is no need for the `--`:
+```
+graphql-faker --forward-headers Authorition --extend http://example.com/graphql ./temp.faker.graphql
+```
 
 ### Usage with Docker
 

@@ -87,7 +87,7 @@ if (argv.header) {
   const headerStrings = Array.isArray(argv.header) ? argv.header : [argv.header];
   for (const str of headerStrings) {
     const index = str.indexOf(':');
-    const name = str.substr(0, index);
+    const name = str.substr(0, index).toLowerCase();
     const value = str.substr(index + 1).trim();
     headers[name] = value;
   }

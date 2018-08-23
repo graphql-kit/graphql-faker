@@ -189,7 +189,7 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
     });
   });
 
-  app.use('/user-idl', bodyParser.text());
+  app.use('/user-idl', bodyParser.text({limit: '5mb', extended: true}));
 
   app.post('/user-idl', (req, res) => {
     try {

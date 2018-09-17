@@ -146,7 +146,7 @@ export function fakeSchema(schema: GraphQLSchema) {
 
   function abstractTypeResolver(type:GraphQLAbstractType) {
     const possibleTypes = schema.getPossibleTypes(type);
-    return () => ({__typename: getRandomItem(possibleTypes)});
+    return () => ({__typename: getRandomItem(possibleTypes as Array<GraphQLObjectType>)});
   }
 }
 

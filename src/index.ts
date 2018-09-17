@@ -160,8 +160,11 @@ if (argv.e) {
   });
 }
 
-function buildServerSchema(idl) {
-  var ast = concatAST([parse(idl), fakeDefinitionAST]);
+function buildServerSchema(idl, concatFake=true) {
+  var ast =parse(idl);
+  if (concatFake){
+    var ast = concatAST([parse(idl), fakeDefinitionAST]);
+  }
   return buildASTSchema(ast);
 }
 
@@ -169,7 +172,7 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
   const app = express();
 
   if (extensionIDL) {
-    const schema = buildServerSchema(schemaIDL);
+    const schema = buildServerSchema(schemaIDL, false);
     extensionIDL.body = extensionIDL.body.replace('<RootTypeName>', schema.getQueryType().name);
   }
   app.options('/graphql', cors(corsOptions))

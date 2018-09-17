@@ -94,7 +94,8 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
 
   buildSchema(value) {
     if (this.state.proxiedSchemaIDL) {
-      let schema = buildSchema(this.state.proxiedSchemaIDL + '\n' + fakeIDL);
+      //In this case we dont need fakeIDL
+      let schema = buildSchema(this.state.proxiedSchemaIDL);
       return extendSchema(schema, parse(value));
     } else {
       return buildSchema(value + '\n' + fakeIDL);

@@ -57,9 +57,11 @@ export default class GraphQLEditor extends React.Component<GraphQLEditorProps> {
       foldGutter: {
         minFoldSize: 4,
       },
+      /*
       lint: {
         schema,
       },
+      */
       hintOptions: {
         schema,
         closeOnUnfocus: false,
@@ -122,7 +124,7 @@ export default class GraphQLEditor extends React.Component<GraphQLEditorProps> {
     const { value, schema } = this.props;
 
     if (schema != prevProps.schema) {
-      this.editor.options.lint.schema = schema;
+      //this.editor.options.lint.schema = schema;
       this.editor.options.hintOptions.schema = schema;
       this.editor.options.info.schema = schema;
       this.editor.options.jump.schema = schema;

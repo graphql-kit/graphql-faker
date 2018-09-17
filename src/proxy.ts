@@ -105,7 +105,17 @@ function buildRootValue(response) {
 function getExtensionFields(extensionAST) {
   const extensionFields = {};
   (extensionAST.definitions || []).forEach(def => {
-    if (def.kind !== Kind.TYPE_EXTENSION_DEFINITION)
+    var extensionsDefintions = [
+      Kind.SCALAR_TYPE_EXTENSION,
+      Kind.SCHEMA_EXTENSION,
+      Kind.OPERATION_TYPE_DEFINITION,
+      Kind.ENUM_TYPE_EXTENSION,
+      Kind.INPUT_OBJECT_TYPE_EXTENSION,
+      Kind.INTERFACE_TYPE_EXTENSION,
+      Kind.OBJECT_TYPE_EXTENSION,
+      Kind.UNION_TYPE_EXTENSION
+    ]
+    if (!extensionsDefintions.includes(def.kind))//def.kind !== Kind.TYPE_EXTENSION_DEFINITION)
       return;
     const typeName = def.definition.name.value;
     // FIXME: handle multiple extends of the same type

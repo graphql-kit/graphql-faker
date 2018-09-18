@@ -170,14 +170,19 @@ function buildServerSchema(idl, concatFake=true) {
 
 function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
   const app = express();
-
+  //Check if extend another fake schema to avoid add the fakeIDL
+  var concatAST=true;
+  if (schemaIDL.body.includes("fake__Locale")){
+    concatAST=false;
+  }
   if (extensionIDL) {
-    const schema = buildServerSchema(schemaIDL, false);
+    const schema = buildServerSchema(schemaIDL, concatAST);
     extensionIDL.body = extensionIDL.body.replace('<RootTypeName>', schema.getQueryType().name);
   }
   app.options('/graphql', cors(corsOptions))
   app.use('/graphql', cors(corsOptions), graphqlHTTP(req => {
-    const schema = buildServerSchema(schemaIDL);
+    
+    const schema = buildServerSchema(schemaIDL, concatAST);
     const forwardHeaders = pick(req.headers, forwardHeaderNames);
     return {
       ...optionsCB(schema, extensionIDL, forwardHeaders),

@@ -37,11 +37,14 @@ export function proxyMiddleware(url, headers) {
   return getIntrospection().then(introspection => {
     const introspectionSchema = buildClientSchema(introspection.data);
     const introspectionIDL = printSchema(introspectionSchema);
-
     return [introspectionIDL, (serverSchema, extensionIDL, forwardHeaders) => {
       const extensionAST = parse(extensionIDL);
+    
       const extensionFields = getExtensionFields(extensionAST);
+   
       const schema = extendSchema(serverSchema, extensionAST);
+      
+      
       fakeSchema(schema);
 
       //TODO: proxy extensions
@@ -104,7 +107,7 @@ function buildRootValue(response) {
 
 function getExtensionFields(extensionAST) {
   const extensionFields = {};
-  (extensionAST.definitions || []).forEach(def => {
+  extensionAST.definitions.forEach(def => {
     var extensionsDefintions = [
       Kind.SCALAR_TYPE_EXTENSION,
       Kind.SCHEMA_EXTENSION,
@@ -115,11 +118,11 @@ function getExtensionFields(extensionAST) {
       Kind.OBJECT_TYPE_EXTENSION,
       Kind.UNION_TYPE_EXTENSION
     ]
-    if (!extensionsDefintions.includes(def.kind))//def.kind !== Kind.TYPE_EXTENSION_DEFINITION)
-      return;
-    const typeName = def.definition.name.value;
+    if (extensionsDefintions.includes(def.kind)){
+      const typeName = def.name.value;
     // FIXME: handle multiple extends of the same type
-    extensionFields[typeName] = def.definition.fields.map(field => field.name.value);
+      extensionFields[typeName] = def.fields.map(field => field.name.value);
+    }
   });
   return extensionFields;
 }

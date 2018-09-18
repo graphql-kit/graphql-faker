@@ -5,7 +5,7 @@ import 'graphiql/graphiql.css';
 
 import * as classNames from 'classnames';
 import * as GraphiQL from 'graphiql';
-import { buildSchema, extendSchema, GraphQLSchema, parse } from 'graphql';
+import { buildSchema, extendSchema, GraphQLSchema, parse} from 'graphql';
 import * as fetch from 'isomorphic-fetch';
 import * as fakeIDL from 'raw-loader!../fake_definition.graphql';
 import * as React from 'react';
@@ -88,23 +88,42 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     return this.fetcher('/user-idl', {
       method: 'post',
       headers: { 'Content-Type': 'text/plain' },
-      body: idl,
+      body: idl
+      
     });
   }
 
   buildSchema(value) {
+    var concatFake = true;
+    var concat='';
+    //Check if extend another fake schema to avoid add the fakeIDL
+    if (value.includes("fake__Locale")){
+      concatFake=false;
+    }
     if (this.state.proxiedSchemaIDL) {
-      //In this case we dont need fakeIDL
-      let schema = buildSchema(this.state.proxiedSchemaIDL);
+      if (concatFake && this.state.proxiedSchemaIDL.includes("fake__Locale")){
+        concatFake=false;
+      }
+      concat = this.state.proxiedSchemaIDL;
+      if (concatFake){
+        concat += '\n' + fakeIDL;
+      }
+      let schema = buildSchema(concat);
       return extendSchema(schema, parse(value));
+
     } else {
-      return buildSchema(value + '\n' + fakeIDL);
+      concat = value;
+      if (concatFake){
+        concat += '\n' + fakeIDL;
+      }
+      return buildSchema(concat);
     }
   }
 
   updateIdl(value, noError = false) {
     try {
       const schema = this.buildSchema(value);
+      
       this.setState(prevState => ({
         ...prevState,
         schema,
@@ -131,7 +150,6 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     if (!dirty) return;
 
     if (!this.updateIdl(value)) return;
-
     this.postIDL(value).then(res => {
       if (res.ok) {
         this.setStatus('Saved!', 2000);
@@ -162,7 +180,9 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     let dirtySchema = null as GraphQLSchema | null;
     try {
       dirtySchema = this.buildSchema(val);
-    } catch(_) { }
+    } catch(_) {
+      
+     }
 
     this.setState(prevState => ({
       ...prevState,

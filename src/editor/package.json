@@ -8,7 +8,7 @@
     "classnames": "^2.2.5",
     "codemirror": "^5.40.0",
     "codemirror-graphql": "^0.6.12",
-    "graphiql": "^0.9.3",
+    "graphiql": "*",
     "graphql": "^14.0.2",
     "isomorphic-fetch": "^2.2.1",
     "marked": "^0.3.6",

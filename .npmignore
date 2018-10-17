@@ -1,4 +1,5 @@
-src/editor/node_modules/
-!/lib
+*
+!Dockerfile
+!.dockerignore
+!dist/**
 !package.json
-!README.md

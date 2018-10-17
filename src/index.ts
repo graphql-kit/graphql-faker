@@ -24,6 +24,8 @@ import { fakeSchema } from './fake_schema';
 import { proxyMiddleware } from './proxy';
 import { existsSync } from './utils';
 
+const REFLECT_ORIGIN = 'reflect';
+
 const argv = yargs
   .command('$0 [file]', '', cmd => cmd.options({
     'port': {
@@ -111,7 +113,7 @@ const fakeDefinitionAST = readAST(path.join(__dirname, 'fake_definition.graphql'
 const corsOptions = {}
 
 if (argv.co) {
-  corsOptions['origin'] =  argv.co
+  corsOptions['origin'] =  argv.co === REFLECT_ORIGIN ? true : argv.co
   corsOptions['credentials'] =  true
 }
 

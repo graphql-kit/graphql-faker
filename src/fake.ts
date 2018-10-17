@@ -186,6 +186,10 @@ const fakeFunctions = {
   // Skipped: faker.phone.phoneFormats
 
   // Random section
+  number: {
+    args: ['minNumber', 'maxNumber', 'precisionNumber'],
+    func: (min, max, precision) => faker.random.number({ min, max, precision }),
+  },
   uuid: () => faker.random.uuid(),
   word: () => faker.random.word(),
   words: () => faker.random.words(),

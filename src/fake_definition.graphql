@@ -117,6 +117,7 @@ enum fake__Types {
 
   phoneNumber
 
+  number
   uuid
   word
   words
@@ -187,6 +188,12 @@ input fake__options {
   dateFormat: String
   # Only for type `colorHex`. [Details here](https://stackoverflow.com/a/43235/4989887)
   baseColor: fake__color = { red255: 0, green255: 0, blue255: 0 }
+  # Only for type `number`
+  minNumber: Float
+  # Only for type `number`
+  maxNumber: Float
+  # Only for type `number`
+  precisionNumber: Float
 }
 
 directive @fake(type:fake__Types!, options: fake__options = {}, locale:fake__Locale) on FIELD_DEFINITION | SCALAR

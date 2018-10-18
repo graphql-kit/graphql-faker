@@ -16,11 +16,12 @@ In the GIF bellow we add fields to types inside real GitHub API and you can make
 
 ## How does it work?
 
-We use `@fake` directive to let you specify how to fake data. And if 60+ fakers is not enough for you, just use `@examples` directive to provide examples. Just add a directive to any field or custom scalar definition:
+We use `@fake` directive to let you specify how to fake data. And if 60+ fakers is not enough for you, just use `@examples` directive to provide examples. Use `@listLength` directive to specify number of returned array items. Add a directive to any field or custom scalar definition:
 
     type Person {
       name: String @fake(type: firstName)
       gender: String @examples(values: ["male", "female"])
+      pets: [Pet] @listLength(min: 1, max: 10)
     }
 
 No need to remember or read any docs. Autocompletion is included!

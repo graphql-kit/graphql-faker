@@ -25,9 +25,14 @@ type FakeArgs = {
 type ExamplesArgs = {
   values: [any];
 };
+type ListLenghtArgs = {
+  min: number;
+  max: number;
+};
 type DirectiveArgs = {
   fake?: FakeArgs;
   examples?: ExamplesArgs;
+  listLength?: ListLenghtArgs;
 };
 
 export const fakeTypeResolver: GraphQLTypeResolver<unknown, unknown> = async (
@@ -58,6 +63,7 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
 ) => {
   const { schema, parentType, fieldName } = info;
   const fieldDef = parentType.getFields()[fieldName];
+  const fieldDirectives = getFakeDirectives(schema, fieldDef);
 
   let defaultResolved = await defaultFieldResolver(source, args, context, info);
   if (defaultResolved instanceof Error) {
@@ -81,12 +87,14 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
       return fakeValueOfType(type.ofType);
     }
     if (isListType(type)) {
-      return Array(getRandomInt(2, 4)).fill(() => fakeValueOfType(type.ofType));
+      const listLength = fieldDirectives.listLength || { min: 2, max: 4 };
+      return Array(getRandomInt(listLength.min, listLength.max))
+        .fill(() => fakeValueOfType(type.ofType));
     }
 
     const {fake, examples} = {
       ...getFakeDirectives(schema, type),
-      ...getFakeDirectives(schema, fieldDef),
+      ...fieldDirectives,
     };
 
     if (isLeafType(type)) {
@@ -139,6 +147,7 @@ function isRelayMutation(fieldDef) {
 function getFakeDirectives(schema, object): DirectiveArgs {
   const fakeDirective = schema.getDirective('fake');
   const examplesDirective = schema.getDirective('examples');
+  const listLenghtDirective = schema.getDirective('listLength');
   assert(fakeDirective != null && examplesDirective != null);
 
   const nodes = [];
@@ -149,12 +158,11 @@ function getFakeDirectives(schema, object): DirectiveArgs {
     nodes.push(...object.extensionNodes);
   }
 
-  let fake;
-  let examples;
+  const result = {} as DirectiveArgs;
   for (const node of nodes) {
-    fake = getDirectiveValues(fakeDirective, node) as FakeArgs;
-    examples = getDirectiveValues(examplesDirective, node) as ExamplesArgs;
+    result.fake = getDirectiveValues(fakeDirective, node) as FakeArgs;
+    result.examples = getDirectiveValues(examplesDirective, node) as ExamplesArgs;
+    result.listLength = getDirectiveValues(listLenghtDirective, node) as ListLenghtArgs;
   }
-
-  return fake || examples ? {fake, examples} : {};
+  return result;
 }

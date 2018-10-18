@@ -199,6 +199,8 @@ input fake__options {
 
 directive @fake(type:fake__Types!, options: fake__options = {}, locale:fake__Locale) on FIELD_DEFINITION | SCALAR
 
+directive @listLength(min: Int!, max: Int!) on FIELD_DEFINITION
+
 scalar examples__JSON
 directive @examples(values: [examples__JSON]!) on FIELD_DEFINITION | SCALAR
 `);

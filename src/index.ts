@@ -24,8 +24,6 @@ import { fakeSchema } from './fake_schema';
 import { proxyMiddleware } from './proxy';
 import { existsSync } from './utils';
 
-const REFLECT_ORIGIN = 'reflect';
-
 const argv = yargs
   .command('$0 [file]', '', cmd => cmd.options({
     'port': {
@@ -112,10 +110,9 @@ if (!argv.file) {
 const fakeDefinitionAST = readAST(path.join(__dirname, 'fake_definition.graphql'));
 const corsOptions = {}
 
-if (argv.co) {
-  corsOptions['origin'] =  argv.co === REFLECT_ORIGIN ? true : argv.co
-  corsOptions['credentials'] =  true
-}
+// Currently no way to turn CORS off entirely, but that is probably fine
+corsOptions['credentials'] =  true
+corsOptions['origin'] = argv.co ? argv.co : true
 
 let userIDL;
 if (existsSync(fileName)) {

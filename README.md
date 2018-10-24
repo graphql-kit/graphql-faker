@@ -73,7 +73,7 @@ Extend real data from GitHub API with faked data based on extension IDL (you can
  * `-o`, `--open`          Open page with IDL editor and GraphiQL in browser
  * `-H`, `--header`        Specify headers to the proxied server in cURL format, e.g.: `Authorization: bearer XXXXXXXXX`
  * `--forward-headers`     Specify which headers should be forwarded to the proxied server
- * `--co`, `--cors-origin` CORS: Specify the origin for the Access-Control-Allow-Origin header
+ * `--co`, `--cors-origin` CORS: Specify the custom origin for the Access-Control-Allow-Origin header, by default it is the same as `Origin` header from the request
  * `-h`, `--help`          Show help
  
 When specifying the `[SDL file]` after the `--forward-headers` option you need to prefix it with `--` to clarify it's not another header. For example:

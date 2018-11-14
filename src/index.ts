@@ -40,7 +40,7 @@ const argv = yargs
     },
     'cors-origin': {
       alias: 'co',
-      describe: 'CORS: Define Access-Control-Allow-Origin header',
+      describe: 'CORS: Specify the custom origin for the Access-Control-Allow-Origin header, by default it is the same as `Origin` header from the request',
       type: 'string',
       requiresArg: true,
     },
@@ -110,10 +110,8 @@ if (!argv.file) {
 const fakeDefinitionAST = readAST(path.join(__dirname, 'fake_definition.graphql'));
 const corsOptions = {}
 
-if (argv.co) {
-  corsOptions['origin'] =  argv.co
-  corsOptions['credentials'] =  true
-}
+corsOptions['credentials'] =  true
+corsOptions['origin'] = argv.co ? argv.co : true
 
 let userIDL;
 if (existsSync(fileName)) {

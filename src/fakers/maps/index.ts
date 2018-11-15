@@ -1,2 +1,2 @@
 export { examples } from "./examples";
-export { types } from "./types";
+export { fakes } from "./fakes";

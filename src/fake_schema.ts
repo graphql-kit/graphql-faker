@@ -81,8 +81,9 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
   const mutationType = schema.getMutationType();
   const jsonType = schema.getTypeMap()["examples__JSON"];
   jsonType["parseLiteral"] = astToJSON;
-
-  for (const type of Object.values(schema.getTypeMap())) {
+  const typeMap = schema.getTypeMap();
+  const values = Object.values(typeMap);
+  for (const type of values) {
     if (
       type instanceof GraphQLScalarType &&
       !stdTypeNames.includes(type.name)
@@ -98,8 +99,9 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
 
   function addFakeProperties(objectType: GraphQLObjectType) {
     const isMutation = objectType === mutationType;
-
-    for (const field of Object.values(objectType.getFields())) {
+    const fields = objectType.getFields();
+    const values = Object.values(fields);
+    for (const field of values) {
       if (isMutation && isRelayMutation(field))
         field.resolve = getRelayMutationResolver();
       else field.resolve = getFieldResolver(field, objectType);
@@ -119,8 +121,8 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
     );
   }
 
-  function getFieldResolver(field, objectType) {
-    const fakeResolver = getResolver(field.type, field);
+  function getFieldResolver(field, objectType, fields?: string[]) {
+    const fakeResolver = getResolver(field.type, field, fields);
     return (source, _0, _1, info) => {
       if (source && source.$example && source[field.name]) {
         return source[field.name];
@@ -144,18 +146,19 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
     return source && source[path!.key];
   }
 
-  function getResolver(type: GraphQLOutputType, field) {
-    if (type instanceof GraphQLNonNull) return getResolver(type.ofType, field);
+  function getResolver(type: GraphQLOutputType, field, fields?: string[]) {
+    if (type instanceof GraphQLNonNull)
+      return getResolver(type.ofType, field, fields);
     if (type instanceof GraphQLList)
       return arrayResolver(
-        getResolver(type.ofType, field),
+        getResolver(type.ofType, field, fields),
         getFakeDirectives(field),
         config
       );
 
     if (isAbstractType(type)) return abstractTypeResolver(type);
 
-    return fieldResolver(type, field, config);
+    return fieldResolver(type, field, fields);
   }
 
   function abstractTypeResolver(type: GraphQLAbstractType) {
@@ -163,7 +166,7 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
     return () => ({ __typename: getRandomItem(possibleTypes, config) });
   }
 
-  function fieldResolver(type: GraphQLOutputType, field, config = {}) {
+  function fieldResolver(type: GraphQLOutputType, field, fields: string[]) {
     const directiveToArgs = {
       ...getFakeDirectives(type),
       ...getFakeDirectives(field)
@@ -171,13 +174,17 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
     const { fake, examples } = directiveToArgs;
 
     const genRandom = () =>
-      getRandomItem(examples.values, config, { type, field });
+      getRandomItem(examples.values, config, { type, field, fields });
 
     if (isLeafType(type)) {
       if (examples) return () => genRandom();
       if (fake) {
         return () =>
-          fakeValue(fake.type, fake.options, fake.locale, { type, field });
+          fakeValue(fake.type, fake.options, fake.locale, {
+            type,
+            field,
+            fields
+          });
       }
       return () => {
         // try resolving value based purely on type and field
@@ -187,7 +194,8 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
             exValue ||
             fakeValue(null, null, null, {
               type,
-              field
+              field,
+              fields
             });
           // if no value returned, fallback to using leaf resolver
           return value !== undefined ? value : getLeafResolver(type, config);

@@ -68,7 +68,7 @@ export const fieldMap = {
   recentDate: ["createdAt", "updatedAt", "changedAt"]
 };
 
-export const types = {
+export const fakes = {
   typeMap,
   fieldMap
 };

@@ -2,111 +2,48 @@
 let faker = require("faker");
 import { createFakeFunctions } from "./functions";
 import { createTypeFakers } from "./type-fakers";
-import { types, examples } from "./faker-maps";
 export { createTypeFakers, createFakeFunctions };
-const escapeStrRegexp = require("escape-string-regexp");
+import { resolveExample, resolveFake, error } from "./resolve";
 
-export const maps = { types, examples };
-
-const resolveFakeType = fake => {
-  return typeof fake === "string" ? fake : fake.type;
-};
-const resolveFakeOptions = fake => {
-  return typeof fake === "string" ? {} : fake.options;
-};
-
-let guessFake = ({ type, field, config }) => {
-  const { typeMap, fieldMap } = types;
-  const typeFieldMap = config.typeMap || typeMap[type];
-  let options = {};
-  if (typeFieldMap) {
-    const guessed = typeFieldMap[field];
-    const type = guessed ? resolveFakeType(guessed) : field;
-    options = resolveFakeOptions(guessed) || {};
-    return { type, options };
-  }
-  const matcherFieldMap = config.fieldMap || fieldMap;
-  const keys = Object.keys(matcherFieldMap);
-  const key = keys.find(key => {
-    const values = keys[key];
-    return values.find(val => {
-      const regExpPattern =
-        typeof val === "string" ? escapeStrRegexp(val) : val;
-      const regExp = new RegExp(regExpPattern, "i");
-      return regExp.test(field);
-    });
-  });
-  return { type: key || field, options };
-};
-
-let resolveArray = ({ field, type, config }) => {
-  const examples = config.examples || {};
-  const typeMap = examples.typeMap || {};
-  const typeExamples = typeMap[type] || {};
-  const typeFieldMatch = typeExamples[field];
-
-  if (typeFieldMatch) return typeFieldMatch;
-
-  const fieldMap = examples.fieldMap || {};
-  const keys = Object.keys(fieldMap);
-  let found;
-  const key = keys.find(key => {
-    const obj = keys[key];
-    if (Array.isArray(obj)) {
-      found = obj;
-      return key;
-    }
-    const { matches } = obj.match || [key];
-    return matches.find(val => {
-      const regExpPattern =
-        typeof val === "string" ? escapeStrRegexp(val) : val;
-      const regExp = new RegExp(regExpPattern, "i");
-      if (regExp.test(field)) {
-        found = obj.values;
-        return val;
-      }
-    });
-  });
-  return key ? found : null;
-};
-
-let error = (msg, reason) => {
-  console.error(msg, reason);
-  throw new Error(msg);
-};
+import * as maps from "./maps/";
+export { maps };
 
 export function createFakers(config) {
   const fakeFunctions = createFakeFunctions(config);
   const typeFakers = createTypeFakers(config);
-  guessFake = config.guessFake || guessFake;
-  resolveArray = config.resolveArray || resolveArray;
-  error = config.error || error;
+  const $resolveFake = config.resolveFake || resolveFake;
+  const $resolveExample = config.resolveExample || resolveExample;
+  const $error = config.error || error;
   faker = config.faker || faker;
 
   function getRandomInt(min: number, max: number) {
     return faker.random.number({ min, max });
   }
 
-  function getRandomItem(array: any[], config = {}, { type, field }: any = {}) {
+  function getRandomItem(
+    array: any[],
+    config = {},
+    { type, field, fields }: any = {}
+  ) {
     if (!Array.isArray(array)) {
-      array = resolveArray({ field, type, config });
+      array = $resolveExample({ field, type, fields, config });
     }
     return array[getRandomInt(0, array.length - 1)];
   }
 
   function fakeValue(fakeType, options?, locale?, typeInfo: any = {}) {
-    const { type, field } = typeInfo;
-    const guessed = guessFake({ type, field, config });
-    fakeType = fakeType || guessed.type;
-    options = options || guessed.options || {};
+    const { type, field, fields } = typeInfo;
+    const resolvedFake = $resolveFake({ type, field, fields, config });
+    fakeType = fakeType || resolvedFake.type;
+    options = options || resolvedFake.options || {};
 
     const fakeGenerator = fakeFunctions[fakeType];
     if (!fakeGenerator) {
-      error(`Could not find a matching fake generator for: ${fakeType}`, {
+      $error(`Could not find a matching fake generator for: ${fakeType}`, {
         type,
         field,
         fakeType,
-        guessed
+        resolvedFake
       });
     }
 

@@ -178,13 +178,23 @@ const fieldMap = {
   // custom overrides
   // each resolved and tested using case insensitive regular expression match
   email: ["mail"],
-  money: ["price"]
+  cheap: {
+    match: ["price"],
+    type: "money",
+    options: {
+      minMoney: 10,
+      maxMoney: 100,
+      decimalPlaces: 2
+    }
+  }
   // ...
 };
 
 const config = {
-  typeMap,
-  fieldMap,
+  fakes: {
+    typeMap,
+    fieldMap
+  },
   examples
 };
 ```
@@ -209,13 +219,16 @@ By using a config object, you can reuse a configuration across multiple projects
 
 On top of the customization options outlined here, you also have the option of passing your own functions for:
 
-- `guessFakeType`
-- `resolveArray`
+- `resolveFake`
+- `resolveExample`
+- `resolveFakeType`
+- `resolveFakeOptions`
 - `getRandomInt`
 - `getRandomItem`
 - `fakeValue`
 - `typeFakers`
 - `createFakers`
+- `error`
 
 See the code for more details on how to customize to fit your scenario. You can f.ex use these hooks to lookup values by calling a web API, such as a CMS, a DB lookup or some faker API on the Internet.
 

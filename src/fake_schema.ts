@@ -14,7 +14,20 @@ import {
   GraphQLLeafType
 } from "graphql";
 
-import { createFake } from "./fake";
+import {
+  createFakers,
+  createFakeFunctions,
+  createTypeFakers,
+  typeMap,
+  fieldMap
+} from "./fakers";
+export {
+  createFakers,
+  createFakeFunctions,
+  createTypeFakers,
+  typeMap,
+  fieldMap
+};
 
 interface GraphQLAppliedDiretives {
   isApplied(directiveName: string): boolean;
@@ -61,9 +74,14 @@ function astToJSON(ast) {
   }
 }
 
-export function fakeSchema(schema: GraphQLSchema, config = {}) {
-  const fake = createFake(config);
-  const { getRandomItem, getRandomInt, typeFakers, fakeValue } = fake;
+export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
+  const fake = createFakers(config);
+
+  const typeFakers = config.typeFakers || fake.typeFakers;
+  const getRandomItem = config.getRandomItem || fake.getRandomItem;
+  const getRandomInt = config.getRandomInt || fake.getRandomInt;
+  const fakeValue = config.fakeValue || fake.fakeValue;
+
   const stdTypeNames = Object.keys(typeFakers);
 
   const mutationType = schema.getMutationType();
@@ -158,17 +176,20 @@ export function fakeSchema(schema: GraphQLSchema, config = {}) {
     };
     const { fake, examples } = directiveToArgs;
 
+    const genRandom = () => getRandomItem(examples.values, { type, field });
+
     if (isLeafType(type)) {
-      if (examples) return () => getRandomItem(examples.values);
+      if (examples) return () => genRandom();
       if (fake) {
-        return () => fakeValue(fake.type, fake.options, fake.locale);
+        return () =>
+          fakeValue(fake.type, fake.options, fake.locale, { type, field });
       }
       return getLeafResolver(type, config);
     } else {
       // TODO: error on fake directive
       if (examples) {
         return () => ({
-          ...getRandomItem(examples.values),
+          ...genRandom(),
           $example: true
         });
       }

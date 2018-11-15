@@ -9,12 +9,28 @@ import chalk from "chalk";
 import * as yargs from "yargs";
 import * as jsonfile from "jsonfile";
 
-import { fakeSchema } from "./fake_schema";
+import {
+  fakeSchema,
+  createFakers,
+  createFakeFunctions,
+  createTypeFakers,
+  typeMap,
+  fieldMap
+} from "./fake_schema";
 import { proxyMiddleware } from "./proxy";
 import { existsSync } from "./utils";
 
 import { Server } from "./server";
 import { IDL } from "./idl";
+
+export {
+  fakeSchema,
+  createFakers,
+  createFakeFunctions,
+  createTypeFakers,
+  typeMap,
+  fieldMap
+};
 
 const argv = yargs
   .command("$0 [file]", "", cmd =>

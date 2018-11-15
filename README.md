@@ -28,7 +28,9 @@ No need to remember or read any docs. Autocompletion is included!
 
 The `@sample` directive is meant to be used for more fine grained constraints and control such as the range of the number of items to return for a particular property.
 
-You can also pass an optional `config` object as the second argument to `fakeSchema` with options for each of the basic supported GraphQL schema (leaf) types, such as `array`, `string` etc.
+You can also pass an optional `config` object as the second argument to `fakeSchema` with various options for more fine-grained control.
+
+### Custom configuration
 
 ```js
 const pickOne = require("pick-one");
@@ -80,11 +82,79 @@ const config = {
       random: myRandomFunctions
     }
   },
+  // create map of resolvers for custom scalars
+  scalars: config => {
+    const types = config.scalarTypes || {};
+    const opts: any = {
+      ...defaults,
+      ...types
+    };
+    // custom scalar resolvers
+    return {
+      Date: {
+        defaultOptions: opts.Int,
+        generator: (days = 30) => {
+          return () => faker.date.recent(days);
+        }
+      }
+    };
+  },
   // custom faker (override/implementation)
   faker: myFaker
 };
 
 fakeSchema(schema, config);
+```
+
+### Faker maps
+
+The faker includes faker maps that will guess the faker to be used based on `type` and `field` name.
+
+```gql
+type Person {
+  name: String @fake
+}
+
+type Product {
+  label: String @fake
+  name: String @fake
+}
+```
+
+- `Person.name` will be resolved to use the `fullName` faker generator
+- `label` will be resolved to `words`
+- `Product.name` will be resolved to `productName`
+
+You can pass in your own custom `typeMap` and `fieldMap` in the config object
+
+```js
+const gfaker = require("graphql-faker");
+
+const myTypeMap = {
+  // custom overrides
+  Person: {
+    name: "firstName"
+  }
+  // ...
+};
+
+// requires deep merge
+const typeMap = merge(gfaker.typeMap, myTypeMap);
+
+// shallow merge
+const fieldMap = {
+  ...gfaker.fieldMap,
+  // custom overrides
+  // each resolved and tested using case insensitive regular expression match
+  email: ["mail"],
+  money: ["price"]
+  // ...
+};
+
+const config = {
+  typeMap,
+  fieldMap
+};
 ```
 
 ### CLI config

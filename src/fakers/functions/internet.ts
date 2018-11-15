@@ -16,6 +16,8 @@ export function internetFunctions(fakerOpts: any = {}) {
       }
     },
     url: () => faker.internet.url(),
+    exampleEmail: () => faker.internet.exampleEmail(),
+    userName: () => faker.internet.userName(),
     domainName: () => faker.internet.domainName(),
     ipv4Address: () => faker.internet.ip(),
     ipv6Address: () => faker.internet.ipv6(),

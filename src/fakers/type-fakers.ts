@@ -14,7 +14,9 @@ export function createTypeFakers(config: any = {}) {
     ...defaults,
     ...types
   };
-  return {
+  const customScalars =
+    typeof config.scalars === "function" ? config.scalars(opts) : {};
+  const primitives = {
     Int: {
       defaultOptions: opts.Int,
       generator: options => {
@@ -51,5 +53,10 @@ export function createTypeFakers(config: any = {}) {
           ).toString("base64");
       }
     }
+  };
+
+  return {
+    ...primitives,
+    ...customScalars
   };
 }

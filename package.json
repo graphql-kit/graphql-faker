@@ -42,6 +42,7 @@
     "chalk": "2.4.1",
     "core-js": "2.5.7",
     "cors": "2.8.4",
+    "escape-string-regexp": "^1.0.5",
     "express": "4.16.3",
     "express-graphql": "github:apis-guru/express-graphql#rootValue_dist",
     "faker": "4.1.0",

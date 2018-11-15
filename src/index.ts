@@ -14,8 +14,7 @@ import {
   createFakers,
   createFakeFunctions,
   createTypeFakers,
-  typeMap,
-  fieldMap
+  maps
 } from "./fake_schema";
 import { proxyMiddleware } from "./proxy";
 import { existsSync } from "./utils";
@@ -28,8 +27,7 @@ export {
   createFakers,
   createFakeFunctions,
   createTypeFakers,
-  typeMap,
-  fieldMap
+  maps
 };
 
 const argv = yargs

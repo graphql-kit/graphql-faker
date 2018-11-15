@@ -46,7 +46,7 @@ export const fieldMap = {
   bankIdentifierCode: ["bic"],
   internationalBankAccountNumber: ["iban"],
   uuid: ["id"],
-  dbColumn: ["column"],
+  dbColumn: ["column", "class"],
   companyName: ["company"],
   count: ["number"],
   zipCode: ["zip", "postal"],
@@ -56,5 +56,11 @@ export const fieldMap = {
   productMaterial: ["material"],
   companyCatchPhrase: ["slogan"],
   firstName: ["first"],
-  lastName: ["last"]
+  lastName: ["last"],
+  alphaNumeric: ["secret", "key"]
+};
+
+export const types = {
+  typeMap,
+  fieldMap
 };

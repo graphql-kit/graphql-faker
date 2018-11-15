@@ -128,7 +128,7 @@ type Product {
 You can pass in your own custom `typeMap` and `fieldMap` in the config object
 
 ```js
-const gfaker = require("graphql-faker");
+const { maps } = require("graphql-faker");
 
 const myTypeMap = {
   // custom overrides
@@ -146,17 +146,17 @@ const examples = {
     }
   },
   fieldMap: {
-    gender: ["male", "female"],
+    ...maps.examples.fieldMap,
     color: ["red", "green", "blue"]
   }
 };
 
 // requires deep merge
-const typeMap = merge(gfaker.typeMap, myTypeMap);
+const typeMap = merge(maps.types.typeMap, myTypeMap);
 
 // shallow merge
 const fieldMap = {
-  ...gfaker.fieldMap,
+  ...maps.types.fieldMap,
   // custom overrides
   // each resolved and tested using case insensitive regular expression match
   email: ["mail"],

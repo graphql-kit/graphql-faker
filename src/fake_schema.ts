@@ -18,16 +18,9 @@ import {
   createFakers,
   createFakeFunctions,
   createTypeFakers,
-  typeMap,
-  fieldMap
+  maps
 } from "./fakers";
-export {
-  createFakers,
-  createFakeFunctions,
-  createTypeFakers,
-  typeMap,
-  fieldMap
-};
+export { createFakers, createFakeFunctions, createTypeFakers, maps };
 
 interface GraphQLAppliedDiretives {
   isApplied(directiveName: string): boolean;

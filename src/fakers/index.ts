@@ -2,11 +2,14 @@
 let faker = require("faker");
 import { createFakeFunctions } from "./functions";
 import { createTypeFakers } from "./type-fakers";
-import { typeMap, fieldMap } from "./faker-maps";
-export { createTypeFakers, createFakeFunctions, typeMap, fieldMap };
+import { types, examples } from "./faker-maps";
+export { createTypeFakers, createFakeFunctions };
 const escapeStrRegexp = require("escape-string-regexp");
 
+export const maps = { types, examples };
+
 let guessFakeType = ({ type, field, config }) => {
+  const { typeMap, fieldMap } = types;
   const typeFieldMap = config.typeMap || typeMap[type];
   if (typeFieldMap) {
     const guessed = typeFieldMap[field];

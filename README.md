@@ -21,7 +21,7 @@ We use `@fake` directive to let you specify how to fake data. And if 60+ fakers 
     type Person {
       name: String @fake(type: firstName)
       gender: String @examples(values: ["male", "female"])
-      pets: [Pet] @sample(min: 1, max: 10)
+      pets: [Pet] @sample(min: 0, max: 8)
     }
 
 No need to remember or read any docs. Autocompletion is included!
@@ -138,6 +138,19 @@ const myTypeMap = {
   // ...
 };
 
+const examples = {
+  typeMap: {
+    Laptop: {
+      // takes precedence
+      color: ["gray", "silver", "black"]
+    }
+  },
+  fieldMap: {
+    gender: ["male", "female"],
+    color: ["red", "green", "blue"]
+  }
+};
+
 // requires deep merge
 const typeMap = merge(gfaker.typeMap, myTypeMap);
 
@@ -153,8 +166,25 @@ const fieldMap = {
 
 const config = {
   typeMap,
-  fieldMap
+  fieldMap,
+  examples
 };
+```
+
+With examples in config, we can now simplify the `@examples` directive usage to lookup in the config
+
+```gql
+type Person {
+  gender: String @examples
+}
+```
+
+In fact we can simplify even further and leave out the directive all together and the resolver will try each type of resolve mechanism (`@fake` and `@examples`) until a value is returned.
+
+```gql
+type Person {
+  gender: String
+}
 ```
 
 ### CLI config

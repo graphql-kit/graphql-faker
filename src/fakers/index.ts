@@ -26,17 +26,32 @@ let guessFakeType = ({ type, field, config }) => {
   return key || field;
 };
 
+let resolveArray = ({ field, type, config }) => {
+  const examples = config.examples || {};
+  const typeMap = examples.typeMap || {};
+  const typeExamples = typeMap[type] || {};
+  const typeFieldMatch = typeExamples[field];
+  if (typeFieldMatch) return typeFieldMatch;
+
+  const fieldMap = examples.fieldMap || {};
+  return fieldMap[field];
+};
+
 export function createFakers(config) {
   const fakeFunctions = createFakeFunctions(config);
   const typeFakers = createTypeFakers(config);
   guessFakeType = config.guessFakeType || guessFakeType;
+  resolveArray = config.resolveArray || resolveArray;
   faker = config.faker || faker;
 
   function getRandomInt(min: number, max: number) {
     return faker.random.number({ min, max });
   }
 
-  function getRandomItem(array: any[]) {
+  function getRandomItem(array: any[], config = {}, { type, field }: any = {}) {
+    if (!Array.isArray(array)) {
+      array = resolveArray({ field, type, config });
+    }
     return array[getRandomInt(0, array.length - 1)];
   }
 

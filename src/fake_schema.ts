@@ -166,7 +166,7 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
 
   function abstractTypeResolver(type: GraphQLAbstractType) {
     const possibleTypes = schema.getPossibleTypes(type);
-    return () => ({ __typename: getRandomItem(possibleTypes) });
+    return () => ({ __typename: getRandomItem(possibleTypes, config) });
   }
 
   function fieldResolver(type: GraphQLOutputType, field, config = {}) {
@@ -176,7 +176,8 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
     };
     const { fake, examples } = directiveToArgs;
 
-    const genRandom = () => getRandomItem(examples.values, { type, field });
+    const genRandom = () =>
+      getRandomItem(examples.values, config, { type, field });
 
     if (isLeafType(type)) {
       if (examples) return () => genRandom();
@@ -184,7 +185,23 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
         return () =>
           fakeValue(fake.type, fake.options, fake.locale, { type, field });
       }
-      return getLeafResolver(type, config);
+      return () => {
+        // try resolving value based purely on type and field
+        try {
+          const exValue = genRandom();
+          const value =
+            exValue ||
+            fakeValue(null, {}, null, {
+              type,
+              field
+            });
+          // if no value returned, fallback to using leaf resolver
+          return value !== undefined ? value : getLeafResolver(type, config);
+        } catch (err) {
+          // if error on resolve, fallback to using leaf resolver (ie. generic value by field type)
+          return getLeafResolver(type, config);
+        }
+      };
     } else {
       // TODO: error on fake directive
       if (examples) {

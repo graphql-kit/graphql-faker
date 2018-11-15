@@ -1,12 +1,10 @@
 //import * as faker from 'faker';
-let faker = require("faker");
+const $faker = require("faker");
 import { createFakeFunctions } from "./functions";
 import { createTypeFakers } from "./type-fakers";
 export { createTypeFakers, createFakeFunctions };
 import { resolveExample, resolveFake, error } from "./resolve";
-
-import * as maps from "./maps/";
-export { maps };
+export { maps } from "./maps/";
 
 export function createFakers(config) {
   const fakeFunctions = createFakeFunctions(config);
@@ -14,7 +12,7 @@ export function createFakers(config) {
   const $resolveFake = config.resolveFake || resolveFake;
   const $resolveExample = config.resolveExample || resolveExample;
   const $error = config.error || error;
-  faker = config.faker || faker;
+  const faker = config.faker || $faker;
 
   function getRandomInt(min: number, max: number) {
     return faker.random.number({ min, max });

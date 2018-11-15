@@ -112,12 +112,12 @@ The faker includes faker maps that will guess the faker to be used based on `typ
 
 ```gql
 type Person {
-  name: String @fake
+  name: String
 }
 
 type Product {
-  label: String @fake
-  name: String @fake
+  label: String
+  name: String
 }
 ```
 
@@ -190,16 +190,18 @@ const fieldMap = {
   // ...
 };
 
+const fakes = {
+  typeMap,
+  fieldMap
+};
+
 const config = {
-  fakes: {
-    typeMap,
-    fieldMap
-  },
+  fakes,
   examples
 };
 ```
 
-With examples in config, we can now simplify the `@examples` directive usage to lookup in the config
+With `examples` in config, we can now simplify the `@examples` directive usage to lookup in the config
 
 ```gql
 type Person {

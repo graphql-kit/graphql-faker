@@ -187,6 +187,8 @@ type Person {
 }
 ```
 
+By using a config object, you can reuse a configuration across multiple projects/schemas with minimal "schema pollution" while still generating appropriate fake values.
+
 ### CLI config
 
 Please note that when using the CLI, you can _not_ pass a custom `faker` or faker `sections` when since these contain functions. The JSON config file can only contain static config data.

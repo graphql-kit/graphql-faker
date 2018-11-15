@@ -9,6 +9,7 @@
 [![docker](https://img.shields.io/docker/build/apisguru/graphql-faker.svg)](https://hub.docker.com/r/apisguru/graphql-faker/)
 
 Mock your future API or extend the existing API with realistic data from [faker.js](https://github.com/Marak/faker.js). **No coding required**.
+
 All you need is to write [GraphQL IDL](https://blog.graph.cool/graphql-sdl-schema-definition-language-6755bcb9ce51). Don't worry, we will provide you with examples in our IDL editor.
 
 In the GIF bellow we add fields to types inside real GitHub API and you can make queries from GraphiQL, Apollo, Relay, etc. and receive **real data mixed with mock data.**
@@ -32,14 +33,18 @@ You can also pass an optional `config` object as the second argument to `fakeSch
 
 ### Custom configuration
 
-```js
-const pickOne = require("pick-one");
-const myRandomFunctions = {
-  ...faker.random,
-  // override
-  word: () => pickOne(["hello", "hi"])
-};
+Pass a config object as the second argument to `fakeSchema` to customize how the fake schema is generated. See below for details on various config options.
 
+```js
+const config = {
+  // ...
+};
+fakeSchema(schema, config);
+```
+
+#### @sample config
+
+```js
 const config = {
   // number of items to generate for arrays/lists
   // used by @sample
@@ -48,7 +53,14 @@ const config = {
       min: 1,
       max: 100
     }
-  },
+  }
+};
+```
+
+#### Primitive types
+
+```js
+const config = {
   // primitive types
   types: {
     Int: {
@@ -65,7 +77,16 @@ const config = {
       min: 111111,
       max: 999999
     }
-  },
+  }
+};
+```
+
+#### faker default options
+
+Define default options/arguments for various fakers
+
+```js
+const config = {
   // used by fakeFunctions
   fakers: {
     // default arguments for specific fakers
@@ -76,12 +97,38 @@ const config = {
       minMoney: 0,
       maxMoney: 999,
       decimalPlaces: 2
-    },
+    }
+  }
+};
+```
+
+#### faker sections
+
+Pass entire custom faker sections with your own faker generators
+
+```js
+const pickOne = require("pick-one");
+const myRandomFunctions = {
+  ...faker.random,
+  // override
+  word: () => pickOne(["hello", "hi"])
+};
+
+const config = {
     // custom faker sections
     sections: {
       random: myRandomFunctions
     }
-  },
+  }
+}
+```
+
+#### scalars
+
+Create handlers/generators for your own custom scalars
+
+```js
+const config = {
   // create map of resolvers for custom scalars
   scalars: config => {
     const types = config.scalarTypes || {};
@@ -98,15 +145,22 @@ const config = {
         }
       }
     };
-  },
+  }
+};
+```
+
+#### faker
+
+Pass in a custom faker object that implements (or extends) the faker API
+
+```js
+const config = {
   // custom faker (override/implementation)
   faker: myFaker
 };
-
-fakeSchema(schema, config);
 ```
 
-### Faker maps
+#### Faker maps
 
 The faker includes faker maps that will guess the faker to be used based on `type` and `field` name.
 
@@ -219,6 +273,8 @@ type Person {
 
 By using a config object, you can reuse a configuration across multiple projects/schemas with minimal "schema pollution" while still generating appropriate fake values.
 
+#### Custom functions
+
 On top of the customization options outlined here, you also have the option of passing your own functions for:
 
 - `resolveFake`
@@ -274,7 +330,7 @@ Extend real data from GitHub API with faked data based on extension IDL (you can
     graphql-faker ./ext-gh.graphql --extend https://api.github.com/graphql \
     --header "Authorization: bearer <TOKEN>"
 
-## Usage
+## CLI Usage
 
     graphql-faker [options] [IDL file]
 
@@ -318,6 +374,30 @@ To specify a custom file, mount a volume where the file is located to `/workdir`
     docker run -v=${PWD}:/workdir apisguru/graphql-faker path/to/schema.idl
 
 Because the process is running inside of the container, `--open` does not work.
+
+### API usage
+
+To use the API directly, use the exported `run` method, passing the relevant options as demonstrated below:
+
+```js
+import { run } from "graphql-faker";
+
+const config = {
+  sample: {
+    array: {
+      min: 1,
+      max: 100
+    }
+  }
+};
+
+run({
+  extendUrl: "http://example.com/graphql",
+  forwardHeaders: "Authorition",
+  file: "./temp.faker.graphql",
+  config
+});
+```
 
 # Development
 
@@ -429,14 +509,17 @@ With arguments:
 
 ### Phone
 
-phoneNumber: () => faker.phone.phoneNumber(),
+- `phoneNumber` (format)
 
 ### Random
 
+- `alpha` (count, upcase)
+- `alphaNumeric` (count)
+- `hexaDecimal` (count)
 - `number` (minNumber, maxNumber, precisionNumber)
 - `uuid`
 - `word`
-- `words`
+- `words` (count)
 - `locale`
 - `filename`
 - `mimeType`

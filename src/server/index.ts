@@ -9,12 +9,13 @@ import { Schema } from "../build-schema";
 import * as path from "path";
 import chalk from "chalk";
 
-export function Server({ corsOptions, argv, IDL }: any) {
+export function createServerApi({ corsOptions, opts = {}, IDL }: any) {
   const log = console.log;
   const { saveIDL } = IDL;
-  const { buildServerSchema } = Schema([IDL]);
+  const { buildServerSchema } = Schema({ IDL });
+  const { forwardHeaders, open, port } = opts;
 
-  const forwardHeaderNames = (argv.forwardHeaders || []).map(str =>
+  const forwardHeaderNames = (forwardHeaders || []).map(str =>
     str.toLowerCase()
   );
 
@@ -69,7 +70,7 @@ export function Server({ corsOptions, argv, IDL }: any) {
 
     app.use("/editor", express.static(path.join(__dirname, "editor")));
 
-    const server = app.listen(argv.port);
+    const server = app.listen(opts.port);
 
     const shutdown = () => {
       server.close();
@@ -82,15 +83,13 @@ export function Server({ corsOptions, argv, IDL }: any) {
     log(`\n${chalk.green("✔")} Your GraphQL Fake API is ready to use 🚀
     Here are your links:
   
-    ${chalk.blue("❯")} Interactive Editor:\t http://localhost:${
-      argv.port
-    }/editor
-    ${chalk.blue("❯")} GraphQL API:\t http://localhost:${argv.port}/graphql
+    ${chalk.blue("❯")} Interactive Editor:\t http://localhost:${port}/editor
+    ${chalk.blue("❯")} GraphQL API:\t http://localhost:${port}/graphql
   
     `);
 
-    if (argv.open) {
-      setTimeout(() => opn(`http://localhost:${argv.port}/editor`), 500);
+    if (open) {
+      setTimeout(() => opn(`http://localhost:${port}/editor`), 500);
     }
   }
 

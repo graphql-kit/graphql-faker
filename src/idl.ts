@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { Source } from "graphql";
 import chalk from "chalk";
 
-export function IDL(fileName) {
+export function createIdlApi(fileName) {
   const log = console.log;
 
   function readIDL(filepath) {

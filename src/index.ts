@@ -1,13 +1,9 @@
 #!/usr/bin/env node
-
 import "core-js/shim";
-
-import { Source } from "graphql";
-
 import * as path from "path";
 import chalk from "chalk";
 import * as yargs from "yargs";
-import * as jsonfile from "jsonfile";
+import { run } from "./run";
 
 import {
   fakeSchema,
@@ -16,11 +12,8 @@ import {
   createTypeFakers,
   maps
 } from "./fake_schema";
-import { proxyMiddleware } from "./proxy";
-import { existsSync } from "./utils";
 
-import { Server } from "./server";
-import { IDL } from "./idl";
+export { run };
 
 export {
   fakeSchema,
@@ -51,7 +44,8 @@ const argv = yargs
       open: {
         alias: "o",
         describe: "Open page with IDL editor and GraphiQL in browser",
-        type: "boolean"
+        type: "boolean",
+        default: false
       },
       "cors-origin": {
         alias: "co",
@@ -111,11 +105,14 @@ if (argv.header) {
   }
 }
 
-const fileName =
-  argv.file ||
-  (argv.extend ? "./schema_extension.faker.graphql" : "./schema.faker.graphql");
+// const { corsOrigin, extend, forwardHeaders, header, config, port, open } = argv;
+const { file, extend } = argv;
 
-if (!argv.file) {
+const fileName =
+  file ||
+  (extend ? "./schema_extension.faker.graphql" : "./schema.faker.graphql");
+
+if (!file) {
   log(
     chalk.yellow(
       `Default file ${chalk.magenta(fileName)} is used. ` +
@@ -124,49 +121,4 @@ if (!argv.file) {
   );
 }
 
-const { readIDL } = IDL(fileName);
-
-const corsOptions = {};
-
-corsOptions["credentials"] = true;
-corsOptions["origin"] = argv.co ? argv.co : true;
-
-let userIDL;
-if (existsSync(fileName)) {
-  userIDL = readIDL(fileName);
-} else {
-  // different default IDLs for extend and non-extend modes
-  let defaultFileName = argv.e
-    ? "default-extend.graphql"
-    : "default-schema.graphql";
-  userIDL = readIDL(path.join(__dirname, defaultFileName));
-}
-
-const { runServer } = Server({ corsOptions, argv });
-
-let config = {};
-try {
-  config = jsonfile.readFileSync(argv.config);
-} catch (err) {
-  console.error(err);
-  throw err;
-}
-
-if (argv.e) {
-  // run in proxy mode
-  const url = argv.e;
-  proxyMiddleware(url, headers)
-    .then(([schemaIDL, cb]) => {
-      schemaIDL = new Source(schemaIDL, `Inrospection from "${url}"`);
-      runServer(schemaIDL, userIDL, config, cb);
-    })
-    .catch(error => {
-      log(chalk.red(error.stack));
-      process.exit(1);
-    });
-} else {
-  runServer(userIDL, null, config, schema => {
-    fakeSchema(schema, config);
-    return { schema };
-  });
-}
+run({ ...argv, extendUrl: extend, log, headers, fileName });

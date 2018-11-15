@@ -6,7 +6,7 @@ import { createIdlApi } from "./idl";
 import { Source } from "graphql";
 import * as path from "path";
 import chalk from "chalk";
-import { fakeSchema } from "./fake_schema";
+import { fakeSchema } from "./fake-schema";
 
 export function run(opts: any) {
   let {
@@ -17,26 +17,31 @@ export function run(opts: any) {
     headers,
     configPath,
     config,
+    idl,
     log
   } = opts;
   log = log || console.log;
 
-  const { readIDL } = createIdlApi(fileName);
   const corsOptions = {};
   extendUrl = extendUrl || extend;
 
   corsOptions["credentials"] = true;
   corsOptions["origin"] = corsOrigin ? corsOrigin : true;
 
-  let userIDL;
-  if (existsSync(fileName)) {
-    userIDL = readIDL(fileName);
-  } else {
-    // different default IDLs for extend and non-extend modes
-    let defaultFileName = extendUrl
-      ? "default-extend.graphql"
-      : "default-schema.graphql";
-    userIDL = readIDL(path.join(__dirname, defaultFileName));
+  let userIDL = idl;
+
+  if (!userIDL) {
+    const { readIDL } = createIdlApi(fileName);
+
+    if (existsSync(fileName)) {
+      userIDL = readIDL(fileName);
+    } else {
+      // different default IDLs for extend and non-extend modes
+      let defaultFileName = extendUrl
+        ? "default-extend.graphql"
+        : "default-schema.graphql";
+      userIDL = readIDL(path.join(__dirname, defaultFileName));
+    }
   }
 
   const { runServer } = createServerApi({ corsOptions, opts });

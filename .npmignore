@@ -3,3 +3,4 @@
 !.dockerignore
 !dist/**
 !package.json
+*.test

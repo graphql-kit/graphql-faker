@@ -1,9 +1,6 @@
-import fetch from 'node-fetch';
-import {Headers} from 'node-fetch';
-import {
-  set as pathSet,
-  get as pathGet,
-} from 'lodash';
+import fetch from "node-fetch";
+import { Headers } from "node-fetch";
+import { set as pathSet, get as pathGet } from "lodash";
 
 import {
   Kind,
@@ -19,14 +16,14 @@ import {
   buildClientSchema,
   introspectionQuery,
   separateOperations,
-  DocumentNode,
-} from 'graphql';
+  DocumentNode
+} from "graphql";
 
-import { fakeSchema } from './fake_schema';
+import { fakeSchema } from "./fake-schema";
 
 type RequestInfo = {
-  document: DocumentNode,
-  variables?: {[name: string]: any};
+  document: DocumentNode;
+  variables?: { [name: string]: any };
   operationName?: string;
   result?: any;
 };
@@ -38,31 +35,41 @@ export function proxyMiddleware(url, headers) {
     const introspectionSchema = buildClientSchema(introspection.data);
     const introspectionIDL = printSchema(introspectionSchema);
 
-    return [introspectionIDL, (serverSchema, extensionIDL, forwardHeaders) => {
-      const extensionAST = parse(extensionIDL);
-      const extensionFields = getExtensionFields(extensionAST);
-      const schema = extendSchema(serverSchema, extensionAST);
-      fakeSchema(schema);
+    return [
+      introspectionIDL,
+      (serverSchema, extensionIDL, forwardHeaders) => {
+        const extensionAST = parse(extensionIDL);
+        const extensionFields = getExtensionFields(extensionAST);
+        const schema = extendSchema(serverSchema, extensionAST);
+        fakeSchema(schema);
 
-      //TODO: proxy extensions
-      return {
-        schema,
-        formatError: error => ({
-          ...formatError(error),
-          ...pathGet(error, 'originalError.extraProps', {}),
-        }),
-        rootValue: (info: RequestInfo) => {
-          const operationName = info.operationName;
-          const variables = info.variables;
-          const query = stripQuery(
-            schema, info.document, operationName, extensionFields
-          );
+        //TODO: proxy extensions
+        return {
+          schema,
+          formatError: error => ({
+            ...formatError(error),
+            ...pathGet(error, "originalError.extraProps", {})
+          }),
+          rootValue: (info: RequestInfo) => {
+            const operationName = info.operationName;
+            const variables = info.variables;
+            const query = stripQuery(
+              schema,
+              info.document,
+              operationName,
+              extensionFields
+            );
 
-          return remoteServer(query, variables, operationName, forwardHeaders)
-            .then(buildRootValue);
-        },
-      };
-    }];
+            return remoteServer(
+              query,
+              variables,
+              operationName,
+              forwardHeaders
+            ).then(buildRootValue);
+          }
+        };
+      }
+    ];
   });
 
   function getIntrospection() {
@@ -74,7 +81,7 @@ export function proxyMiddleware(url, headers) {
       })
       .catch(error => {
         throw Error(`Can't get introspection from ${url}:\n${error.message}`);
-      })
+      });
   }
 }
 
@@ -82,11 +89,10 @@ function buildRootValue(response) {
   const rootValue = response.data;
   const globalErrors = [];
 
-  for (const error of (response.errors || [])) {
-    if (!error.path)
-      globalErrors.push(error);
+  for (const error of response.errors || []) {
+    if (!error.path) globalErrors.push(error);
 
-    const {message, locations: _1, path: _2, ...extraProps} = error;
+    const { message, locations: _1, path: _2, ...extraProps } = error;
     const errorObj = new Error(error.message);
     (errorObj as any).extraProps = extraProps;
 
@@ -97,7 +103,7 @@ function buildRootValue(response) {
 
   // TODO proxy global errors
   if (globalErrors.length !== 0)
-    console.error('Global Errors:\n', globalErrors);
+    console.error("Global Errors:\n", globalErrors);
 
   return rootValue;
 }
@@ -105,11 +111,12 @@ function buildRootValue(response) {
 function getExtensionFields(extensionAST) {
   const extensionFields = {};
   (extensionAST.definitions || []).forEach(def => {
-    if (def.kind !== Kind.TYPE_EXTENSION_DEFINITION)
-      return;
+    if (def.kind !== Kind.TYPE_EXTENSION_DEFINITION) return;
     const typeName = def.definition.name.value;
     // FIXME: handle multiple extends of the same type
-    extensionFields[typeName] = def.definition.fields.map(field => field.name.value);
+    extensionFields[typeName] = def.definition.fields.map(
+      field => field.name.value
+    );
   });
   return extensionFields;
 }
@@ -123,34 +130,35 @@ function injectTypename(node) {
         kind: Kind.FIELD,
         name: {
           kind: Kind.NAME,
-          value: '__typename',
-        },
-      },
-    ],
+          value: "__typename"
+        }
+      }
+    ]
   };
 }
 
 function stripQuery(schema, queryAST, operationName, extensionFields) {
   const typeInfo = new TypeInfo(schema);
 
-  const changedAST = visit(queryAST, visitWithTypeInfo(typeInfo, {
-    [Kind.FIELD]: () => {
-      const typeName = typeInfo.getParentType().name;
-      const fieldName = typeInfo.getFieldDef().name;
+  const changedAST = visit(
+    queryAST,
+    visitWithTypeInfo(typeInfo, {
+      [Kind.FIELD]: () => {
+        const typeName = typeInfo.getParentType().name;
+        const fieldName = typeInfo.getFieldDef().name;
 
-      if (fieldName.startsWith('__'))
-        return null;
-      if ((extensionFields[typeName] || []).includes(fieldName))
-        return null;
-    },
-    [Kind.SELECTION_SET]: {
-      leave(node) {
-        const type = typeInfo.getParentType()
-        if (isAbstractType(type) || node.selections.length === 0)
-          return injectTypename(node);
+        if (fieldName.startsWith("__")) return null;
+        if ((extensionFields[typeName] || []).includes(fieldName)) return null;
+      },
+      [Kind.SELECTION_SET]: {
+        leave(node) {
+          const type = typeInfo.getParentType();
+          if (isAbstractType(type) || node.selections.length === 0)
+            return injectTypename(node);
+        }
       }
-    },
-  }));
+    })
+  );
 
   let operation = extractOperation(changedAST, operationName);
   operation = removeUnusedVariables(operation);
@@ -158,12 +166,12 @@ function stripQuery(schema, queryAST, operationName, extensionFields) {
 }
 
 function removeUnusedVariables(queryAST) {
-  const seenVariables = {}
+  const seenVariables = {};
   visit(queryAST, {
     [Kind.VARIABLE_DEFINITION]: () => false,
-    [Kind.VARIABLE]: (node) => {
+    [Kind.VARIABLE]: node => {
       seenVariables[node.name.value] = true;
-    },
+    }
   });
 
   // Need to second visit to account for variables used in fragments
@@ -175,38 +183,36 @@ function removeUnusedVariables(queryAST) {
           def => seenVariables[def.variable.name.value]
         );
         return { ...node, variableDefinitions };
-      },
-    },
+      }
+    }
   });
 }
 
 function extractOperation(queryAST, operationName) {
   const operations = separateOperations(queryAST);
-  if (operationName)
-    return operations[operationName];
+  if (operationName) return operations[operationName];
   return Object.values(operations)[0];
 }
 
 function requestFactory(url, headersObj) {
   return (query, variables?, operationName?, forwardHeaders?) => {
     return fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: new Headers({
-        "content-type": 'application/json',
+        "content-type": "application/json",
         ...headersObj,
-        ...forwardHeaders,
+        ...forwardHeaders
       }),
       body: JSON.stringify({
         operationName,
         query,
-        variables,
+        variables
       })
     }).then(responce => {
-      if (responce.ok)
-        return responce.json();
+      if (responce.ok) return responce.json();
       return responce.text().then(body => {
         throw Error(`${responce.status} ${responce.statusText}\n${body}`);
       });
     });
-  }
+  };
 }

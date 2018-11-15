@@ -14,9 +14,12 @@
 - allow passing custom faker sections
 - split faker functions into separate faker section files
 - added args to some of the fakers (latitude, longitude, zipCode, ...)
+- started added testing suite via ts-jest
+- extracted run function to allow direct API usage
 - added fakers:
     - zipCodeByState
     - nearbyGPSCoordinate
     - alpha
     - alphaNumeric
     - hexaDecimal
+

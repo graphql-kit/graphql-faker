@@ -11,7 +11,7 @@ import {
   createFakeFunctions,
   createTypeFakers,
   maps
-} from "./fake_schema";
+} from "./fake-schema";
 
 export { run };
 

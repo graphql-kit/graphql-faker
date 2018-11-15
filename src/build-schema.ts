@@ -9,7 +9,7 @@ export function Schema({ IDL }: any) {
   }
 
   const fakeDefinitionAST = readAST(
-    path.join(__dirname, "fake_definition.graphql")
+    path.join(__dirname, "fake-definition.graphql")
   );
 
   function buildServerSchema(idl) {

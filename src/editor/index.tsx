@@ -7,7 +7,7 @@ import * as classNames from 'classnames';
 import * as GraphiQL from 'graphiql';
 import { buildSchema, extendSchema, GraphQLSchema, parse } from 'graphql';
 import * as fetch from 'isomorphic-fetch';
-import * as fakeIDL from 'raw-loader!../fake_definition.graphql';
+import * as fakeIDL from 'raw-loader!../fake-definition.graphql';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -27,7 +27,6 @@ type FakeEditorState = {
 };
 
 class FakeEditor extends React.Component<any, FakeEditorState> {
-
   constructor(props) {
     super(props);
 
@@ -57,7 +56,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   }
 
   fetcher(url, options = {}) {
-    const baseUrl = '..'
+    const baseUrl = '..';
     return fetch(baseUrl + url, {
       credentials: 'include',
       ...options,
@@ -156,12 +155,12 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     this.setState(prevState => ({ ...prevState, activeTab: tab }));
   }
 
-  onEdit = (val) => {
+  onEdit = val => {
     if (this.state.error) this.updateIdl(val);
     let dirtySchema = null as GraphQLSchema | null;
     try {
       dirtySchema = this.buildSchema(val);
-    } catch(_) { }
+    } catch (_) {}
 
     this.setState(prevState => ({
       ...prevState,
@@ -172,7 +171,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   };
 
   render() {
-    let { value, activeTab, schema , dirty, dirtySchema } = this.state;
+    let { value, activeTab, schema, dirty, dirtySchema } = this.state;
     return (
       <div className="faker-editor-container">
         <nav>
@@ -225,10 +224,11 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
             />
             <div className="action-panel">
               <a
-                className={classNames("material-button", {
+                className={classNames('material-button', {
                   '-disabled': !dirty,
                 })}
-                onClick={this.saveUserIDL}>
+                onClick={this.saveUserIDL}
+              >
                 <span> Save </span>
               </a>
               <div className="status-bar">

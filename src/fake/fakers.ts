@@ -1,6 +1,6 @@
 //import * as faker from 'faker';
 let faker = require("faker");
-import { createFakeFunctions } from "./fake-functions";
+import { createFakeFunctions } from "./functions";
 import { createTypeFakers } from "./type-fakers";
 
 export function createFakers(config) {

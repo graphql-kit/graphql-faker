@@ -1,0 +1,19 @@
+# Changelog
+
+### 2.0.0
+
+- more customizable
+- more granular design/architecture for easier refactoring and composition
+- improved usage docs
+- improved customization docs
+- customizable via config object/file
+- allow passing custom faker object via config
+- allow passing custom faker sections 
+- split faker functions into separate faker section files
+- added args to some of the fakers (latitude, longitude, zipCode, ...)
+- added fakers:
+    - zipCodeByState
+    - nearbyGPSCoordinate
+    - alpha
+    - alphaNumeric
+    - hexaDecimal

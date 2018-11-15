@@ -28,7 +28,7 @@ export function internetFunctions(fakerOpts: any = {}) {
     },
     macAddress: () => faker.internet.mac(),
     password: {
-      args: ["passwordLenth"],
+      args: ["passwordLength"],
       func: len => {
         const opts = {
           ...fakerOpts.password,

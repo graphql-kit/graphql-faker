@@ -31,35 +31,54 @@ The `@sample` directive is meant to be used for more fine grained constraints an
 You can also pass an optional `config` object as the second argument to `fakeSchema` with options for each of the basic supported GraphQL schema (leaf) types, such as `array`, `string` etc.
 
 ```js
+const pickOne = require("pick-one");
+const myRandomFunctions = {
+  ...faker.random,
+  // override
+  word: () => pickOne(["hello", "hi"])
+};
+
 const config = {
   // number of items to generate for arrays/lists
-  array: {
-    min: 1,
-    max: 100
+  // used by @sample
+  sample: {
+    array: {
+      min: 1,
+      max: 100
+    }
   },
   // primitive types
-  Int: {
-    min: 0,
-    max: 99
+  types: {
+    Int: {
+      min: 0,
+      max: 99
+    },
+    Float: {
+      min: 0,
+      max: 99,
+      precision: 0.01
+    },
+    ID: {
+      separator: "_",
+      min: 111111,
+      max: 999999
+    }
   },
-  Float: {
-    min: 0,
-    max: 99,
-    precision: 0.01
-  },
-  ID: {
-    separator: "_",
-    min: 111111,
-    max: 999999
-  },
-  // default arguments for specific fakers
-  streetAddress: {
-    useFullAddress: true
-  },
-  money: {
-    minMoney: 0,
-    maxMoney: 999,
-    decimalPlaces: 2
+  // used by fakeFunctions
+  fakers: {
+    // default arguments for specific fakers
+    streetAddress: {
+      useFullAddress: true
+    },
+    money: {
+      minMoney: 0,
+      maxMoney: 999,
+      decimalPlaces: 2
+    },
+    // custom faker sections
+    sections: {
+      random: myRandomFunctions
+    }
   },
   // custom faker (override/implementation)
   faker: myFaker
@@ -67,6 +86,10 @@ const config = {
 
 fakeSchema(schema, config);
 ```
+
+### CLI config
+
+Please note that when using the CLI, you can _not_ pass a custom `faker` or faker `sections` when since these contain functions. The JSON config file can only contain static config data.
 
 ## Features
 
@@ -133,6 +156,12 @@ When you finish with an other option there is no need for the `--`:
 graphql-faker --forward-headers Authorition --extend http://example.com/graphql ./temp.faker.graphql
 ```
 
+Using config file `faker-config.json`
+
+```
+graphql-faker --extend http://example.com/graphql --config ./faker-config.json -- ./temp.faker.graphql
+```
+
 ### Usage with Docker
 
     docker run -p=9002:9002 apisguru/graphql-faker [options] [IDL file]
@@ -163,7 +192,8 @@ With arguments:
 
 ### Address
 
-- `zipCode`
+- `zipCode` (format)
+- `zipCodeByState` (state)
 - `city`
 - `streetName`
 - `streetAddress` (useFullAddress)
@@ -173,8 +203,9 @@ With arguments:
 - `countryCode`
 - `state`
 - `stateAbbr`
-- `latitude`
-- `longitude`
+- `latitude` (min, max, precision)
+- `longitude` (min, max, precision)
+- `nearbyGPSCoordinate` (latitude, longitude, radius, isMetric)
 
 ### Commerce
 

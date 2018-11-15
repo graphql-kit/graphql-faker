@@ -8,10 +8,11 @@ const defaults = {
   ID: { max: 9999999999, separator: ":" }
 };
 
-export function createTypeFakers(config = {}) {
+export function createTypeFakers(config: any = {}) {
+  const types = config.types || {};
   const opts: any = {
     ...defaults,
-    ...config
+    ...types
   };
   return {
     Int: {

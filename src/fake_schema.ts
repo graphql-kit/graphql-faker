@@ -181,7 +181,8 @@ export function fakeSchema(schema: GraphQLSchema, config = {}) {
     { sample }: DirectiveArgs,
     config: any = {}
   ) {
-    const array = config.array || {};
+    const sampleOpts = config.sample || config;
+    const array = sampleOpts.array || {};
     const opts = array.options || {
       min: 2,
       max: 10

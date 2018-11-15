@@ -20,7 +20,14 @@ export const typeMap = {
   Product: {
     name: "productName",
     category: "productCategory",
-    price: "money"
+    price: {
+      type: "money",
+      options: {
+        minMoney: 10,
+        maxMoney: 1000,
+        decimalPlaces: 2
+      }
+    }
   },
   Address: {
     zip: "zipCode",

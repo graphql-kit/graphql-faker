@@ -185,7 +185,7 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
           const exValue = genRandom();
           const value =
             exValue ||
-            fakeValue(null, {}, null, {
+            fakeValue(null, null, null, {
               type,
               field
             });

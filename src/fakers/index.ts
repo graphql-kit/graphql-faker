@@ -8,12 +8,22 @@ const escapeStrRegexp = require("escape-string-regexp");
 
 export const maps = { types, examples };
 
-let guessFakeType = ({ type, field, config }) => {
+const resolveFakeType = fake => {
+  return typeof fake === "string" ? fake : fake.type;
+};
+const resolveFakeOptions = fake => {
+  return typeof fake === "string" ? {} : fake.options;
+};
+
+let guessFake = ({ type, field, config }) => {
   const { typeMap, fieldMap } = types;
   const typeFieldMap = config.typeMap || typeMap[type];
+  let options = {};
   if (typeFieldMap) {
     const guessed = typeFieldMap[field];
-    return guessed ? guessed : field;
+    const type = guessed ? resolveFakeType(guessed) : field;
+    options = resolveFakeOptions(guessed) || {};
+    return { type, options };
   }
   const matcherFieldMap = config.fieldMap || fieldMap;
   const keys = Object.keys(matcherFieldMap);
@@ -26,7 +36,7 @@ let guessFakeType = ({ type, field, config }) => {
       return regExp.test(field);
     });
   });
-  return key || field;
+  return { type: key || field, options };
 };
 
 let resolveArray = ({ field, type, config }) => {
@@ -68,7 +78,7 @@ let error = (msg, reason) => {
 export function createFakers(config) {
   const fakeFunctions = createFakeFunctions(config);
   const typeFakers = createTypeFakers(config);
-  guessFakeType = config.guessFakeType || guessFakeType;
+  guessFake = config.guessFake || guessFake;
   resolveArray = config.resolveArray || resolveArray;
   error = config.error || error;
   faker = config.faker || faker;
@@ -86,8 +96,9 @@ export function createFakers(config) {
 
   function fakeValue(fakeType, options?, locale?, typeInfo: any = {}) {
     const { type, field } = typeInfo;
-    const guessedFakeType = guessFakeType({ type, field, config });
-    fakeType = fakeType || guessedFakeType;
+    const guessed = guessFake({ type, field, config });
+    fakeType = fakeType || guessed.type;
+    options = options || guessed.options || {};
 
     const fakeGenerator = fakeFunctions[fakeType];
     if (!fakeGenerator) {
@@ -95,7 +106,7 @@ export function createFakers(config) {
         type,
         field,
         fakeType,
-        guessedFakeType
+        guessed
       });
     }
 

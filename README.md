@@ -133,7 +133,21 @@ const { maps } = require("graphql-faker");
 const myTypeMap = {
   // custom overrides
   Person: {
+    // the faker generator to use to generate a fake value for this field
     name: "firstName"
+  },
+  Product: {
+    name: "productName",
+    category: "productCategory",
+    // detailed config with options
+    price: {
+      type: "money",
+      options: {
+        minMoney: 10,
+        maxMoney: 1000,
+        decimalPlaces: 2
+      }
+    }
   }
   // ...
 };
@@ -142,7 +156,7 @@ const ticker = ["AAPL", "MSFT", "GE", "GOOG", "CNET", "JPM", "NYT"];
 const examples = {
   typeMap: {
     Laptop: {
-      // takes precedence
+      // takes precedence over color in fieldMap
       color: ["gray", "silver", "black"]
     }
   },

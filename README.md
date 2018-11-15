@@ -138,6 +138,7 @@ const myTypeMap = {
   // ...
 };
 
+const ticker = ["AAPL", "MSFT", "GE", "GOOG", "CNET", "JPM", "NYT"];
 const examples = {
   typeMap: {
     Laptop: {
@@ -147,7 +148,10 @@ const examples = {
   },
   fieldMap: {
     ...maps.examples.fieldMap,
-    color: ["red", "green", "blue"]
+    ticker: {
+      match: ["ticker", "symbol", "stock"],
+      values: ticker
+    }
   }
 };
 
@@ -188,6 +192,18 @@ type Person {
 ```
 
 By using a config object, you can reuse a configuration across multiple projects/schemas with minimal "schema pollution" while still generating appropriate fake values.
+
+On top of the customization options outlined here, you also have the option of passing your own functions for:
+
+- `guessFakeType`
+- `resolveArray`
+- `getRandomInt`
+- `getRandomItem`
+- `fakeValue`
+- `typeFakers`
+- `createFakers`
+
+See the code for more details on how to customize to fit your scenario. You can f.ex use these hooks to lookup values by calling a web API, such as a CMS, a DB lookup or some faker API on the Internet.
 
 ### CLI config
 

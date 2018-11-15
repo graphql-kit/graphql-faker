@@ -68,7 +68,8 @@ function astToJSON(ast) {
 }
 
 export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
-  const fake = createFakers(config);
+  const $createFakers = config.createFakers || createFakers;
+  const fake = $createFakers(config);
 
   const typeFakers = config.typeFakers || fake.typeFakers;
   const getRandomItem = config.getRandomItem || fake.getRandomItem;

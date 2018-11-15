@@ -34,10 +34,35 @@ let resolveArray = ({ field, type, config }) => {
   const typeMap = examples.typeMap || {};
   const typeExamples = typeMap[type] || {};
   const typeFieldMatch = typeExamples[field];
+
   if (typeFieldMatch) return typeFieldMatch;
 
   const fieldMap = examples.fieldMap || {};
-  return fieldMap[field];
+  const keys = Object.keys(fieldMap);
+  let found;
+  const key = keys.find(key => {
+    const obj = keys[key];
+    if (Array.isArray(obj)) {
+      found = obj;
+      return key;
+    }
+    const { matches } = obj.match || [key];
+    return matches.find(val => {
+      const regExpPattern =
+        typeof val === "string" ? escapeStrRegexp(val) : val;
+      const regExp = new RegExp(regExpPattern, "i");
+      if (regExp.test(field)) {
+        found = obj.values;
+        return val;
+      }
+    });
+  });
+  return key ? found : null;
+};
+
+let error = (msg, reason) => {
+  console.error(msg, reason);
+  throw new Error(msg);
 };
 
 export function createFakers(config) {
@@ -45,6 +70,7 @@ export function createFakers(config) {
   const typeFakers = createTypeFakers(config);
   guessFakeType = config.guessFakeType || guessFakeType;
   resolveArray = config.resolveArray || resolveArray;
+  error = config.error || error;
   faker = config.faker || faker;
 
   function getRandomInt(min: number, max: number) {
@@ -56,11 +82,6 @@ export function createFakers(config) {
       array = resolveArray({ field, type, config });
     }
     return array[getRandomInt(0, array.length - 1)];
-  }
-
-  function error(msg, reason) {
-    console.error(msg, reason);
-    throw new Error(msg);
   }
 
   function fakeValue(fakeType, options?, locale?, typeInfo: any = {}) {

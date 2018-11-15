@@ -57,7 +57,8 @@ export const fieldMap = {
   companyCatchPhrase: ["slogan"],
   firstName: ["first"],
   lastName: ["last"],
-  alphaNumeric: ["secret", "key"]
+  alphaNumeric: ["secret", "key"],
+  recentDate: ["createdAt", "updatedAt", "changedAt"]
 };
 
 export const types = {

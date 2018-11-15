@@ -219,7 +219,8 @@ export function fakeSchema(schema: GraphQLSchema, config = {}) {
   }
 
   function getLeafResolver(type: GraphQLLeafType, config: any = {}) {
-    const opts = config[type.name] || {};
+    const types = config.types || {};
+    const opts = types[type.name];
     if (type instanceof GraphQLEnumType) {
       const values = type.getValues().map(x => x.value);
       return () => getRandomItem(values);

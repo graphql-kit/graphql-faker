@@ -7,8 +7,11 @@
 - improved usage docs
 - improved customization docs
 - customizable via config object/file
+- allow passing maps to guess fakers to use based on type and field
+- allow passing maps to guess example to use based on type and field
+- allow trying to generate fake value based on type and field by lookup in maps
 - allow passing custom faker object via config
-- allow passing custom faker sections 
+- allow passing custom faker sections
 - split faker functions into separate faker section files
 - added args to some of the fakers (latitude, longitude, zipCode, ...)
 - added fakers:

@@ -1,8 +1,37 @@
 import { examples as exampleMaps } from "../maps";
 import { error } from "./error";
-const escapeStrRegexp = require("escape-string-regexp");
+import { matchValue, validateFunction } from "./common";
 
-// TODO: test and make DRY (remove duplication - see resolveFake)
+function createKeyMatcher({ fieldMap, type, field, fields, error }) {
+  let matchedValues;
+  return function matchFakeByKey(key) {
+    const obj = fieldMap[key];
+    if (Array.isArray(obj)) {
+      matchedValues = obj;
+      return key;
+    }
+    const matches = obj.match || obj.matches || [key];
+    if (!Array.isArray(matches)) {
+      error(`resolveArray: ${key} missing matches array. Invalid ${matches}`, {
+        type,
+        field,
+        fields,
+        key,
+        obj,
+        matches
+      });
+    }
+    matches.find(value => {
+      if (matchValue(value, field)) {
+        matchedValues = obj.values;
+        return value;
+      }
+    });
+    return matchedValues;
+  };
+}
+
+// TODO: split into separate functions for resolving typeMap and fieldMap similar to resolveFake
 export const resolveExample = ({ field, type, fields, config }) => {
   const $exampleMaps = config.exampleMaps || exampleMaps;
 
@@ -15,34 +44,31 @@ export const resolveExample = ({ field, type, fields, config }) => {
 
   if (typeFieldMatch) return typeFieldMatch;
 
-  const keys = Object.keys(fieldMap);
-  let found;
-  const key = keys.find(key => {
-    const obj = keys[key];
-    if (Array.isArray(obj)) {
-      found = obj;
-      return key;
-    }
-    const matches = obj.match || obj.matches || [key];
-    if (!Array.isArray(matches)) {
-      $error(`resolveArray: ${key} missing matches array. Invalid ${matches}`, {
-        type,
-        field,
-        fields,
-        key,
-        obj,
-        matches
-      });
-    }
-    return matches.find(val => {
-      const regExpPattern =
-        typeof val === "string" ? escapeStrRegexp(val) : val;
-      const regExp = new RegExp(regExpPattern, "i");
-      if (regExp.test(field)) {
-        found = obj.values;
-        return val;
-      }
-    });
+  const example = config.example || {};
+  const $createKeyMatcher = example.createKeyMatcher || createKeyMatcher;
+  validateFunction({
+    method: "resolveExample",
+    data: {
+      config
+    },
+    func: $createKeyMatcher,
+    functionName: "createKeyMatcher",
+    error
   });
-  return key ? found : null;
+
+  const matchKey = $createKeyMatcher({
+    fieldMap,
+    type,
+    field,
+    fields,
+    error: $error
+  });
+  const keys = Object.keys(fieldMap);
+  let values;
+  const key = keys.find(key => {
+    values = matchKey(key);
+    return Boolean(values);
+  });
+
+  return key ? values : null;
 };

@@ -9,8 +9,14 @@ export { maps } from "./maps/";
 export function createFakers(config) {
   const fakeFunctions = createFakeFunctions(config);
   const typeFakers = createTypeFakers(config);
-  const $resolveFake = config.resolveFake || resolveFake;
-  const $resolveExample = config.resolveExample || resolveExample;
+  const resolvers = config.resolvers || {};
+  const directives = resolvers.directives || {};
+  const fake = directives.fake || {};
+  const example = directives.example || {};
+
+  const $resolveFake = fake.resolveFake || resolveFake;
+  const $resolveExample = example.resolveExample || resolveExample;
+
   const $error = config.error || error;
   const faker = config.faker || $faker;
 

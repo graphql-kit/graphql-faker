@@ -1,15 +1,17 @@
 import { examples as exampleMaps } from "../maps";
 import { error } from "./error";
-import { matchValue, validateFunction } from "./common";
+import { matchValue, validateFunction, directivesObj } from "./common";
 
-function resolveExampleValues(obj) {
-  return obj.values;
+function exampleFuns(config) {
+  return directivesObj(config).example || {};
 }
+
+const resolveValues = obj => (typeof obj === "string" ? [] : obj.values);
 
 function createKeyMatcher({ fieldMap, type, field, fields, error, config }) {
   let matchedValues;
-  const $resolveExampleValues =
-    config.resolveExampleValues || resolveExampleValues;
+  const example = exampleFuns(config);
+  const $resolveExampleValues = example.resolveValues || resolveValues;
 
   return function matchFakeByKey(key) {
     const obj = fieldMap[key];
@@ -38,8 +40,45 @@ function createKeyMatcher({ fieldMap, type, field, fields, error, config }) {
   };
 }
 
+function resolveFromFieldMap({
+  config,
+  error,
+  fieldMap,
+  createKeyMatcher,
+  type,
+  field,
+  fields
+}) {
+  validateFunction({
+    method: "resolveExample",
+    data: {
+      config
+    },
+    func: createKeyMatcher,
+    functionName: "createKeyMatcher",
+    error
+  });
+
+  const matchKey = createKeyMatcher({
+    fieldMap,
+    type,
+    field,
+    fields,
+    config,
+    error
+  });
+  const keys = Object.keys(fieldMap);
+  let values;
+  const key = keys.find(key => {
+    values = matchKey(key);
+    return Boolean(values);
+  });
+
+  return key ? values : null;
+}
+
 // TODO: split into separate functions for resolving typeMap and fieldMap similar to resolveFake
-export const resolveExample = ({ field, type, fields, config }) => {
+export const resolveExample = ({ field, type, fields, config }): any[] => {
   const $exampleMaps = config.exampleMaps || exampleMaps;
 
   const typeMap = $exampleMaps.typeMap || {};
@@ -50,33 +89,19 @@ export const resolveExample = ({ field, type, fields, config }) => {
   const $error = config.error || error;
 
   if (typeFieldMatch) return typeFieldMatch;
-
-  const example = config.example || {};
+  const example = exampleFuns(config);
   const $createKeyMatcher = example.createKeyMatcher || createKeyMatcher;
-  validateFunction({
-    method: "resolveExample",
-    data: {
-      config
-    },
-    func: $createKeyMatcher,
-    functionName: "createKeyMatcher",
-    error
-  });
-
-  const matchKey = $createKeyMatcher({
-    fieldMap,
+  const ctx = {
     type,
     field,
     fields,
     error: $error,
     config
-  });
-  const keys = Object.keys(fieldMap);
-  let values;
-  const key = keys.find(key => {
-    values = matchKey(key);
-    return Boolean(values);
-  });
+  };
 
-  return key ? values : null;
+  return resolveFromFieldMap({
+    createKeyMatcher: $createKeyMatcher,
+    fieldMap,
+    ...ctx
+  });
 };

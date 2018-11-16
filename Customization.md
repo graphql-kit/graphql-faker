@@ -1,6 +1,6 @@
 # Customization
 
-Pass a config object as the second argument to `fakeSchema` to customize how the fake schema is generated. See below for details on various config options.
+Pass a `config` object as the second argument to `fakeSchema` to customize how the fake schema is generated. See below for details on all the configuration options available.
 
 ```js
 const config = {
@@ -9,7 +9,7 @@ const config = {
 fakeSchema(schema, config);
 ```
 
-### @sample config
+### @sample directive config
 
 ```js
 const config = {
@@ -240,9 +240,9 @@ type Person {
 
 By using a config object, you can reuse a configuration across multiple projects/schemas with minimal "schema pollution" while still generating appropriate fake values.
 
-### Custom functions
+### Custom schema resolver functions
 
-On top of the customization options outlined here, you also have the option of passing your own functions for:
+You can further customize by passing any of the following functions as entries in `config.resolvers.schema` object
 
 - `getRandomInt`
 - `getRandomItem`
@@ -251,26 +251,80 @@ On top of the customization options outlined here, you also have the option of p
 - `createFakers`
 - `error`
 
-### fake resolvers
+```js
+const config = {
+  resolvers: {
+    schema: {
+      error: (msg, data) => {
+        console.error(`ERROR: ${msg}`, data);
+        throw new SchemaFakerError(msg);
+      }
+    }
+    // ...
+  }
+  // ...
+};
+```
 
-On the `config.fake` object
+### Custom directives resolver functions
+
+Custom function for resolving directives can be set in the `config.resolvers.directives` object
+
+#### fake directive resolvers
+
+On the `config.resolvers.directives.fake` object, set any of the following custom functions:
 
 - `resolveFake`
-- `resolveExample`
 - `resolveFakeType`
 - `resolveFakeOptions`
+- `resolveFromFieldMap`
+- `resolveFromTypeFieldMap`
 
-### example resolvers
+```js
+const config = {
+  resolvers: {
+    fake: {
+      resolveFakeOptions: ({ value }: any = {}) => {
+        return typeof value === "string" ? {} : value.opts || value.options;
+    }
+    // ...
+  }
+  // ...
+};
+```
 
-On the `config.example` object
+### example directive resolvers
 
+On the `config.resolvers.directives.example` object, set any of the following custom functions:
+
+- `resolveExample`
+- `resolveFromFieldMap`
 - `createKeyMatcher`
-- `resolveExampleValues`
+- `resolveValues`
 
 See the code under `src/fakers/resolve` for more details on how to customize to fit your particular needs.
 
-You can f.ex use these hooks to lookup fake values by:
+```js
+const config = {
+  resolvers: {
+    example: {
+      resolveExample: (opts = {}) => {
+        let values = [];
+        /// ...
+        return values;
+      },
+      resolveExampleValues: obj => (typeof obj === "string" ? [] : obj.values)
+    }
+    // ...
+  }
+  // ...
+};
+```
 
-- lookup in a CMS
-- a Database lookup
-- fetch data from a public faker/generator API on the WWW
+### Hooks usage
+
+You can use these hooks to lookup fake values by:
+
+- lookup data in a CMS, such as real/fake products, articles etc.
+- Database lookup
+- fetch fake data from a public faker/generator API on the WWW

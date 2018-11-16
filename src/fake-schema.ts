@@ -67,14 +67,34 @@ function astToJSON(ast) {
   }
 }
 
+function schemaResolvers(config) {
+  const resolvers = config.resolvers || {};
+  return resolvers.schema || {};
+}
+
+function useFakeProperties(type) {
+  return type instanceof GraphQLObjectType && !type.name.startsWith("__");
+}
+
+function isScalarField(type, stdTypeNames) {
+  return type instanceof GraphQLScalarType && !stdTypeNames.includes(type.name);
+}
+
+function setScalarType(type: GraphQLScalarType) {
+  type.serialize = value => value;
+  type.parseLiteral = astToJSON;
+  type.parseValue = x => x;
+}
+
 export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
-  const $createFakers = config.createFakers || createFakers;
+  const schemaRes = schemaResolvers(config);
+  const $createFakers = schemaRes.createFakers || createFakers;
   const fake = $createFakers(config);
 
-  const typeFakers = config.typeFakers || fake.typeFakers;
-  const getRandomItem = config.getRandomItem || fake.getRandomItem;
-  const getRandomInt = config.getRandomInt || fake.getRandomInt;
-  const fakeValue = config.fakeValue || fake.fakeValue;
+  const typeFakers = schemaRes.typeFakers || fake.typeFakers;
+  const getRandomItem = schemaRes.getRandomItem || fake.getRandomItem;
+  const getRandomInt = schemaRes.getRandomInt || fake.getRandomInt;
+  const fakeValue = schemaRes.fakeValue || fake.fakeValue;
 
   const stdTypeNames = Object.keys(typeFakers);
 
@@ -84,27 +104,32 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
   const typeMap = schema.getTypeMap();
   const values = Object.values(typeMap);
   for (const type of values) {
-    if (
-      type instanceof GraphQLScalarType &&
-      !stdTypeNames.includes(type.name)
-    ) {
-      type.serialize = value => value;
-      type.parseLiteral = astToJSON;
-      type.parseValue = x => x;
+    if (isScalarField(type, stdTypeNames)) {
+      setScalarType(type as GraphQLScalarType);
     }
-    if (type instanceof GraphQLObjectType && !type.name.startsWith("__"))
-      addFakeProperties(type);
-    if (isAbstractType(type)) type.resolveType = obj => obj.__typename;
+    if (useFakeProperties(type)) {
+      addFakeProperties(type as GraphQLObjectType);
+    }
+    if (isAbstractType(type)) {
+      type.resolveType = obj => obj.__typename;
+    }
+  }
+
+  function isMutation(objectType) {
+    return objectType === mutationType;
+  }
+
+  function useRelayMutation(field, objectType) {
+    return isMutation(objectType) && isRelayMutation(field);
   }
 
   function addFakeProperties(objectType: GraphQLObjectType) {
-    const isMutation = objectType === mutationType;
     const fields = objectType.getFields();
     const values = Object.values(fields);
     for (const field of values) {
-      if (isMutation && isRelayMutation(field))
-        field.resolve = getRelayMutationResolver();
-      else field.resolve = getFieldResolver(field, objectType);
+      field.resolve = useRelayMutation(field, objectType)
+        ? getRelayMutationResolver()
+        : getFieldResolver(field, objectType);
     }
   }
 
@@ -166,43 +191,41 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
     return () => ({ __typename: getRandomItem(possibleTypes, config) });
   }
 
+  function resolveDefaultValue({ genRandom, getLeafResolver, ctx }) {
+    // try resolving value based purely on type and field
+    const { type } = ctx;
+    try {
+      const exValue = genRandom();
+      const value = exValue || fakeValue(null, null, null, ctx);
+      // if no value returned, fallback to using leaf resolver
+      return value !== undefined ? value : getLeafResolver(type, config);
+    } catch (err) {
+      // if error on resolve, fallback to using leaf resolver (ie. generic value by field type)
+      return getLeafResolver(type, config);
+    }
+  }
+
   function fieldResolver(type: GraphQLOutputType, field, fields: string[]) {
     const directiveToArgs = {
       ...getFakeDirectives(type),
       ...getFakeDirectives(field)
     };
     const { fake, examples } = directiveToArgs;
-
+    const ctx = {
+      type,
+      field,
+      fields
+    };
     const genRandom = () =>
       getRandomItem(examples.values, config, { type, field, fields });
 
     if (isLeafType(type)) {
       if (examples) return () => genRandom();
       if (fake) {
-        return () =>
-          fakeValue(fake.type, fake.options, fake.locale, {
-            type,
-            field,
-            fields
-          });
+        return () => fakeValue(fake.type, fake.options, fake.locale, ctx);
       }
       return () => {
-        // try resolving value based purely on type and field
-        try {
-          const exValue = genRandom();
-          const value =
-            exValue ||
-            fakeValue(null, null, null, {
-              type,
-              field,
-              fields
-            });
-          // if no value returned, fallback to using leaf resolver
-          return value !== undefined ? value : getLeafResolver(type, config);
-        } catch (err) {
-          // if error on resolve, fallback to using leaf resolver (ie. generic value by field type)
-          return getLeafResolver(type, config);
-        }
+        resolveDefaultValue({ genRandom, getLeafResolver, ctx });
       };
     } else {
       // TODO: error on fake directive
@@ -250,10 +273,13 @@ export function fakeSchema(schema: GraphQLSchema, config: any = {}) {
     if (!directives) return {};
 
     const result = {} as DirectiveArgs;
+
     if (directives.isApplied("fake"))
       result.fake = directives.getDirectiveArgs("fake") as FakeArgs;
+
     if (directives.isApplied("examples"))
       result.examples = directives.getDirectiveArgs("examples") as ExamplesArgs;
+
     if (directives.isApplied("sample"))
       result.sample = directives.getDirectiveArgs("sample") as SampleArgs;
     return result;

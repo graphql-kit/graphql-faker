@@ -15,3 +15,8 @@ export function matchValue(value, field) {
   const regExp = new RegExp(regExpPattern, "i");
   return regExp.test(field);
 }
+
+export function directivesObj(config) {
+  const resolvers = config.resolvers || {};
+  return resolvers.directives || {};
+}

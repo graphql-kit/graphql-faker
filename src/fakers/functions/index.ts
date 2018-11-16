@@ -32,6 +32,7 @@ export function createFakeFunctions(config: any = {}) {
   const phone = sections.phone || phoneFunctions(fakerOpts);
   const random = sections.random || randomFunctions(fakerOpts);
   const system = sections.system || systemFunctions();
+  const other = sections.other || {};
 
   return {
     ...address,
@@ -47,6 +48,7 @@ export function createFakeFunctions(config: any = {}) {
     ...name,
     ...phone,
     ...random,
-    ...system
+    ...system,
+    other
   };
 }

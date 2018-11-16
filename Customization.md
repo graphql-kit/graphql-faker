@@ -244,10 +244,6 @@ By using a config object, you can reuse a configuration across multiple projects
 
 On top of the customization options outlined here, you also have the option of passing your own functions for:
 
-- `resolveFake`
-- `resolveExample`
-- `resolveFakeType`
-- `resolveFakeOptions`
 - `getRandomInt`
 - `getRandomItem`
 - `fakeValue`
@@ -255,4 +251,26 @@ On top of the customization options outlined here, you also have the option of p
 - `createFakers`
 - `error`
 
-See the code for more details on how to customize to fit your scenario. You can f.ex use these hooks to lookup values by calling a web API, such as a CMS, a DB lookup or some faker API on the Internet.
+### fake resolvers
+
+On the `config.fake` object
+
+- `resolveFake`
+- `resolveExample`
+- `resolveFakeType`
+- `resolveFakeOptions`
+
+### example resolvers
+
+On the `config.example` object
+
+- `createKeyMatcher`
+- `resolveExampleValues`
+
+See the code under `src/fakers/resolve` for more details on how to customize to fit your particular needs.
+
+You can f.ex use these hooks to lookup fake values by:
+
+- lookup in a CMS
+- a Database lookup
+- fetch data from a public faker/generator API on the WWW

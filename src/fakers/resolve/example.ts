@@ -2,8 +2,15 @@ import { examples as exampleMaps } from "../maps";
 import { error } from "./error";
 import { matchValue, validateFunction } from "./common";
 
-function createKeyMatcher({ fieldMap, type, field, fields, error }) {
+function resolveExampleValues(obj) {
+  return obj.values;
+}
+
+function createKeyMatcher({ fieldMap, type, field, fields, error, config }) {
   let matchedValues;
+  const $resolveExampleValues =
+    config.resolveExampleValues || resolveExampleValues;
+
   return function matchFakeByKey(key) {
     const obj = fieldMap[key];
     if (Array.isArray(obj)) {
@@ -23,7 +30,7 @@ function createKeyMatcher({ fieldMap, type, field, fields, error }) {
     }
     matches.find(value => {
       if (matchValue(value, field)) {
-        matchedValues = obj.values;
+        matchedValues = $resolveExampleValues(obj);
         return value;
       }
     });
@@ -61,7 +68,8 @@ export const resolveExample = ({ field, type, fields, config }) => {
     type,
     field,
     fields,
-    error: $error
+    error: $error,
+    config
   });
   const keys = Object.keys(fieldMap);
   let values;

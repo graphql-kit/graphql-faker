@@ -30,7 +30,7 @@ No need to remember or read any docs. Autocompletion is included!
 + 60+ different types of faked data e.g. `streetAddress`, `firstName`, `lastName`, `imageUrl`, `lorem`, `semver`
 + Comes with multiple locales supported
 + Runs as a local server (can be called from browser, cURL, your app, etc.)
-+ Interactive editor with autocompletion for directives with GraphiQL embeded
++ Interactive editor with autocompletion for directives with GraphiQL embedded
 + ✨ Support for proxying existing GraphQL API and extending it with faked data
 ![Extend mode diagram](./docs/extend-mode.gif)
 
@@ -53,7 +53,7 @@ __Note:__ You can specify non-existing IDL file names - Faker will use example I
 
 Extend real data from SWAPI with faked data based on extension IDL:
 
-    graphql-faker ./ext-swapi.grqphql --extend http://swapi.apis.guru
+    graphql-faker ./ext-swapi.graphql --extend http://swapi.apis.guru
 
 Extend real data from GitHub API with faked data based on extension IDL (you can get token [here](https://developer.github.com/early-access/graphql/guides/accessing-graphql/#generating-an-oauth-token)):
 
@@ -64,7 +64,7 @@ Extend real data from GitHub API with faked data based on extension IDL (you can
 
     graphql-faker [options] [IDL file]
 
-`[IDL file]` - path to file with [IDL](https://www.graph.cool/docs/faq/graphql-schema-definition-idl-kr84dktnp0/). If this argument is omited Faker uses default file name.
+`[IDL file]` - path to file with [IDL](https://www.graph.cool/docs/faq/graphql-schema-definition-idl-kr84dktnp0/). If this argument is omitted Faker uses default file name.
 
 ### Options
 
@@ -78,11 +78,11 @@ Extend real data from GitHub API with faked data based on extension IDL (you can
  
 When specifying the `[SDL file]` after the `--forward-headers` option you need to prefix it with `--` to clarify it's not another header. For example:
 ```
-graphql-faker --extend http://example.com/graphql --forward-headers Authorition -- ./temp.faker.graphql
+graphql-faker --extend http://example.com/graphql --forward-headers Authorization -- ./temp.faker.graphql
 ```
 When you finish with an other option there is no need for the `--`:
 ```
-graphql-faker --forward-headers Authorition --extend http://example.com/graphql ./temp.faker.graphql
+graphql-faker --forward-headers Authorization --extend http://example.com/graphql ./temp.faker.graphql
 ```
 
 ### Usage with Docker

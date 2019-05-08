@@ -7,7 +7,7 @@ import * as classNames from 'classnames';
 import * as GraphiQL from 'graphiql';
 import { buildSchema, extendSchema, GraphQLSchema, parse } from 'graphql';
 import * as fetch from 'isomorphic-fetch';
-import * as fakeIDL from 'raw-loader!../fake_definition.graphql';
+import * as fakeSDL from 'raw-loader!../fake_definition.graphql';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -23,7 +23,7 @@ type FakeEditorState = {
   status: string | null;
   schema: GraphQLSchema | null;
   dirtySchema: GraphQLSchema | null;
-  proxiedSchemaIDL: string | null;
+  proxiedSchemaSDL: string | null;
 };
 
 class FakeEditor extends React.Component<any, FakeEditorState> {
@@ -40,15 +40,15 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       error: null,
       status: null,
       schema: null,
-      proxiedSchemaIDL: null,
+      proxiedSchemaSDL: null,
     };
   }
 
   componentDidMount() {
-    this.fetcher('/user-idl')
+    this.fetcher('/user-sdl')
       .then(response => response.json())
-      .then(IDLs => {
-        this.updateValue(IDLs);
+      .then(SDLs => {
+        this.updateValue(SDLs);
       });
 
     window.onbeforeunload = () => {
@@ -72,32 +72,32 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     }).then(response => response.json());
   }
 
-  updateValue({ schemaIDL, extensionIDL }) {
-    let value = extensionIDL || schemaIDL;
-    const proxiedSchemaIDL = extensionIDL ? schemaIDL : null;
+  updateValue({ schemaSDL, extensionSDL }) {
+    let value = extensionSDL || schemaSDL;
+    const proxiedSchemaSDL = extensionSDL ? schemaSDL : null;
 
     this.setState({
       value,
       cachedValue: value,
-      proxiedSchemaIDL,
+      proxiedSchemaSDL,
     });
     this.updateIdl(value, true);
   }
 
-  postIDL(idl) {
-    return this.fetcher('/user-idl', {
+  postSDL(sdl) {
+    return this.fetcher('/user-sdl', {
       method: 'post',
       headers: { 'Content-Type': 'text/plain' },
-      body: idl,
+      body: sdl,
     });
   }
 
   buildSchema(value) {
-    if (this.state.proxiedSchemaIDL) {
-      let schema = buildSchema(this.state.proxiedSchemaIDL + '\n' + fakeIDL);
+    if (this.state.proxiedSchemaSDL) {
+      let schema = buildSchema(this.state.proxiedSchemaSDL + '\n' + fakeSDL);
       return extendSchema(schema, parse(value));
     } else {
-      return buildSchema(value + '\n' + fakeIDL);
+      return buildSchema(value + '\n' + fakeSDL);
     }
   }
 
@@ -125,13 +125,13 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     }, delay);
   }
 
-  saveUserIDL = () => {
+  saveUserSDL = () => {
     let { value, dirty } = this.state;
     if (!dirty) return;
 
     if (!this.updateIdl(value)) return;
 
-    this.postIDL(value).then(res => {
+    this.postSDL(value).then(res => {
       if (res.ok) {
         this.setStatus('Saved!', 2000);
         return this.setState(prevState => ({
@@ -220,7 +220,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
             <GraphQLEditor
               schema={dirtySchema || schema}
               onEdit={this.onEdit}
-              onCommand={this.saveUserIDL}
+              onCommand={this.saveUserSDL}
               value={value || ''}
             />
             <div className="action-panel">
@@ -228,7 +228,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
                 className={classNames("material-button", {
                   '-disabled': !dirty,
                 })}
-                onClick={this.saveUserIDL}>
+                onClick={this.saveUserSDL}>
                 <span> Save </span>
               </a>
               <div className="status-bar">

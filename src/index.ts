@@ -34,7 +34,7 @@ const argv = yargs
     },
     'open': {
       alias: 'o',
-      describe: 'Open page with IDL editor and GraphiQL in browser',
+      describe: 'Open page with SDL editor and GraphiQL in browser',
       type: 'boolean',
     },
     'cors-origin': {
@@ -81,13 +81,13 @@ const argv = yargs
   .alias('h', 'help')
   .epilog(`Examples:
 
-  # Mock GraphQL API based on example IDL and open interactive editor
+  # Mock GraphQL API based on example SDL and open interactive editor
   $0 --open
 
-  # Extend real data from SWAPI with faked data based on extension IDL
+  # Extend real data from SWAPI with faked data based on extension SDL
   $0 ./ext-swapi.grqphql --extend http://swapi.apis.guru/
 
-  # Extend real data from GitHub API with faked data based on extension IDL
+  # Extend real data from GitHub API with faked data based on extension SDL
   $0 ./ext-gh.graphql --extend https://api.github.com/graphql \\
   --header "Authorization: bearer <TOKEN>"`)
   .argv
@@ -103,11 +103,11 @@ if (!fileName) {
   `Specify [file] parameter to change.`));
 }
 
-// different default IDLs for extend and non-extend modes
+// different default SDLs for extend and non-extend modes
 const defaultFileName = argv.extend ? 'default-extend.graphql' : 'default-schema.graphql';
-let userIDL = existsSync(fileName)
-  ? readIDL(fileName)
-  : readIDL(path.join(__dirname, defaultFileName));
+let userSDL = existsSync(fileName)
+  ? readSDL(fileName)
+  : readSDL(path.join(__dirname, defaultFileName));
 
 const fakeDefinitionAST = readAST(path.join(__dirname, 'fake_definition.graphql'));
 
@@ -115,27 +115,27 @@ if (argv.extend) {
   // run in proxy mode
   const url = argv.extend;
   proxyMiddleware(url, argv.headers)
-    .then(([schemaIDL, cb]) => {
-      schemaIDL = new Source(schemaIDL, `Inrospection from "${url}"`);
-      runServer(schemaIDL, userIDL, cb)
+    .then(([schemaSDL, cb]) => {
+      schemaSDL = new Source(schemaSDL, `Inrospection from "${url}"`);
+      runServer(schemaSDL, userSDL, cb)
     })
     .catch(error => {
       log(chalk.red(error.stack));
       process.exit(1);
     });
 } else {
-  runServer(userIDL, null, schema => {
+  runServer(userSDL, null, schema => {
     fakeSchema(schema)
     return {schema};
   });
 }
 
-function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
+function runServer(schemaSDL: Source, extensionSDL: Source, optionsCB) {
   const app = express();
 
-  if (extensionIDL) {
-    const schema = buildServerSchema(schemaIDL);
-    extensionIDL.body = extensionIDL.body.replace('<RootTypeName>', schema.getQueryType().name);
+  if (extensionSDL) {
+    const schema = buildServerSchema(schemaSDL);
+    extensionSDL.body = extensionSDL.body.replace('<RootTypeName>', schema.getQueryType().name);
   }
 
   const corsOptions = {
@@ -144,31 +144,31 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
   };
   app.options('/graphql', cors(corsOptions))
   app.use('/graphql', cors(corsOptions), graphqlHTTP(req => {
-    const schema = buildServerSchema(schemaIDL);
+    const schema = buildServerSchema(schemaSDL);
     const forwardHeaders = pick(req.headers, argv['forward-headers']);
     return {
-      ...optionsCB(schema, extensionIDL, forwardHeaders),
+      ...optionsCB(schema, extensionSDL, forwardHeaders),
       graphiql: true,
     };
   }));
 
-  app.get('/user-idl', (_, res) => {
+  app.get('/user-sdl', (_, res) => {
     res.status(200).json({
-      schemaIDL: schemaIDL.body,
-      extensionIDL: extensionIDL && extensionIDL.body,
+      schemaSDL: schemaSDL.body,
+      extensionSDL: extensionSDL && extensionSDL.body,
     });
   });
 
-  app.use('/user-idl', bodyParser.text({limit: '8mb'}));
+  app.use('/user-sdl', bodyParser.text({limit: '8mb'}));
 
-  app.post('/user-idl', (req, res) => {
+  app.post('/user-sdl', (req, res) => {
     try {
       fs.writeFileSync(fileName, req.body);
-      const newIDL = new Source(req.body, fileName);
-      if (extensionIDL === null)
-        schemaIDL = newIDL;
+      const newSDL = new Source(req.body, fileName);
+      if (extensionSDL === null)
+        schemaSDL = newSDL;
       else
-        extensionIDL = newIDL;
+        extensionSDL = newSDL;
       log(`${chalk.green('✚')} schema saved to ${chalk.magenta(fileName)} on ${(new Date()).toLocaleString()}`);
 
       res.status(200).send('ok');
@@ -202,7 +202,7 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
   }
 }
 
-function readIDL(filepath) {
+function readSDL(filepath) {
   return new Source(
     fs.readFileSync(filepath, 'utf-8'),
     filepath
@@ -210,10 +210,10 @@ function readIDL(filepath) {
 }
 
 function readAST(filepath) {
-  return parse(readIDL(filepath));
+  return parse(readSDL(filepath));
 }
 
-function buildServerSchema(idl) {
-  var ast = concatAST([parse(idl), fakeDefinitionAST]);
+function buildServerSchema(sdl) {
+  var ast = concatAST([parse(sdl), fakeDefinitionAST]);
   return buildASTSchema(ast);
 }

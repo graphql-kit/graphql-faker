@@ -9,7 +9,7 @@
 [![docker](https://img.shields.io/docker/build/apisguru/graphql-faker.svg)](https://hub.docker.com/r/apisguru/graphql-faker/)
 
 Mock your future API or extend the existing API with realistic data from [faker.js](https://github.com/Marak/faker.js). __No coding required__.
-All you need is to write [GraphQL IDL](https://blog.graph.cool/graphql-sdl-schema-definition-language-6755bcb9ce51). Don't worry, we will provide you with examples in our IDL editor.
+All you need is to write [GraphQL SDL](https://blog.graph.cool/graphql-sdl-schema-definition-language-6755bcb9ce51). Don't worry, we will provide you with examples in our SDL editor.
 
 In the GIF bellow we add fields to types inside real GitHub API and you can make queries from GraphiQL, Apollo, Relay, etc. and receive __real data mixed with mock data.__
 ![demo-gif](./docs/demo.gif)
@@ -45,32 +45,32 @@ or run it in a Docker container, see **Usage with Docker**
 
 ## TL;DR
 
-Mock GraphQL API based on example IDL and open interactive editor:
+Mock GraphQL API based on example SDL and open interactive editor:
 
     graphql-faker --open
 
-__Note:__ You can specify non-existing IDL file names - Faker will use example IDL which you can edit in interactive editor.
+__Note:__ You can specify non-existing SDL file names - Faker will use example SDL which you can edit in interactive editor.
 
-Extend real data from SWAPI with faked data based on extension IDL:
+Extend real data from SWAPI with faked data based on extension SDL:
 
     graphql-faker ./ext-swapi.graphql --extend http://swapi.apis.guru
 
-Extend real data from GitHub API with faked data based on extension IDL (you can get token [here](https://developer.github.com/early-access/graphql/guides/accessing-graphql/#generating-an-oauth-token)):
+Extend real data from GitHub API with faked data based on extension SDL (you can get token [here](https://developer.github.com/early-access/graphql/guides/accessing-graphql/#generating-an-oauth-token)):
 
     graphql-faker ./ext-gh.graphql --extend https://api.github.com/graphql \
     --header "Authorization: bearer <TOKEN>"
 
 ## Usage
 
-    graphql-faker [options] [IDL file]
+    graphql-faker [options] [SDL file]
 
-`[IDL file]` - path to file with [IDL](https://www.graph.cool/docs/faq/graphql-schema-definition-idl-kr84dktnp0/). If this argument is omitted Faker uses default file name.
+`[SDL file]` - path to file with [SDL](https://www.graph.cool/docs/faq/graphql-schema-definition-idl-kr84dktnp0/). If this argument is omitted Faker uses default file name.
 
 ### Options
 
  * `-p`, `--port`          HTTP Port [default: `env.PORT` or `9002`]
  * `-e`, `--extend`        URL to existing GraphQL server to extend
- * `-o`, `--open`          Open page with IDL editor and GraphiQL in browser
+ * `-o`, `--open`          Open page with SDL editor and GraphiQL in browser
  * `-H`, `--header`        Specify headers to the proxied server in cURL format, e.g.: `Authorization: bearer XXXXXXXXX`
  * `--forward-headers`     Specify which headers should be forwarded to the proxied server
  * `--co`, `--cors-origin` CORS: Specify the custom origin for the Access-Control-Allow-Origin header, by default it is the same as `Origin` header from the request
@@ -87,11 +87,11 @@ graphql-faker --forward-headers Authorization --extend http://example.com/graphq
 
 ### Usage with Docker
 
-    docker run -p=9002:9002 apisguru/graphql-faker [options] [IDL file]
+    docker run -p=9002:9002 apisguru/graphql-faker [options] [SDL file]
 
 To specify a custom file, mount a volume where the file is located to `/workdir`:
 
-    docker run -v=${PWD}:/workdir apisguru/graphql-faker path/to/schema.idl
+    docker run -v=${PWD}:/workdir apisguru/graphql-faker path/to/schema.sdl
 
 Because the process is running inside of the container, `--open` does not work.
 

@@ -1,6 +1,6 @@
-# This is sample IDL schema for GraphQL Faker in extend mode.
+# This is sample SDL schema for GraphQL Faker in extend mode.
 #
-# In this mode Faker leverages IDL extend keyword.
+# In this mode Faker leverages SDL extend keyword.
 # Also you can use following two directives to enhance fake data:
 #   - @fake
 #   - @examples

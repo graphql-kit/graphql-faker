@@ -36,10 +36,10 @@ export function proxyMiddleware(url, headers) {
 
   return getIntrospection().then(introspection => {
     const introspectionSchema = buildClientSchema(introspection.data);
-    const introspectionIDL = printSchema(introspectionSchema);
+    const introspectionSDL = printSchema(introspectionSchema);
 
-    return [introspectionIDL, (serverSchema, extensionIDL, forwardHeaders) => {
-      const extensionAST = parse(extensionIDL);
+    return [introspectionSDL, (serverSchema, extensionSDL, forwardHeaders) => {
+      const extensionAST = parse(extensionSDL);
       const extensionFields = getExtensionFields(extensionAST);
       const schema = extendSchema(serverSchema, extensionAST);
       fakeSchema(schema);

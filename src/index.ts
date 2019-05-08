@@ -111,23 +111,6 @@ let userIDL = existsSync(fileName)
 
 const fakeDefinitionAST = readAST(path.join(__dirname, 'fake_definition.graphql'));
 
-function readIDL(filepath) {
-  return new Source(
-    fs.readFileSync(filepath, 'utf-8'),
-    filepath
-  );
-}
-
-function readAST(filepath) {
-  return parse(readIDL(filepath));
-}
-
-function saveIDL(idl) {
-  fs.writeFileSync(fileName, idl);
-  log(`${chalk.green('✚')} schema saved to ${chalk.magenta(fileName)} on ${(new Date()).toLocaleString()}`);
-  return new Source(idl, fileName);
-}
-
 if (argv.extend) {
   // run in proxy mode
   const url = argv.extend;
@@ -145,11 +128,6 @@ if (argv.extend) {
     fakeSchema(schema)
     return {schema};
   });
-}
-
-function buildServerSchema(idl) {
-  var ast = concatAST([parse(idl), fakeDefinitionAST]);
-  return buildASTSchema(ast);
 }
 
 function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
@@ -185,10 +163,13 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
 
   app.post('/user-idl', (req, res) => {
     try {
+      fs.writeFileSync(fileName, req.body);
+      const newIDL = new Source(req.body, fileName);
       if (extensionIDL === null)
-        schemaIDL = saveIDL(req.body);
+        schemaIDL = newIDL;
       else
-        extensionIDL = saveIDL(req.body);
+        extensionIDL = newIDL;
+      log(`${chalk.green('✚')} schema saved to ${chalk.magenta(fileName)} on ${(new Date()).toLocaleString()}`);
 
       res.status(200).send('ok');
     } catch(err) {
@@ -219,4 +200,20 @@ function runServer(schemaIDL: Source, extensionIDL: Source, optionsCB) {
   if (argv.open) {
     setTimeout(() => opn(`http://localhost:${argv.port}/editor`), 500);
   }
+}
+
+function readIDL(filepath) {
+  return new Source(
+    fs.readFileSync(filepath, 'utf-8'),
+    filepath
+  );
+}
+
+function readAST(filepath) {
+  return parse(readIDL(filepath));
+}
+
+function buildServerSchema(idl) {
+  var ast = concatAST([parse(idl), fakeDefinitionAST]);
+  return buildASTSchema(ast);
 }

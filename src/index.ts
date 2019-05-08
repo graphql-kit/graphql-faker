@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-import 'core-js/shim';
-
 import {
   Source,
   parse,
@@ -24,7 +22,7 @@ import { fakeSchema } from './fake_schema';
 import { proxyMiddleware } from './proxy';
 import { existsSync } from './utils';
 
-const argv = yargs
+const argv: any = yargs
   .command('$0 [file]', '', cmd => cmd.options({
     'port': {
       alias: 'p',
@@ -78,7 +76,6 @@ const argv = yargs
   $0 ./ext-gh.graphql --extend https://api.github.com/graphql \\
   --header "Authorization: bearer <TOKEN>"`)
   .argv
-
 
 const log = console.log;
 

@@ -15,7 +15,6 @@ import chalk from 'chalk';
 import * as opn from 'opn';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
-import { pick } from 'lodash';
 import * as yargs from 'yargs';
 
 import { fakeSchema } from './fake_schema';
@@ -145,7 +144,11 @@ function runServer(schemaSDL: Source, extensionSDL: Source, optionsCB) {
   app.options('/graphql', cors(corsOptions))
   app.use('/graphql', cors(corsOptions), graphqlHTTP(req => {
     const schema = buildServerSchema(schemaSDL);
-    const forwardHeaders = pick(req.headers, argv['forward-headers']);
+    const forwardHeaders = {};
+
+    for (const name of argv['forward-headers']) {
+      forwardHeaders[name] = req.headers[name];
+    }
     return {
       ...optionsCB(schema, extensionSDL, forwardHeaders),
       graphiql: true,

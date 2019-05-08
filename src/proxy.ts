@@ -58,7 +58,10 @@ export function proxyMiddleware(url, headers) {
             schema, info.document, operationName, extensionFields
           );
 
-          return remoteServer(query, variables, operationName, forwardHeaders)
+          return remoteServer(query, variables, operationName, {
+              ...headers,
+              ...forwardHeaders,
+            })
             .then(buildRootValue);
         },
       };
@@ -66,7 +69,7 @@ export function proxyMiddleware(url, headers) {
   });
 
   function getIntrospection() {
-    return remoteServer(introspectionQuery)
+    return remoteServer(introspectionQuery, undefined, undefined, headers)
       .then(introspection => {
         if (introspection.errors)
           throw Error(JSON.stringify(introspection.errors, null, 2));
@@ -187,14 +190,13 @@ function extractOperation(queryAST, operationName) {
   return Object.values(operations)[0];
 }
 
-function requestFactory(url, headersObj) {
-  return (query, variables?, operationName?, forwardHeaders?) => {
+function requestFactory(url) {
+  return (query, variables?, operationName?, headers?) => {
     return fetch(url, {
       method: 'POST',
       headers: new Headers({
         "content-type": 'application/json',
-        ...headersObj,
-        ...forwardHeaders,
+        ...headers,
       }),
       body: JSON.stringify({
         operationName,

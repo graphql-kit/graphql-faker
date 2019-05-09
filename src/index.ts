@@ -4,7 +4,10 @@ import {
   Source,
   parse,
   concatAST,
+  printSchema,
   buildASTSchema,
+  buildClientSchema,
+  introspectionQuery,
 } from 'graphql';
 
 import * as fs from 'fs';
@@ -16,6 +19,8 @@ import * as opn from 'opn';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 import * as yargs from 'yargs';
+import fetch from 'node-fetch';
+import {Headers} from 'node-fetch';
 
 import { fakeSchema } from './fake_schema';
 import { proxyMiddleware } from './proxy';
@@ -102,27 +107,54 @@ if (!fileName) {
   `Specify [file] parameter to change.`));
 }
 
-// different default SDLs for extend and non-extend modes
-const defaultFileName = argv.extend ? 'default-extend.graphql' : 'default-schema.graphql';
-let userSDL = existsSync(fileName)
-  ? readSDL(fileName)
-  : readSDL(path.join(__dirname, defaultFileName));
-
-const fakeDefinitionAST = readAST(path.join(__dirname, 'fake_definition.graphql'));
+const fakeDefinitionAST = parse(
+  readSDL(path.join(__dirname, 'fake_definition.graphql')),
+);
 
 if (argv.extend) {
   // run in proxy mode
   const url = argv.extend;
-  proxyMiddleware(url, argv.headers)
-    .then(([schemaSDL, cb]) => {
-      schemaSDL = new Source(schemaSDL, `Inrospection from "${url}"`);
-      runServer(schemaSDL, userSDL, cb)
+  const remoteServer = requestFactory(url);
+
+  remoteServer(introspectionQuery)
+    .then(response => {
+      if (response.errors) {
+        throw Error(JSON.stringify(response.errors, null, 2));
+      }
+      return response.data;
+    })
+    .catch(error => {
+      throw Error(`Can't get introspection from ${url}:\n${error.message}`);
+    })
+    .then(introspection => {
+      const schema = buildClientSchema(introspection);
+      const schemaSDL = new Source(
+        printSchema(schema),
+        `Inrospection from "${url}"`,
+      );
+
+      let extensionSDL;
+      if (existsSync(fileName)) {
+        extensionSDL = readSDL(fileName)
+      } else {
+        extensionSDL = readSDL(path.join(__dirname, 'default-extend.graphql'));
+
+        const rootTypeName = schema.getQueryType().name;
+        extensionSDL.body =
+          extensionSDL.body.replace('<RootTypeName>', rootTypeName);
+      }
+
+      runServer(schemaSDL, extensionSDL, proxyMiddleware(remoteServer));
     })
     .catch(error => {
       log(chalk.red(error.stack));
       process.exit(1);
     });
 } else {
+  const userSDL = existsSync(fileName)
+    ? readSDL(fileName)
+    : readSDL(path.join(__dirname, 'default-schema.graphql'));
+
   runServer(userSDL, null, schema => {
     fakeSchema(schema)
     return {schema};
@@ -131,26 +163,23 @@ if (argv.extend) {
 
 function runServer(schemaSDL: Source, extensionSDL: Source, optionsCB) {
   const app = express();
-
-  if (extensionSDL) {
-    const schema = buildServerSchema(schemaSDL);
-    extensionSDL.body = extensionSDL.body.replace('<RootTypeName>', schema.getQueryType().name);
-  }
-
   const corsOptions = {
     credentials: true,
     origin: argv['cors-origin'],
   };
+
   app.options('/graphql', cors(corsOptions))
   app.use('/graphql', cors(corsOptions), graphqlHTTP(req => {
-    const schema = buildServerSchema(schemaSDL);
-    const forwardHeaders = {};
+    var mergedAST = concatAST([parse(schemaSDL), fakeDefinitionAST]);
+    const schema = buildASTSchema(mergedAST);
 
-    for (const name of argv['forward-headers']) {
-      forwardHeaders[name] = req.headers[name];
+    const additionalHeaders = {};
+    for (const name of (argv['forward-headers'] || [])) {
+      additionalHeaders[name] = req.headers[name];
     }
+
     return {
-      ...optionsCB(schema, extensionSDL, forwardHeaders),
+      ...optionsCB(schema, extensionSDL, additionalHeaders),
       graphiql: true,
     };
   }));
@@ -212,11 +241,26 @@ function readSDL(filepath) {
   );
 }
 
-function readAST(filepath) {
-  return parse(readSDL(filepath));
-}
-
-function buildServerSchema(sdl) {
-  var ast = concatAST([parse(sdl), fakeDefinitionAST]);
-  return buildASTSchema(ast);
+function requestFactory(url) {
+  return (query, variables?, operationName?, additionalHeaders?) => {
+    return fetch(url, {
+      method: 'POST',
+      headers: new Headers({
+        "content-type": 'application/json',
+        ...(argv.headers || {}),
+        ...additionalHeaders
+      }),
+      body: JSON.stringify({
+        operationName,
+        query,
+        variables,
+      })
+    }).then(responce => {
+      if (responce.ok)
+        return responce.json();
+      return responce.text().then(body => {
+        throw Error(`${responce.status} ${responce.statusText}\n${body}`);
+      });
+    });
+  }
 }

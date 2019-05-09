@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-import {Headers} from 'node-fetch';
 import {
   set as pathSet,
   get as pathGet,
@@ -12,12 +10,9 @@ import {
   visit,
   TypeInfo,
   formatError,
-  printSchema,
   extendSchema,
   isAbstractType,
   visitWithTypeInfo,
-  buildClientSchema,
-  introspectionQuery,
   separateOperations,
   DocumentNode,
 } from 'graphql';
@@ -31,54 +26,32 @@ type RequestInfo = {
   result?: any;
 };
 
-export function proxyMiddleware(url, headers) {
-  const remoteServer = requestFactory(url, headers);
+export function proxyMiddleware(remoteServer) {
+  return (serverSchema, extensionSDL, additionalHeaders) => {
+    const extensionAST = parse(extensionSDL);
+    const extensionFields = getExtensionFields(extensionAST);
+    const schema = extendSchema(serverSchema, extensionAST);
+    fakeSchema(schema);
 
-  return getIntrospection().then(introspection => {
-    const introspectionSchema = buildClientSchema(introspection.data);
-    const introspectionSDL = printSchema(introspectionSchema);
+    //TODO: proxy extensions
+    return {
+      schema,
+      formatError: error => ({
+        ...formatError(error),
+        ...pathGet(error, 'originalError.extraProps', {}),
+      }),
+      rootValue: (info: RequestInfo) => {
+        const operationName = info.operationName;
+        const variables = info.variables;
+        const query = stripQuery(
+          schema, info.document, operationName, extensionFields
+        );
 
-    return [introspectionSDL, (serverSchema, extensionSDL, forwardHeaders) => {
-      const extensionAST = parse(extensionSDL);
-      const extensionFields = getExtensionFields(extensionAST);
-      const schema = extendSchema(serverSchema, extensionAST);
-      fakeSchema(schema);
-
-      //TODO: proxy extensions
-      return {
-        schema,
-        formatError: error => ({
-          ...formatError(error),
-          ...pathGet(error, 'originalError.extraProps', {}),
-        }),
-        rootValue: (info: RequestInfo) => {
-          const operationName = info.operationName;
-          const variables = info.variables;
-          const query = stripQuery(
-            schema, info.document, operationName, extensionFields
-          );
-
-          return remoteServer(query, variables, operationName, {
-              ...headers,
-              ...forwardHeaders,
-            })
-            .then(buildRootValue);
-        },
-      };
-    }];
-  });
-
-  function getIntrospection() {
-    return remoteServer(introspectionQuery, undefined, undefined, headers)
-      .then(introspection => {
-        if (introspection.errors)
-          throw Error(JSON.stringify(introspection.errors, null, 2));
-        return introspection;
-      })
-      .catch(error => {
-        throw Error(`Can't get introspection from ${url}:\n${error.message}`);
-      })
-  }
+        return remoteServer(query, variables, operationName, additionalHeaders)
+          .then(buildRootValue);
+      },
+    };
+  };
 }
 
 function buildRootValue(response) {
@@ -188,27 +161,4 @@ function extractOperation(queryAST, operationName) {
   if (operationName)
     return operations[operationName];
   return Object.values(operations)[0];
-}
-
-function requestFactory(url) {
-  return (query, variables?, operationName?, headers?) => {
-    return fetch(url, {
-      method: 'POST',
-      headers: new Headers({
-        "content-type": 'application/json',
-        ...headers,
-      }),
-      body: JSON.stringify({
-        operationName,
-        query,
-        variables,
-      })
-    }).then(responce => {
-      if (responce.ok)
-        return responce.json();
-      return responce.text().then(body => {
-        throw Error(`${responce.status} ${responce.statusText}\n${body}`);
-      });
-    });
-  }
 }

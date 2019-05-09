@@ -26,31 +26,28 @@ type RequestInfo = {
   result?: any;
 };
 
-export function proxyMiddleware(remoteServer) {
-  return (serverSchema, extensionSDL, additionalHeaders) => {
-    const extensionAST = parse(extensionSDL);
-    const extensionFields = getExtensionFields(extensionAST);
-    const schema = extendSchema(serverSchema, extensionAST);
-    fakeSchema(schema);
+export function proxyMiddleware(serverRequest, serverSchema, extensionSDL) {
+  const extensionAST = parse(extensionSDL);
+  const extensionFields = getExtensionFields(extensionAST);
+  const schema = extendSchema(serverSchema, extensionAST);
+  fakeSchema(schema);
 
-    //TODO: proxy extensions
-    return {
-      schema,
-      formatError: error => ({
-        ...formatError(error),
-        ...pathGet(error, 'originalError.extraProps', {}),
-      }),
-      rootValue: (info: RequestInfo) => {
-        const operationName = info.operationName;
-        const variables = info.variables;
-        const query = stripQuery(
-          schema, info.document, operationName, extensionFields
-        );
+  //TODO: proxy extensions
+  return {
+    schema,
+    formatError: error => ({
+      ...formatError(error),
+      ...pathGet(error, 'originalError.extraProps', {}),
+    }),
+    rootValue: (info: RequestInfo) => {
+      const operationName = info.operationName;
+      const variables = info.variables;
+      const query = stripQuery(
+        schema, info.document, operationName, extensionFields
+      );
 
-        return remoteServer(query, variables, operationName, additionalHeaders)
-          .then(buildRootValue);
-      },
-    };
+      return serverRequest(query, variables, operationName).then(buildRootValue);
+    },
   };
 }
 

@@ -111,23 +111,11 @@ const fakeDefinitionAST = parse(
   readSDL(path.join(__dirname, 'fake_definition.graphql')),
 );
 
-if (argv.extend) {
-  // run in proxy mode
+if (argv.extend) { // run in proxy mode
   const url = argv.extend;
-  const remoteServer = requestFactory(url);
 
-  remoteServer(introspectionQuery)
-    .then(response => {
-      if (response.errors) {
-        throw Error(JSON.stringify(response.errors, null, 2));
-      }
-      return response.data;
-    })
-    .catch(error => {
-      throw Error(`Can't get introspection from ${url}:\n${error.message}`);
-    })
-    .then(introspection => {
-      const schema = buildClientSchema(introspection);
+  getRemoteSchema(url, argv.headers)
+    .then(schema => {
       const schemaSDL = new Source(
         printSchema(schema),
         `Inrospection from "${url}"`,
@@ -144,7 +132,7 @@ if (argv.extend) {
           extensionSDL.body.replace('<RootTypeName>', rootTypeName);
       }
 
-      runServer(schemaSDL, extensionSDL, proxyMiddleware(remoteServer));
+      runServer(schemaSDL, extensionSDL);
     })
     .catch(error => {
       log(chalk.red(error.stack));
@@ -154,34 +142,40 @@ if (argv.extend) {
   const userSDL = existsSync(fileName)
     ? readSDL(fileName)
     : readSDL(path.join(__dirname, 'default-schema.graphql'));
-
-  runServer(userSDL, null, schema => {
-    fakeSchema(schema)
-    return {schema};
-  });
+  runServer(userSDL, null);
 }
 
-function runServer(schemaSDL: Source, extensionSDL: Source, optionsCB) {
+function runServer(schemaSDL: Source, extensionSDL: Source) {
   const app = express();
   const corsOptions = {
     credentials: true,
     origin: argv['cors-origin'],
   };
 
-  app.options('/graphql', cors(corsOptions))
-  app.use('/graphql', cors(corsOptions), graphqlHTTP(req => {
+  app.options('/graphql', cors(corsOptions));
+  // TODO: remove any
+  app.use('/graphql', cors(corsOptions), (graphqlHTTP as any)(req => {
     var mergedAST = concatAST([parse(schemaSDL), fakeDefinitionAST]);
     const schema = buildASTSchema(mergedAST);
 
-    const additionalHeaders = {};
-    for (const name of (argv['forward-headers'] || [])) {
-      additionalHeaders[name] = req.headers[name];
-    }
+    if (argv.extend) {
+      const url = argv.extend;
 
-    return {
-      ...optionsCB(schema, extensionSDL, additionalHeaders),
-      graphiql: true,
-    };
+      // TODO: remove any
+      const proxyHeaders = ({ ...(argv['headers'] || {}) } as any);
+      for (const name of (argv['forward-headers'] || [])) {
+        proxyHeaders[name] = req.headers[name];
+      }
+
+      const serverRequest = graphqlRequest.bind(this, url, proxyHeaders);
+      return {
+        ...proxyMiddleware(serverRequest, schema, extensionSDL),
+        graphiql: true,
+      };
+    } else {
+      fakeSchema(schema)
+      return {schema};
+    }
   }));
 
   app.get('/user-sdl', (_, res) => {
@@ -241,26 +235,36 @@ function readSDL(filepath) {
   );
 }
 
-function requestFactory(url) {
-  return (query, variables?, operationName?, additionalHeaders?) => {
-    return fetch(url, {
-      method: 'POST',
-      headers: new Headers({
-        "content-type": 'application/json',
-        ...(argv.headers || {}),
-        ...additionalHeaders
-      }),
-      body: JSON.stringify({
-        operationName,
-        query,
-        variables,
-      })
-    }).then(responce => {
-      if (responce.ok)
-        return responce.json();
-      return responce.text().then(body => {
-        throw Error(`${responce.status} ${responce.statusText}\n${body}`);
-      });
+function getRemoteSchema(url, headers) {
+  return graphqlRequest(url, headers, introspectionQuery)
+    .then(response => {
+      if (response.errors) {
+        throw Error(JSON.stringify(response.errors, null, 2));
+      }
+      return buildClientSchema(response.data);
+    })
+    .catch(error => {
+      throw Error(`Can't get introspection from ${url}:\n${error.message}`);
+    })
+}
+
+function graphqlRequest(url, headers, query, variables?, operationName?) {
+  return fetch(url, {
+    method: 'POST',
+    headers: new Headers({
+      "content-type": 'application/json',
+      ...(headers || {}),
+    }),
+    body: JSON.stringify({
+      operationName,
+      query,
+      variables,
+    })
+  }).then(responce => {
+    if (responce.ok)
+      return responce.json();
+    return responce.text().then(body => {
+      throw Error(`${responce.status} ${responce.statusText}\n${body}`);
     });
-  }
+  });
 }

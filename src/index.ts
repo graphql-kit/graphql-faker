@@ -106,46 +106,51 @@ if (!fileName) {
   log(chalk.yellow(`Default file ${chalk.magenta(fileName)} is used. ` +
   `Specify [file] parameter to change.`));
 }
-
-const fakeDefinitionAST = parse(
-  readSDL(path.join(__dirname, 'fake_definition.graphql')),
-);
+let userSDL = existsSync(fileName) && readSDL(fileName);
 
 if (argv.extend) { // run in proxy mode
   const url = argv.extend;
 
   getRemoteSchema(url, argv.headers)
     .then(schema => {
-      const schemaSDL = new Source(
+      const remoteSDL = new Source(
         printSchema(schema),
         `Inrospection from "${url}"`,
       );
 
-      let extensionSDL;
-      if (existsSync(fileName)) {
-        extensionSDL = readSDL(fileName)
-      } else {
-        extensionSDL = readSDL(path.join(__dirname, 'default-extend.graphql'));
+      if (!userSDL) {
+        let body = fs.readFileSync(
+          path.join(__dirname, 'default-extend.graphql'),
+          'utf-8',
+        );
 
         const rootTypeName = schema.getQueryType().name;
-        extensionSDL.body =
-          extensionSDL.body.replace('<RootTypeName>', rootTypeName);
+        body = body.replace('<RootTypeName>', rootTypeName);
+
+        userSDL = new Source(body, fileName);
       }
 
-      runServer(schemaSDL, extensionSDL);
+      runServer(userSDL, remoteSDL);
     })
     .catch(error => {
       log(chalk.red(error.stack));
       process.exit(1);
     });
 } else {
-  const userSDL = existsSync(fileName)
-    ? readSDL(fileName)
-    : readSDL(path.join(__dirname, 'default-schema.graphql'));
-  runServer(userSDL, null);
+  if (!userSDL) {
+    userSDL = new Source(
+      fs.readFileSync(path.join(__dirname, 'default-schema.graphql'), 'utf-8'),
+      fileName,
+    );
+  }
+  runServer(userSDL);
 }
 
-function runServer(schemaSDL: Source, extensionSDL: Source) {
+const fakeDefinitionAST = parse(
+  readSDL(path.join(__dirname, 'fake_definition.graphql')),
+);
+
+function runServer(userSDL: Source, remoteSDL?: Source) {
   const app = express();
   const corsOptions = {
     credentials: true,
@@ -155,6 +160,7 @@ function runServer(schemaSDL: Source, extensionSDL: Source) {
   app.options('/graphql', cors(corsOptions));
   // TODO: remove any
   app.use('/graphql', cors(corsOptions), (graphqlHTTP as any)(req => {
+    const schemaSDL = remoteSDL ? remoteSDL : userSDL;
     var mergedAST = concatAST([parse(schemaSDL), fakeDefinitionAST]);
     const schema = buildASTSchema(mergedAST);
 
@@ -169,7 +175,7 @@ function runServer(schemaSDL: Source, extensionSDL: Source) {
 
       const serverRequest = graphqlRequest.bind(this, url, proxyHeaders);
       return {
-        ...proxyMiddleware(serverRequest, schema, extensionSDL),
+        ...proxyMiddleware(serverRequest, schema, userSDL),
         graphiql: true,
       };
     } else {
@@ -180,8 +186,8 @@ function runServer(schemaSDL: Source, extensionSDL: Source) {
 
   app.get('/user-sdl', (_, res) => {
     res.status(200).json({
-      schemaSDL: schemaSDL.body,
-      extensionSDL: extensionSDL && extensionSDL.body,
+      userSDL: userSDL.body,
+      remoteSDL: remoteSDL && remoteSDL.body,
     });
   });
 
@@ -189,13 +195,12 @@ function runServer(schemaSDL: Source, extensionSDL: Source) {
 
   app.post('/user-sdl', (req, res) => {
     try {
+      const fileName = userSDL.name;
       fs.writeFileSync(fileName, req.body);
-      const newSDL = new Source(req.body, fileName);
-      if (extensionSDL === null)
-        schemaSDL = newSDL;
-      else
-        extensionSDL = newSDL;
-      log(`${chalk.green('✚')} schema saved to ${chalk.magenta(fileName)} on ${(new Date()).toLocaleString()}`);
+      userSDL = new Source(req.body, fileName);
+
+      const date = (new Date()).toLocaleString();
+      log(`${chalk.green('✚')} schema saved to ${chalk.magenta(fileName)} on ${date}`);
 
       res.status(200).send('ok');
     } catch(err) {

@@ -23,7 +23,7 @@ type FakeEditorState = {
   status: string | null;
   schema: GraphQLSchema | null;
   dirtySchema: GraphQLSchema | null;
-  proxiedSchemaSDL: string | null;
+  remoteSDL: string | null;
 };
 
 class FakeEditor extends React.Component<any, FakeEditorState> {
@@ -40,7 +40,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       error: null,
       status: null,
       schema: null,
-      proxiedSchemaSDL: null,
+      remoteSDL: null,
     };
   }
 
@@ -72,16 +72,13 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     }).then(response => response.json());
   }
 
-  updateValue({ schemaSDL, extensionSDL }) {
-    let value = extensionSDL || schemaSDL;
-    const proxiedSchemaSDL = extensionSDL ? schemaSDL : null;
-
+  updateValue({ userSDL, remoteSDL }) {
     this.setState({
-      value,
-      cachedValue: value,
-      proxiedSchemaSDL,
+      value: userSDL,
+      cachedValue: userSDL,
+      remoteSDL,
     });
-    this.updateIdl(value, true);
+    this.updateIdl(userSDL, true);
   }
 
   postSDL(sdl) {
@@ -92,12 +89,12 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     });
   }
 
-  buildSchema(value) {
-    if (this.state.proxiedSchemaSDL) {
-      let schema = buildSchema(this.state.proxiedSchemaSDL + '\n' + fakeSDL);
-      return extendSchema(schema, parse(value));
+  buildSchema(userSDL) {
+    if (this.state.remoteSDL) {
+      let schema = buildSchema(this.state.remoteSDL + '\n' + fakeSDL);
+      return extendSchema(schema, parse(userSDL));
     } else {
-      return buildSchema(value + '\n' + fakeSDL);
+      return buildSchema(userSDL + '\n' + fakeSDL);
     }
   }
 

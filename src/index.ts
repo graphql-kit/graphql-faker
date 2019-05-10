@@ -18,162 +18,90 @@ import chalk from 'chalk';
 import * as opn from 'opn';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
-import * as yargs from 'yargs';
 import fetch from 'node-fetch';
 import {Headers} from 'node-fetch';
 
+import { parseCLI } from './cli';
 import { fakeSchema } from './fake_schema';
 import { proxyMiddleware } from './proxy';
 import { existsSync } from './utils';
 
-const argv = yargs
-  .usage('$0 [file]')
-  .options({
-    'port': {
-      alias: 'p',
-      describe: 'HTTP Port',
-      type: 'number',
-      requiresArg: true,
-      default: process.env.PORT || 9002,
-    },
-    'open': {
-      alias: 'o',
-      describe: 'Open page with SDL editor and GraphiQL in browser',
-      type: 'boolean',
-    },
-    'cors-origin': {
-      alias: 'co',
-      describe: 'CORS: Specify the custom origin for the Access-Control-Allow-Origin header, by default it is the same as `Origin` header from the request',
-      type: 'string',
-      requiresArg: true,
-      default: true,
-    },
-    'extend': {
-      alias: 'e',
-      describe: 'URL to existing GraphQL server to extend',
-      type: 'string',
-      requiresArg: true,
-    },
-    'header': {
-      alias: 'H',
-      describe: 'Specify headers to the proxied server in cURL format, e.g.: "Authorization: bearer XXXXXXXXX"',
-      array: true,
-      type: 'string',
-      requiresArg: true,
-      implies: 'extend',
-      coerce(arr) {
-        const headers = {};
-        for (const str of arr) {
-          const [, name, value] = str.match(/(.*?):(.*)/);
-          headers[name.toLowerCase()] = value.trim();
-        }
-        return headers;
-      },
-    },
-    'forward-headers': {
-      describe: 'Specify which headers should be forwarded to the proxied server',
-      array: true,
-      type: 'string',
-      implies: 'extend',
-      coerce(arr) {
-        return arr.map(str => str.toLowerCase());
-      },
-    },
-  })
-  .strict()
-  .help('h')
-  .alias('h', 'help')
-  .epilog(`Examples:
-
-  # Mock GraphQL API based on example SDL and open interactive editor
-  $0 --open
-
-  # Extend real data from SWAPI with faked data based on extension SDL
-  $0 ./ext-swapi.grqphql --extend http://swapi.apis.guru/
-
-  # Extend real data from GitHub API with faked data based on extension SDL
-  $0 ./ext-gh.graphql --extend https://api.github.com/graphql \\
-  --header "Authorization: bearer <TOKEN>"`)
-  .argv
-
 const log = console.log;
 
-let fileName = argv.file as string | undefined;
-if (!fileName) {
-  fileName = argv.extend
-    ? './schema_extension.faker.graphql'
-    : './schema.faker.graphql';
-  log(chalk.yellow(`Default file ${chalk.magenta(fileName)} is used. ` +
-  `Specify [file] parameter to change.`));
-}
-let userSDL = existsSync(fileName) && readSDL(fileName);
+parseCLI((options) => {
+  const { extendURL, headers } = options;
+  const fileName = options.fileName ||
+    (extendURL ? './schema_extension.faker.graphql' : './schema.faker.graphql');
 
-if (argv.extend) { // run in proxy mode
-  const url = argv.extend;
+  if (!options.fileName) {
+    log(chalk.yellow(`Default file ${chalk.magenta(fileName)} is used. ` +
+    `Specify [file] parameter to change.`));
+  }
 
-  getRemoteSchema(url, argv.headers)
-    .then(schema => {
-      const remoteSDL = new Source(
-        printSchema(schema),
-        `Inrospection from "${url}"`,
-      );
+  let userSDL = existsSync(fileName) && readSDL(fileName);
 
-      if (!userSDL) {
-        let body = fs.readFileSync(
-          path.join(__dirname, 'default-extend.graphql'),
-          'utf-8',
+  if (extendURL) { // run in proxy mode
+    getRemoteSchema(extendURL, headers)
+      .then(schema => {
+        const remoteSDL = new Source(
+          printSchema(schema),
+          `Inrospection from "${extendURL}"`,
         );
 
-        const rootTypeName = schema.getQueryType().name;
-        body = body.replace('<RootTypeName>', rootTypeName);
+        if (!userSDL) {
+          let body = fs.readFileSync(
+            path.join(__dirname, 'default-extend.graphql'),
+            'utf-8',
+          );
 
-        userSDL = new Source(body, fileName);
-      }
+          const rootTypeName = schema.getQueryType().name;
+          body = body.replace('<RootTypeName>', rootTypeName);
 
-      runServer(userSDL, remoteSDL);
-    })
-    .catch(error => {
-      log(chalk.red(error.stack));
-      process.exit(1);
-    });
-} else {
-  if (!userSDL) {
-    userSDL = new Source(
-      fs.readFileSync(path.join(__dirname, 'default-schema.graphql'), 'utf-8'),
-      fileName,
-    );
+          userSDL = new Source(body, fileName);
+        }
+
+        runServer(options, userSDL, remoteSDL);
+      })
+      .catch(error => {
+        log(chalk.red(error.stack));
+        process.exit(1);
+      });
+  } else {
+    if (!userSDL) {
+      userSDL = new Source(
+        fs.readFileSync(path.join(__dirname, 'default-schema.graphql'), 'utf-8'),
+        fileName,
+      );
+    }
+    runServer(options, userSDL);
   }
-  runServer(userSDL);
-}
+});
 
 const fakeDefinitionAST = parse(
   readSDL(path.join(__dirname, 'fake_definition.graphql')),
 );
 
-function runServer(userSDL: Source, remoteSDL?: Source) {
-  const app = express();
+function runServer(options, userSDL: Source, remoteSDL?: Source) {
+  const { port, openEditor, extendURL, headers, forwardHeaders } = options;
   const corsOptions = {
     credentials: true,
-    origin: argv['cors-origin'],
+    origin: options.corsOrigin,
   };
+  const app = express();
 
   app.options('/graphql', cors(corsOptions));
-  // TODO: remove any
   app.use('/graphql', cors(corsOptions), (graphqlHTTP as any)(req => {
     const schemaSDL = remoteSDL ? remoteSDL : userSDL;
     var mergedAST = concatAST([parse(schemaSDL), fakeDefinitionAST]);
     const schema = buildASTSchema(mergedAST);
 
-    if (argv.extend) {
-      const url = argv.extend;
-
-      // TODO: remove any
-      const proxyHeaders = ({ ...(argv['headers'] || {}) } as any);
-      for (const name of (argv['forward-headers'] || [])) {
+    if (extendURL) {
+      const proxyHeaders = { ...headers };
+      for (const name of forwardHeaders) {
         proxyHeaders[name] = req.headers[name];
       }
 
-      const serverRequest = graphqlRequest.bind(this, url, proxyHeaders);
+      const serverRequest = graphqlRequest.bind(this, extendURL, proxyHeaders);
       return {
         ...proxyMiddleware(serverRequest, schema, userSDL),
         graphiql: true,
@@ -210,7 +138,7 @@ function runServer(userSDL: Source, remoteSDL?: Source) {
 
   app.use('/editor', express.static(path.join(__dirname, 'editor')));
 
-  const server = app.listen(argv.port);
+  const server = app.listen(port);
 
   const shutdown = () => {
     server.close();
@@ -223,13 +151,13 @@ function runServer(userSDL: Source, remoteSDL?: Source) {
   log(`\n${chalk.green('✔')} Your GraphQL Fake API is ready to use 🚀
   Here are your links:
 
-  ${chalk.blue('❯')} Interactive Editor:\t http://localhost:${argv.port}/editor
-  ${chalk.blue('❯')} GraphQL API:\t http://localhost:${argv.port}/graphql
+  ${chalk.blue('❯')} Interactive Editor:\t http://localhost:${port}/editor
+  ${chalk.blue('❯')} GraphQL API:\t http://localhost:${port}/graphql
 
   `);
 
-  if (argv.open) {
-    setTimeout(() => opn(`http://localhost:${argv.port}/editor`), 500);
+  if (openEditor) {
+    setTimeout(() => opn(`http://localhost:${port}/editor`), 500);
   }
 }
 

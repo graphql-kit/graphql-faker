@@ -17,7 +17,7 @@ import {
 import {
   getRandomInt,
   getRandomItem,
-  typeFakers,
+  stdScalarFakers,
   fakeValue,
 } from './fake';
 
@@ -40,7 +40,7 @@ type DirectiveArgs = {
   examples?: ExamplesArgs
 };
 
-const stdTypeNames = Object.keys(typeFakers);
+const stdTypeNames = Object.keys(stdScalarFakers);
 
 function astToJSON(ast) {
   switch (ast.kind) {
@@ -164,7 +164,7 @@ function fieldResolver(type:GraphQLOutputType, field) {
     if (fake) {
       return () => fakeValue(fake.type, fake.options, fake.locale);
     }
-    return getLeafResolver(type);
+    return () => fakeLeafValue(type);
   } else {
     // TODO: error on fake directive
     if (examples) {
@@ -201,15 +201,15 @@ function getFakeDirectives(object: any) {
   return result;
 }
 
-function getLeafResolver(type:GraphQLLeafType) {
+function fakeLeafValue(type:GraphQLLeafType) {
   if (type instanceof GraphQLEnumType) {
     const values = type.getValues().map(x => x.value);
-    return () => getRandomItem(values);
+    return getRandomItem(values);
   }
 
-  const typeFaker = typeFakers[type.name];
-  if (typeFaker)
-    return typeFaker.generator(typeFaker.defaultOptions);
-  else
-    return () => `<${type.name}>`;
+  const faker = stdScalarFakers[type.name];
+  if (faker)
+    return faker();
+
+  return `<${type.name}>`;
 }

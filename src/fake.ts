@@ -10,42 +10,17 @@ export function getRandomItem(array:any[]) {
   return array[getRandomInt(0, array.length - 1)];
 }
 
-export const typeFakers = {
-  'Int': {
-    defaultOptions: {min: 0, max: 99999},
-    generator: (options) => {
-      options.precision = 1;
-      return () => faker.random.number(options);
-    }
-  },
-  'Float': {
-    defaultOptions: {min: 0, max: 99999, precision: 0.01},
-    generator: (options) => {
-      return () => faker.random.number(options);
-    }
-  },
-  'String': {
-    defaultOptions: {},
-    generator: () => {
-      return () => 'string';
-    }
-  },
-  'Boolean': {
-    defaultOptions: {},
-    generator: () => {
-      return () => faker.random.boolean();
-    }
-  },
-  'ID': {
-    defaultOptions: {},
-    generator: () => {
-      return (parentType) =>
-        new Buffer(
-          parentType.name + ':' + faker.random.number({max: 9999999999}).toString()
-        ).toString('base64');
-    }
-  },
+export const stdScalarFakers = {
+  'Int': () => faker.random.number({ min: 0, max: 99999, precision: 1 }),
+  'Float': () => faker.random.number({ min: 0, max: 99999, precision: 0.01 }),
+  'String': () => 'string',
+  'Boolean': () => faker.random.boolean(),
+  'ID': () => toBase64(faker.random.number({max: 9999999999}).toString()),
 };
+
+function toBase64(str) {
+  return (new Buffer(str)).toString('base64');
+}
 
 const fakeFunctions = {
   // Address section

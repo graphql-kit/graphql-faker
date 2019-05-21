@@ -15,7 +15,7 @@ import * as path from 'path';
 import * as express from 'express';
 import * as graphqlHTTP from 'express-graphql';
 import chalk from 'chalk';
-import * as opn from 'opn';
+import * as open from 'open';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 import fetch from 'node-fetch';
@@ -157,7 +157,7 @@ function runServer(options, userSDL: Source, remoteSDL?: Source) {
   `);
 
   if (openEditor) {
-    setTimeout(() => opn(`http://localhost:${port}/editor`), 500);
+    setTimeout(() => open(`http://localhost:${port}/editor`), 500);
   }
 }
 

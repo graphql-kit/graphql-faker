@@ -139,7 +139,7 @@ const fakeFunctions = {
   },
   macAddress: () => faker.internet.mac(),
   password: {
-    args: ['passwordLenth'],
+    args: ['passwordLength'],
     func: (len) => faker.internet.password(len),
   },
 

@@ -87,7 +87,7 @@ export function parseCLI(commandCB: (options: Options) => void) {
       corsOrigin: argv['cors-origin'],
       openEditor: argv.open,
       extendURL: argv.extend,
-      headers: argv.headers || {},
+      headers: argv.header || {},
       forwardHeaders: argv.forwardHeaders || [],
     });
   }

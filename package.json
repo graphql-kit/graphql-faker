@@ -1,6 +1,6 @@
 {
   "name": "graphql-faker",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "description": "Mock or extend your GraphQL API with faked data. No coding required",
   "main": "dist/index.js",
   "bin": "dist/index.js",

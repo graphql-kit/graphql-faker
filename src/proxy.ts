@@ -52,7 +52,7 @@ export function proxyMiddleware(serverRequest, serverSchema, extensionSDL) {
 }
 
 function buildRootValue(response) {
-  const rootValue = response.data;
+  const rootValue = response.data || {};
   const globalErrors = [];
 
   for (const error of (response.errors || [])) {

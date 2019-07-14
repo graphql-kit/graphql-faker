@@ -6,7 +6,7 @@ export function getRandomInt(min:number, max:number) {
   return faker.random.number({min, max});
 }
 
-export function getRandomItem(array:any[]) {
+export function getRandomItem<T>(array: ReadonlyArray<T>): T {
   return array[getRandomInt(0, array.length - 1)];
 }
 

@@ -8,23 +8,17 @@ import {
   parse,
   print,
   visit,
+  execute,
   TypeInfo,
   formatError,
   extendSchema,
   isAbstractType,
   visitWithTypeInfo,
   separateOperations,
-  DocumentNode,
+  ExecutionArgs,
 } from 'graphql';
 
 import { fakeSchema } from './fake_schema';
-
-type RequestInfo = {
-  document: DocumentNode,
-  variables?: {[name: string]: any};
-  operationName?: string;
-  result?: any;
-};
 
 export function proxyMiddleware(serverRequest, serverSchema, extensionSDL) {
   const extensionAST = parse(extensionSDL);
@@ -35,18 +29,23 @@ export function proxyMiddleware(serverRequest, serverSchema, extensionSDL) {
   //TODO: proxy extensions
   return {
     schema,
-    formatError: error => ({
+    customFormatErrorFn: error => ({
       ...formatError(error),
       ...pathGet(error, 'originalError.extraProps', {}),
     }),
-    rootValue: (info: RequestInfo) => {
-      const operationName = info.operationName;
-      const variables = info.variables;
+    execute(args: ExecutionArgs) {
+      const { schema, document, variableValues, operationName} = args;
       const query = stripQuery(
-        schema, info.document, operationName, extensionFields
+        schema,
+        document,
+        operationName,
+        extensionFields,
       );
 
-      return serverRequest(query, variables, operationName).then(buildRootValue);
+      const rootValue = serverRequest(query, variableValues, operationName)
+        .then(buildRootValue);
+
+      return execute({ ...args, rootValue });
     },
   };
 }
@@ -77,13 +76,15 @@ function buildRootValue(response) {
 
 function getExtensionFields(extensionAST) {
   const extensionFields = {};
-  (extensionAST.definitions || []).forEach(def => {
-    if (def.kind !== Kind.TYPE_EXTENSION_DEFINITION)
-      return;
-    const typeName = def.definition.name.value;
-    // FIXME: handle multiple extends of the same type
-    extensionFields[typeName] = def.definition.fields.map(field => field.name.value);
-  });
+
+  for (const def of extensionAST.definitions) {
+    if (def.kind !== Kind.OBJECT_TYPE_EXTENSION) {
+      const typeName = def.name.value;
+
+      // FIXME: handle multiple extends of the same type
+      extensionFields[typeName] = def.fields.map(field => field.name.value);
+    }
+  }
   return extensionFields;
 }
 

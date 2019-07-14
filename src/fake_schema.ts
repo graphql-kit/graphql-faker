@@ -1,10 +1,10 @@
+import * as assert from 'assert';
 import {
-  Kind,
   isLeafType,
   isAbstractType,
+  getDirectiveValues,
   GraphQLSchema,
   GraphQLObjectType,
-  GraphQLScalarType,
   GraphQLAbstractType,
   GraphQLOutputType,
   GraphQLInputObjectType,
@@ -21,12 +21,6 @@ import {
   fakeValue,
 } from './fake';
 
-interface GraphQLAppliedDiretives {
-  isApplied(directiveName: string): boolean;
-  getAppliedDirectives(): Array<string>;
-  getDirectiveArgs(directiveName: string): { [argName: string]: any };
-}
-
 type FakeArgs = {
   type:string
   options: {[key:string]: any}
@@ -40,40 +34,14 @@ type DirectiveArgs = {
   examples?: ExamplesArgs
 };
 
-const stdTypeNames = Object.keys(stdScalarFakers);
-
-function astToJSON(ast) {
-  switch (ast.kind) {
-    case Kind.NULL:
-      return null;
-    case Kind.INT:
-      return parseInt(ast.value, 10);
-    case Kind.FLOAT:
-      return parseFloat(ast.value);
-    case Kind.STRING:
-    case Kind.BOOLEAN:
-      return ast.value;
-    case Kind.LIST:
-      return ast.values.map(astToJSON);
-    case Kind.OBJECT:
-      return ast.fields.reduce((object, {name, value}) => {
-        object[name.value] = astToJSON(value);
-        return object;
-      }, {});
-  }
-}
-
 export function fakeSchema(schema: GraphQLSchema) {
+  const fakeDirective = schema.getDirective('fake');
+  const examplesDirective = schema.getDirective('examples');
+  assert(fakeDirective != null && examplesDirective != null);
+
   const mutationType = schema.getMutationType();
-  const jsonType = schema.getTypeMap()['examples__JSON'];
-  jsonType['parseLiteral'] = astToJSON;
 
   for (const type of Object.values(schema.getTypeMap())) {
-    if (type instanceof GraphQLScalarType && !stdTypeNames.includes(type.name)) {
-      type.serialize = (value => value);
-      type.parseLiteral = astToJSON;
-      type.parseValue = (x => x);
-    }
     if (type instanceof GraphQLObjectType && !type.name.startsWith('__'))
       addFakeProperties(type);
     if (isAbstractType(type))
@@ -148,32 +116,50 @@ export function fakeSchema(schema: GraphQLSchema) {
     const possibleTypes = schema.getPossibleTypes(type);
     return () => ({__typename: getRandomItem(possibleTypes)});
   }
-}
 
-function fieldResolver(type:GraphQLOutputType, field) {
-  const directiveToArgs = {
-    ...getFakeDirectives(type),
-    ...getFakeDirectives(field),
-  };
-  const {fake, examples} = directiveToArgs;
+  function fieldResolver(type:GraphQLOutputType, field) {
+    const directiveToArgs = {
+      ...getFakeDirectives(type),
+      ...getFakeDirectives(field),
+    };
+    const {fake, examples} = directiveToArgs;
 
-
-  if (isLeafType(type)) {
-    if (examples)
-      return () => getRandomItem(examples.values)
-    if (fake) {
-      return () => fakeValue(fake.type, fake.options, fake.locale);
+    if (isLeafType(type)) {
+      if (examples)
+        return () => getRandomItem(examples.values)
+      if (fake) {
+        return () => fakeValue(fake.type, fake.options, fake.locale);
+      }
+      return () => fakeLeafValue(type);
+    } else {
+      // TODO: error on fake directive
+      if (examples) {
+        return () => ({
+          ...getRandomItem(examples.values),
+          $example: true,
+        });
+      }
+      return () => ({});
     }
-    return () => fakeLeafValue(type);
-  } else {
-    // TODO: error on fake directive
-    if (examples) {
-      return () => ({
-        ...getRandomItem(examples.values),
-        $example: true,
-      });
+  }
+
+  function getFakeDirectives(object): DirectiveArgs {
+    const nodes = []
+    if (object.astNode != null) {
+      nodes.push(object.astNode);
     }
-    return () => ({});
+    if (object.extensionNodes != null) {
+      nodes.push(...object.extensionNodes);
+    }
+
+    let fake;
+    let examples;
+    for (const node of nodes) {
+      fake = getDirectiveValues(fakeDirective, node) as FakeArgs;
+      examples = getDirectiveValues(examplesDirective, node) as ExamplesArgs;
+    }
+
+    return { fake, examples };
   }
 }
 
@@ -186,19 +172,6 @@ function arrayResolver(itemResolver) {
       result.push(itemResolver(...args));
     return result;
   }
-}
-
-function getFakeDirectives(object: any) {
-  const directives = object['appliedDirectives'] as GraphQLAppliedDiretives;
-  if (!directives)
-    return {};
-
-  const result = {} as DirectiveArgs;
-  if (directives.isApplied('fake'))
-    result.fake = directives.getDirectiveArgs('fake') as FakeArgs;
-  if (directives.isApplied('examples'))
-    result.examples = directives.getDirectiveArgs('examples') as ExamplesArgs;
-  return result;
 }
 
 function fakeLeafValue(type:GraphQLLeafType) {

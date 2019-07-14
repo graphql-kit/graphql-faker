@@ -90,10 +90,13 @@ function runServer(options, userSDL: Source, remoteSDL?: Source) {
   const app = express();
 
   app.options('/graphql', cors(corsOptions));
-  app.use('/graphql', cors(corsOptions), (graphqlHTTP as any)(req => {
-    const schemaSDL = remoteSDL ? remoteSDL : userSDL;
-    var mergedAST = concatAST([parse(schemaSDL), fakeDefinitionAST]);
-    const schema = buildASTSchema(mergedAST);
+  app.use('/graphql', cors(corsOptions), graphqlHTTP(req => {
+    const schemaAST = parse(remoteSDL ? remoteSDL : userSDL, {
+      allowLegacySDLEmptyFields: true,
+      allowLegacySDLImplementsInterfaces: true,
+    });
+    let mergedAST = concatAST([schemaAST, fakeDefinitionAST]);
+    const schema = buildASTSchema(mergedAST, { commentDescriptions: true });
 
     if (extendURL) {
       const proxyHeaders = { ...headers };

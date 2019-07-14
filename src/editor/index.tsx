@@ -5,7 +5,7 @@ import 'graphiql/graphiql.css';
 
 import * as classNames from 'classnames';
 import * as GraphiQL from 'graphiql';
-import { buildSchema, extendSchema, GraphQLSchema, parse } from 'graphql';
+import { buildASTSchema, extendSchema, GraphQLSchema, parse } from 'graphql';
 import * as fetch from 'isomorphic-fetch';
 import * as fakeSDL from 'raw-loader!../fake_definition.graphql';
 import * as React from 'react';
@@ -25,6 +25,14 @@ type FakeEditorState = {
   dirtySchema: GraphQLSchema | null;
   remoteSDL: string | null;
 };
+
+function buildSchema(sdl) {
+  const ast = parse(sdl, {
+    allowLegacySDLEmptyFields: true,
+    allowLegacySDLImplementsInterfaces: true,
+  });
+  return buildASTSchema(ast, { commentDescriptions: true });
+}
 
 class FakeEditor extends React.Component<any, FakeEditorState> {
 
@@ -91,8 +99,9 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
 
   buildSchema(userSDL) {
     if (this.state.remoteSDL) {
-      let schema = buildSchema(this.state.remoteSDL + '\n' + fakeSDL);
-      return extendSchema(schema, parse(userSDL));
+      return buildSchema(
+        this.state.remoteSDL + '\n' + fakeSDL + '\n' + userSDL,
+      );
     } else {
       return buildSchema(userSDL + '\n' + fakeSDL);
     }

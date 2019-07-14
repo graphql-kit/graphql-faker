@@ -4,6 +4,9 @@
   "description": "Mock or extend your GraphQL API with faked data. No coding required",
   "main": "dist/index.js",
   "bin": "dist/index.js",
+  "engines": {
+    "node": ">= 8.x"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -e ts --exec 'ts-node src/index.ts'",

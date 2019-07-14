@@ -151,8 +151,8 @@ function runServer(options, userSDL: Source, remoteSDL?: Source) {
   log(`\n${chalk.green('✔')} Your GraphQL Fake API is ready to use 🚀
   Here are your links:
 
-  ${chalk.blue('❯')} Interactive Editor:\t http://localhost:${port}/editor
-  ${chalk.blue('❯')} GraphQL API:\t http://localhost:${port}/graphql
+  ${chalk.blue('❯')} Interactive Editor: http://localhost:${port}/editor
+  ${chalk.blue('❯')} GraphQL API:        http://localhost:${port}/graphql
 
   `);
 

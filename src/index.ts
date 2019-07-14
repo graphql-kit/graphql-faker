@@ -108,7 +108,7 @@ function runServer(options, userSDL: Source, remoteSDL?: Source) {
       };
     } else {
       fakeSchema(schema)
-      return {schema};
+      return { schema, graphiql: true };
     }
   }));
 

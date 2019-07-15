@@ -2,12 +2,14 @@
 
 import {
   Source,
+  GraphQLSchema,
   parse,
   concatAST,
   printSchema,
   buildASTSchema,
-  buildClientSchema,
-  introspectionQuery,
+  extendSchema,
+  isObjectType,
+  isInterfaceType,
 } from 'graphql';
 
 import * as fs from 'fs';
@@ -18,18 +20,19 @@ import chalk from 'chalk';
 import * as open from 'open';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
-import fetch from 'node-fetch';
-import {Headers} from 'node-fetch';
 
 import { parseCLI } from './cli';
 import { fakeSchema } from './fake_schema';
-import { proxyMiddleware } from './proxy';
-import { existsSync } from './utils';
+import { getProxyExecuteFn } from './proxy';
+import { existsSync, readSDL, getRemoteSchema } from './utils';
 
 const log = console.log;
+const fakeDefinitionAST = parse(
+  readSDL(path.join(__dirname, 'fake_definition.graphql')),
+);
 
 parseCLI((options) => {
-  const { extendURL, headers } = options;
+  const { extendURL, headers, forwardHeaders } = options;
   const fileName = options.fileName ||
     (extendURL ? './schema_extension.faker.graphql' : './schema.faker.graphql');
 
@@ -60,7 +63,8 @@ parseCLI((options) => {
           userSDL = new Source(body, fileName);
         }
 
-        runServer(options, userSDL, remoteSDL);
+        const executeFn = getProxyExecuteFn(extendURL, headers, forwardHeaders);
+        runServer(options, userSDL, remoteSDL, executeFn);
       })
       .catch(error => {
         log(chalk.red(error.stack));
@@ -77,12 +81,13 @@ parseCLI((options) => {
   }
 });
 
-const fakeDefinitionAST = parse(
-  readSDL(path.join(__dirname, 'fake_definition.graphql')),
-);
-
-function runServer(options, userSDL: Source, remoteSDL?: Source) {
-  const { port, openEditor, extendURL, headers, forwardHeaders } = options;
+function runServer(
+  options,
+  userSDL: Source,
+  remoteSDL?: Source,
+  customExecuteFn?
+) {
+  const { port, openEditor } = options;
   const corsOptions = {
     credentials: true,
     origin: options.corsOrigin,
@@ -90,30 +95,11 @@ function runServer(options, userSDL: Source, remoteSDL?: Source) {
   const app = express();
 
   app.options('/graphql', cors(corsOptions));
-  app.use('/graphql', cors(corsOptions), graphqlHTTP(req => {
-    const schemaAST = parse(remoteSDL ? remoteSDL : userSDL, {
-      allowLegacySDLEmptyFields: true,
-      allowLegacySDLImplementsInterfaces: true,
-    });
-    let mergedAST = concatAST([schemaAST, fakeDefinitionAST]);
-    const schema = buildASTSchema(mergedAST, { commentDescriptions: true });
-
-    if (extendURL) {
-      const proxyHeaders = { ...headers };
-      for (const name of forwardHeaders) {
-        proxyHeaders[name] = req.headers[name];
-      }
-
-      const serverRequest = graphqlRequest.bind(this, extendURL, proxyHeaders);
-      return {
-        ...proxyMiddleware(serverRequest, schema, userSDL),
-        graphiql: true,
-      };
-    } else {
-      fakeSchema(schema)
-      return { schema, graphiql: true };
-    }
-  }));
+  app.use('/graphql', cors(corsOptions), graphqlHTTP(() => ({
+    schema: remoteSDL ? buildSchema(remoteSDL, userSDL) : buildSchema(userSDL),
+    customExecuteFn,
+    graphiql: true,
+  })));
 
   app.get('/user-sdl', (_, res) => {
     res.status(200).json({
@@ -123,7 +109,6 @@ function runServer(options, userSDL: Source, remoteSDL?: Source) {
   });
 
   app.use('/user-sdl', bodyParser.text({limit: '8mb'}));
-
   app.post('/user-sdl', (req, res) => {
     try {
       const fileName = userSDL.name;
@@ -164,43 +149,26 @@ function runServer(options, userSDL: Source, remoteSDL?: Source) {
   }
 }
 
-function readSDL(filepath) {
-  return new Source(
-    fs.readFileSync(filepath, 'utf-8'),
-    filepath
-  );
-}
+function buildSchema(schemaSDL: Source, extendSDL?: Source): GraphQLSchema {
+  var mergedAST = concatAST([parse(schemaSDL), fakeDefinitionAST]);
+  let schema = buildASTSchema(mergedAST);
 
-function getRemoteSchema(url, headers) {
-  return graphqlRequest(url, headers, introspectionQuery)
-    .then(response => {
-      if (response.errors) {
-        throw Error(JSON.stringify(response.errors, null, 2));
+  if (extendSDL) {
+    schema = extendSchema(schema, parse(extendSDL));
+
+    // FIXME: put in field extensions
+    for (const type of Object.values(schema.getTypeMap())) {
+      if (isObjectType(type) || isInterfaceType(type)) {
+        for (const field of Object.values(type.getFields())) {
+          const node = field.astNode;
+          if (node && node.loc && node.loc.source === extendSDL) {
+            (field as any).isExtensionField = true;
+          }
+        }
       }
-      return buildClientSchema(response.data);
-    })
-    .catch(error => {
-      throw Error(`Can't get introspection from ${url}:\n${error.message}`);
-    })
-}
+    }
+  }
 
-function graphqlRequest(url, headers, query, variables?, operationName?) {
-  return fetch(url, {
-    method: 'POST',
-    headers: new Headers({
-      "content-type": 'application/json',
-      ...(headers || {}),
-    }),
-    body: JSON.stringify({
-      operationName,
-      query,
-      variables,
-    })
-  }).then(responce => {
-    if (responce.ok)
-      return responce.json();
-    return responce.text().then(body => {
-      throw Error(`${responce.status} ${responce.statusText}\n${body}`);
-    });
-  });
+  fakeSchema(schema);
+  return schema;
 }

@@ -26,12 +26,23 @@ type FakeEditorState = {
   remoteSDL: string | null;
 };
 
-function buildSchema(sdl) {
-  const ast = parse(sdl, {
+function parseSDL(sdl) {
+  return parse(sdl, {
     allowLegacySDLEmptyFields: true,
     allowLegacySDLImplementsInterfaces: true,
   });
-  return buildASTSchema(ast, { commentDescriptions: true });
+}
+
+function buildSchema(sdl, extensionSDL?) {
+  const schema = buildASTSchema(parseSDL(sdl), { commentDescriptions: true });
+  if (extensionSDL) {
+    return extendSchema(
+      schema,
+      parseSDL(extensionSDL),
+      { commentDescriptions: true }
+    );
+  }
+  return schema;
 }
 
 class FakeEditor extends React.Component<any, FakeEditorState> {
@@ -99,9 +110,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
 
   buildSchema(userSDL) {
     if (this.state.remoteSDL) {
-      return buildSchema(
-        this.state.remoteSDL + '\n' + fakeSDL + '\n' + userSDL,
-      );
+      return buildSchema(this.state.remoteSDL + '\n' + fakeSDL, userSDL);
     } else {
       return buildSchema(userSDL + '\n' + fakeSDL);
     }

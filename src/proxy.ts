@@ -41,23 +41,16 @@ export function getProxyExecuteFn(url, headers, forwardHeaders) {
       print(operationAST),
       args.variableValues,
       operationName,
-    ).then(
-      response => execute({ ...args, rootValue: buildRootValue(response)}),
-    );
+    ).then(result => proxyResponse(result, args));
   };
 }
 
-function buildRootValue(response) {
+function proxyResponse(response, args) {
   const rootValue = response.data || {};
   const globalErrors = [];
 
   for (const error of (response.errors || [])) {
     const { message, path, extensions } = error;
-    if (!path) {
-      globalErrors.push(error);
-      continue;
-    }
-
     const errorObj = new GraphQLError(
       message,
       undefined,
@@ -67,16 +60,22 @@ function buildRootValue(response) {
       undefined,
       extensions,
     );
+
+    if (!path) {
+      globalErrors.push(errorObj);
+      continue;
+    }
+
     // Recreate root value up to a place where original error was thrown
     // and place error as field value.
     pathSet(rootValue, error.path, errorObj);
   }
 
-  // TODO proxy global errors
-  if (globalErrors.length !== 0)
-    console.error('Global Errors:\n', globalErrors);
+  if (globalErrors.length !== 0) {
+    return { errors: globalErrors };
+  }
 
-  return rootValue;
+  return execute({ ...args, rootValue });
 }
 
 function injectTypename(node) {

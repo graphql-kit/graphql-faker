@@ -5,7 +5,6 @@ import {
   getDirectiveValues,
   GraphQLSchema,
   GraphQLObjectType,
-  GraphQLAbstractType,
   GraphQLOutputType,
   GraphQLInputObjectType,
   GraphQLList,
@@ -105,24 +104,14 @@ export function fakeSchema(schema: GraphQLSchema) {
     if (type instanceof GraphQLList)
       return arrayResolver(getResolver(type.ofType, field));
 
-    if (isAbstractType(type))
-      return abstractTypeResolver(type);
-
     return fieldResolver(type, field);
   }
 
-
-  function abstractTypeResolver(type:GraphQLAbstractType) {
-    const possibleTypes = schema.getPossibleTypes(type);
-    return () => ({__typename: getRandomItem(possibleTypes)});
-  }
-
   function fieldResolver(type:GraphQLOutputType, field) {
-    const directiveToArgs = {
+    const { fake, examples } = {
       ...getFakeDirectives(type),
       ...getFakeDirectives(field),
     };
-    const {fake, examples} = directiveToArgs;
 
     if (isLeafType(type)) {
       if (examples)
@@ -133,13 +122,15 @@ export function fakeSchema(schema: GraphQLSchema) {
       return () => fakeLeafValue(type);
     } else {
       // TODO: error on fake directive
-      if (examples) {
-        return () => ({
-          ...getRandomItem(examples.values),
-          $example: true,
-        });
-      }
-      return () => ({});
+      const possibleTypes = isAbstractType(type)
+        ? schema.getPossibleTypes(type)
+        : [type];
+
+      return () => ({
+        __typename: getRandomItem(possibleTypes),
+        ...(examples ? getRandomItem(examples.values) : {}),
+        $example: true,
+      });
     }
   }
 

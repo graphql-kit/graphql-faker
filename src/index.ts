@@ -3,9 +3,7 @@
 import {
   Source,
   GraphQLSchema,
-  Kind,
   parse,
-  concatAST,
   printSchema,
   buildASTSchema,
   extendSchema,
@@ -25,12 +23,10 @@ import * as bodyParser from 'body-parser';
 import { parseCLI } from './cli';
 import { fakeSchema } from './fake_schema';
 import { getProxyExecuteFn } from './proxy';
+import { mergeWithFakeDefinitions } from './fake_definition';
 import { existsSync, readSDL, getRemoteSchema } from './utils';
 
 const log = console.log;
-const fakeDefinitionAST = parse(
-  readSDL(path.join(__dirname, 'fake_definition.graphql')),
-);
 
 parseCLI((options) => {
   const { extendURL, headers, forwardHeaders } = options;
@@ -150,33 +146,9 @@ function runServer(
   }
 }
 
-function defToName(defNode) {
-  const { kind, name } = defNode;
-  if (name == null) {
-    return '';
-  }
-  return (kind === Kind.DIRECTIVE_DEFINITION ? '@' : '') + name.value;
-}
-
-const fakeDefinitionsSet = new Set(
-  fakeDefinitionAST.definitions.map(defToName),
-);
-
 function buildSchema(schemaSDL: Source, extendSDL?: Source): GraphQLSchema {
   let schemaAST = parse(schemaSDL);
-
-  // Remove Faker's own definitions that were added to have valid SDL for other
-  // tools, see: https://github.com/APIs-guru/graphql-faker/issues/75
-  schemaAST = {
-    ...schemaAST,
-    definitions: schemaAST.definitions.filter(def => {
-      const name = defToName(def);
-      return name === '' || !fakeDefinitionsSet.has(name);
-    }),
-  };
-
-  var mergedAST = concatAST([schemaAST, fakeDefinitionAST]);
-  let schema = buildASTSchema(mergedAST);
+  let schema = buildASTSchema(mergeWithFakeDefinitions(schemaAST));
 
   if (extendSDL) {
     schema = extendSchema(schema, parse(extendSDL));

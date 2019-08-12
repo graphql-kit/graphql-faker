@@ -6,8 +6,8 @@ import 'graphiql/graphiql.css';
 import * as classNames from 'classnames';
 import * as GraphiQL from 'graphiql';
 import { buildASTSchema, extendSchema, GraphQLSchema, parse } from 'graphql';
+import { mergeWithFakeDefinitions } from '../fake_definition';
 import * as fetch from 'isomorphic-fetch';
-import * as fakeSDL from 'raw-loader!../fake_definition.graphql';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -34,7 +34,8 @@ function parseSDL(sdl) {
 }
 
 function buildSchema(sdl, extensionSDL?) {
-  const schema = buildASTSchema(parseSDL(sdl), { commentDescriptions: true });
+  const userSDL = mergeWithFakeDefinitions(parseSDL(sdl));
+  const schema = buildASTSchema(userSDL, { commentDescriptions: true });
   if (extensionSDL) {
     return extendSchema(
       schema,
@@ -110,9 +111,9 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
 
   buildSchema(userSDL) {
     if (this.state.remoteSDL) {
-      return buildSchema(this.state.remoteSDL + '\n' + fakeSDL, userSDL);
+      return buildSchema(this.state.remoteSDL, userSDL);
     } else {
-      return buildSchema(userSDL + '\n' + fakeSDL);
+      return buildSchema(userSDL);
     }
   }
 

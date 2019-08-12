@@ -23,7 +23,7 @@ module.exports = {
     },
   },
   resolve: {
-    extensions: ['.jsx', '.js', '.tsx', 'ts', '.json'],
+    extensions: ['.jsx', '.js', '.tsx', '.ts', '.json'],
   },
   entry: ['./index.tsx'],
   output: {

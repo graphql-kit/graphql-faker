@@ -1,3 +1,6 @@
+import { Kind, parse, concatAST } from 'graphql';
+
+const fakeDefinitionAST = parse(`
 enum fake__Locale {
   az
   cz
@@ -198,3 +201,4 @@ directive @fake(type:fake__Types!, options: fake__options = {}, locale:fake__Loc
 
 scalar examples__JSON
 directive @examples(values: [examples__JSON]!) on FIELD_DEFINITION | SCALAR
+`);

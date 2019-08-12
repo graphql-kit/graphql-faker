@@ -3,6 +3,7 @@
 import {
   Source,
   GraphQLSchema,
+  Kind,
   parse,
   concatAST,
   printSchema,
@@ -149,8 +150,32 @@ function runServer(
   }
 }
 
+function defToName(defNode) {
+  const { kind, name } = defNode;
+  if (name == null) {
+    return '';
+  }
+  return (kind === Kind.DIRECTIVE_DEFINITION ? '@' : '') + name.value;
+}
+
+const fakeDefinitionsSet = new Set(
+  fakeDefinitionAST.definitions.map(defToName),
+);
+
 function buildSchema(schemaSDL: Source, extendSDL?: Source): GraphQLSchema {
-  var mergedAST = concatAST([parse(schemaSDL), fakeDefinitionAST]);
+  let schemaAST = parse(schemaSDL);
+
+  // Remove Faker's own definitions that were added to have valid SDL for other
+  // tools, see: https://github.com/APIs-guru/graphql-faker/issues/75
+  schemaAST = {
+    ...schemaAST,
+    definitions: schemaAST.definitions.filter(def => {
+      const name = defToName(def);
+      return name === '' || !fakeDefinitionsSet.has(name);
+    }),
+  };
+
+  var mergedAST = concatAST([schemaAST, fakeDefinitionAST]);
   let schema = buildASTSchema(mergedAST);
 
   if (extendSDL) {

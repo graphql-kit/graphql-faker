@@ -119,7 +119,6 @@ function removeUnusedVariables(documentAST) {
   visit(documentAST, {
     [Kind.VARIABLE_DEFINITION]: () => false,
     [Kind.VARIABLE]: (node) => {
-      console.log(node);
       seenVariables[node.name.value] = true;
     },
   });

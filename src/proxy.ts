@@ -113,17 +113,22 @@ function stripExtensionFields(schema, operationAST) {
   }));
 }
 
-function removeUnusedVariables(operationAST) {
+function removeUnusedVariables(documentAST) {
   const seenVariables = Object.create(null);
 
-  visit(operationAST.selectionSet, {
+  visit(documentAST, {
+    [Kind.VARIABLE_DEFINITION]: () => false,
     [Kind.VARIABLE]: (node) => {
+      console.log(node);
       seenVariables[node.name.value] = true;
     },
   });
 
-  const variableDefinitions = (operationAST.variableDefinitions || []).filter(
-    def => seenVariables[def.variable.name.value]
-  );
-  return {...operationAST, variableDefinitions };
+  return visit(documentAST, {
+    [Kind.VARIABLE_DEFINITION]: (node) => {
+      if (!seenVariables[node.variable.name.value]) {
+        return null;
+      }
+    }
+  });
 }

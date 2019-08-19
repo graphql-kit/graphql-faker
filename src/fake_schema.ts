@@ -150,7 +150,7 @@ export function fakeSchema(schema: GraphQLSchema) {
       examples = getDirectiveValues(examplesDirective, node) as ExamplesArgs;
     }
 
-    return { fake, examples };
+    return (fake || examples) ? { fake, examples } : {};
   }
 }
 

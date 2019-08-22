@@ -9,7 +9,7 @@
     "codemirror": "5.48.0",
     "codemirror-graphql": "0.8.3",
     "graphiql": "0.13.2",
-    "graphql": "14.4.2",
+    "graphql": "14.5.0",
     "isomorphic-fetch": "2.2.1",
     "marked": "0.3.6",
     "react": "15.6.2",
@@ -17,7 +17,6 @@
   },
   "devDependencies": {
     "@types/classnames": "2.2.3",
-    "@types/graphql": "14.2.2",
     "@types/react": "15.6.26",
     "@types/react-dom": "15.5.10",
     "autoprefixer": "6.7.7",

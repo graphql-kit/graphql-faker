@@ -1,12 +1,14 @@
 import * as assert from 'assert';
 import {
+  isNonNullType,
+  isObjectType,
+  isInputObjectType,
   isLeafType,
   isAbstractType,
   getDirectiveValues,
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLOutputType,
-  GraphQLInputObjectType,
   GraphQLList,
   GraphQLNonNull,
   GraphQLEnumType,
@@ -41,7 +43,7 @@ export function fakeSchema(schema: GraphQLSchema) {
   const mutationType = schema.getMutationType();
 
   for (const type of Object.values(schema.getTypeMap())) {
-    if (type instanceof GraphQLObjectType && !type.name.startsWith('__'))
+    if (isObjectType(type) && !type.name.startsWith('__'))
       addFakeProperties(type);
     if (isAbstractType(type))
       type.resolveType = (obj => obj.__typename);
@@ -66,9 +68,9 @@ export function fakeSchema(schema: GraphQLSchema) {
     const inputType = args[0].type;
     // TODO: check presence of 'clientMutationId'
     return (
-      inputType instanceof GraphQLNonNull &&
-      inputType.ofType instanceof GraphQLInputObjectType &&
-      field.type instanceof GraphQLObjectType
+      isNonNullType(inputType) &&
+      isInputObjectType(inputType.ofType) &&
+      isObjectType(field.type)
     );
   }
 

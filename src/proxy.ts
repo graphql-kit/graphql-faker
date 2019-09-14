@@ -1,5 +1,4 @@
 import { Request } from 'express';
-import { set as pathSet } from 'lodash';
 import {
   Kind,
   print,
@@ -76,6 +75,21 @@ function proxyResponse(response, args) {
   }
 
   return execute({ ...args, rootValue });
+}
+
+function pathSet(rootObject, path, value) {
+  let currentObject = rootObject;
+
+  const basePath = [...path];
+  const lastKey = basePath.pop();
+  for (const key of basePath) {
+    if (currentObject[key] == null) {
+      currentObject[key] = typeof key === 'number' ? [] : {};
+    }
+    currentObject = currentObject[key];
+  }
+
+  currentObject[lastKey] = value;
 }
 
 function injectTypename(node) {

@@ -21,10 +21,10 @@ import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 
 import { parseCLI } from './cli';
-import { fakeSchema } from './fake_schema';
 import { getProxyExecuteFn } from './proxy';
 import { mergeWithFakeDefinitions } from './fake_definition';
 import { existsSync, readSDL, getRemoteSchema } from './utils';
+import { fakeTypeResolver, fakeFieldResolver } from './fake_schema';
 
 const log = console.log;
 
@@ -94,6 +94,8 @@ function runServer(
   app.options('/graphql', cors(corsOptions));
   app.use('/graphql', cors(corsOptions), graphqlHTTP(() => ({
     schema: remoteSDL ? buildSchema(remoteSDL, userSDL) : buildSchema(userSDL),
+    typeResolver: fakeTypeResolver,
+    fieldResolver: fakeFieldResolver,
     customExecuteFn,
     graphiql: true,
   })));
@@ -166,6 +168,5 @@ function buildSchema(schemaSDL: Source, extendSDL?: Source): GraphQLSchema {
     }
   }
 
-  fakeSchema(schema);
   return schema;
 }

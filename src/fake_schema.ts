@@ -1,181 +1,160 @@
 import * as assert from 'assert';
 import {
+  isListType,
   isNonNullType,
   isObjectType,
   isInputObjectType,
+  isEnumType,
   isLeafType,
   isAbstractType,
-  getDirectiveValues,
-  GraphQLSchema,
-  GraphQLObjectType,
-  GraphQLOutputType,
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLEnumType,
   GraphQLLeafType,
+  GraphQLTypeResolver,
+  GraphQLFieldResolver,
+  defaultTypeResolver,
+  defaultFieldResolver,
+  getDirectiveValues,
 } from 'graphql';
 
-import {
-  getRandomInt,
-  getRandomItem,
-  stdScalarFakers,
-  fakeValue,
-} from './fake';
+import { getRandomInt, getRandomItem, stdScalarFakers, fakeValue } from './fake';
 
 type FakeArgs = {
-  type:string
-  options: {[key:string]: any}
-  locale: string
+  type: string;
+  options: {[key: string]: any};
+  locale: string;
 };
 type ExamplesArgs = {
-  values:[any]
+  values: [any];
 };
 type DirectiveArgs = {
-  fake?: FakeArgs
-  examples?: ExamplesArgs
+  fake?: FakeArgs;
+  examples?: ExamplesArgs;
 };
 
-export function fakeSchema(schema: GraphQLSchema) {
-  const fakeDirective = schema.getDirective('fake');
-  const examplesDirective = schema.getDirective('examples');
-  assert(fakeDirective != null && examplesDirective != null);
+export const fakeTypeResolver: GraphQLTypeResolver<unknown, unknown> = async (
+  value,
+  context,
+  info,
+  abstractType,
+) => {
+  const defaultResolved = await defaultTypeResolver(
+    value,
+    context,
+    info,
+    abstractType,
+  );
+  if (defaultResolved != null) {
+    return defaultResolved;
+  }
+
+  const possibleTypes = info.schema.getPossibleTypes(abstractType);
+  return getRandomItem(possibleTypes);
+};
+
+export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
+  source,
+  args,
+  context,
+  info,
+) => {
+  const { schema, parentType, fieldName } = info;
+  const fieldDef = parentType.getFields()[fieldName];
+
+  let defaultResolved = await defaultFieldResolver(source, args, context, info);
+  if (defaultResolved instanceof Error) {
+    return defaultResolved;
+  }
 
   const mutationType = schema.getMutationType();
+  const isMutation = parentType === mutationType;
+  if (isMutation && isRelayMutation(fieldDef)) {
+    return { ...args['input'], ...(defaultResolved || {}) };
+  }
 
-  for (const type of Object.values(schema.getTypeMap())) {
-    if (isObjectType(type) && !type.name.startsWith('__'))
-      addFakeProperties(type);
-    if (isAbstractType(type))
-      type.resolveType = (obj => obj.__typename);
-  };
+  if (defaultResolved != null) {
+    return defaultResolved;
+  }
 
-  function addFakeProperties(objectType:GraphQLObjectType) {
-    const isMutation = (objectType === mutationType);
+  return fakeValueOfType(fieldDef.type);
 
-    for (const field of Object.values(objectType.getFields())) {
-      if (isMutation && isRelayMutation(field))
-        field.resolve = getRelayMutationResolver();
-      else
-        field.resolve = getFieldResolver(field, objectType);
+  function fakeValueOfType(type) {
+    if (isNonNullType(type)) {
+      return fakeValueOfType(type.ofType);
     }
-  }
-
-  function isRelayMutation(field) {
-    const args = field.args;
-    if (args.length !== 1 || args[0].name !== 'input')
-      return false;
-
-    const inputType = args[0].type;
-    // TODO: check presence of 'clientMutationId'
-    return (
-      isNonNullType(inputType) &&
-      isInputObjectType(inputType.ofType) &&
-      isObjectType(field.type)
-    );
-  }
-
-  function getFieldResolver(field, objectType) {
-    const fakeResolver = getResolver(field.type, field);
-    return (source, _0, _1, info) => {
-      if (source && source.$example && source[field.name]) {
-        return source[field.name];
-      }
-
-      const value = getCurrentSourceProperty(source, info.path);
-      return (value !== undefined) ? value : fakeResolver(objectType);
+    if (isListType(type)) {
+      return Array(getRandomInt(2, 4)).fill(() => fakeValueOfType(type.ofType));
     }
-  }
 
-  function getRelayMutationResolver() {
-    return (source, args, _1, info) => {
-      const value = getCurrentSourceProperty(source, info.path);
-      if (value instanceof Error)
-        return value;
-      return {...args['input'], ...value};
-    }
-  }
-
-  // get value or Error instance injected by the proxy
-  function getCurrentSourceProperty(source, path) {
-    return source && source[path!.key];
-  }
-
-  function getResolver(type:GraphQLOutputType, field) {
-    if (type instanceof GraphQLNonNull)
-      return getResolver(type.ofType, field);
-    if (type instanceof GraphQLList)
-      return arrayResolver(getResolver(type.ofType, field));
-
-    return fieldResolver(type, field);
-  }
-
-  function fieldResolver(type:GraphQLOutputType, field) {
-    const { fake, examples } = {
-      ...getFakeDirectives(type),
-      ...getFakeDirectives(field),
+    const {fake, examples} = {
+      ...getFakeDirectives(schema, type),
+      ...getFakeDirectives(schema, fieldDef),
     };
 
     if (isLeafType(type)) {
-      if (examples)
-        return () => getRandomItem(examples.values)
+      if (examples) return getRandomItem(examples.values);
       if (fake) {
-        return () => fakeValue(fake.type, fake.options, fake.locale);
+        return fakeValue(fake.type, fake.options, fake.locale);
       }
-      return () => fakeLeafValue(type);
+      return fakeLeafValue(type);
     } else {
       // TODO: error on fake directive
       const possibleTypes = isAbstractType(type)
         ? schema.getPossibleTypes(type)
         : [type];
 
-      return () => ({
+      return {
         __typename: getRandomItem(possibleTypes),
         ...(examples ? getRandomItem(examples.values) : {}),
-        $example: true,
-      });
+      };
     }
   }
+};
 
-  function getFakeDirectives(object): DirectiveArgs {
-    const nodes = []
-    if (object.astNode != null) {
-      nodes.push(object.astNode);
-    }
-    if (object.extensionNodes != null) {
-      nodes.push(...object.extensionNodes);
-    }
-
-    let fake;
-    let examples;
-    for (const node of nodes) {
-      fake = getDirectiveValues(fakeDirective, node) as FakeArgs;
-      examples = getDirectiveValues(examplesDirective, node) as ExamplesArgs;
-    }
-
-    return (fake || examples) ? { fake, examples } : {};
-  }
-}
-
-function arrayResolver(itemResolver) {
-  return (...args) => {
-    let length = getRandomInt(2, 4);
-    const result = [];
-
-    while (length-- !== 0)
-      result.push(itemResolver(...args));
-    return result;
-  }
-}
-
-function fakeLeafValue(type:GraphQLLeafType) {
-  if (type instanceof GraphQLEnumType) {
+function fakeLeafValue(type: GraphQLLeafType) {
+  if (isEnumType(type)) {
     const values = type.getValues().map(x => x.value);
     return getRandomItem(values);
   }
 
   const faker = stdScalarFakers[type.name];
-  if (faker)
-    return faker();
+  if (faker) return faker();
 
   return `<${type.name}>`;
+}
+
+function isRelayMutation(fieldDef) {
+  const { args } = fieldDef;
+  if (args.length !== 1 || args[0].name !== 'input') {
+    return false;
+  }
+
+  const inputType = args[0].type;
+  // TODO: check presence of 'clientMutationId'
+  return (
+    isNonNullType(inputType) &&
+    isInputObjectType(inputType.ofType) &&
+    isObjectType(fieldDef.type)
+  );
+}
+
+function getFakeDirectives(schema, object): DirectiveArgs {
+  const fakeDirective = schema.getDirective('fake');
+  const examplesDirective = schema.getDirective('examples');
+  assert(fakeDirective != null && examplesDirective != null);
+
+  const nodes = [];
+  if (object.astNode != null) {
+    nodes.push(object.astNode);
+  }
+  if (object.extensionNodes != null) {
+    nodes.push(...object.extensionNodes);
+  }
+
+  let fake;
+  let examples;
+  for (const node of nodes) {
+    fake = getDirectiveValues(fakeDirective, node) as FakeArgs;
+    examples = getDirectiveValues(examplesDirective, node) as ExamplesArgs;
+  }
+
+  return fake || examples ? {fake, examples} : {};
 }

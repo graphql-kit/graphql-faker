@@ -7,7 +7,6 @@ import * as classNames from 'classnames';
 import * as GraphiQL from 'graphiql';
 import { buildASTSchema, extendSchema, GraphQLSchema, parse } from 'graphql';
 import { mergeWithFakeDefinitions } from '../fake_definition';
-import * as fetch from 'isomorphic-fetch';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 

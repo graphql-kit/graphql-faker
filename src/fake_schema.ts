@@ -7,6 +7,7 @@ import {
   isEnumType,
   isLeafType,
   isAbstractType,
+  GraphQLType,
   GraphQLLeafType,
   GraphQLTypeResolver,
   GraphQLFieldResolver,
@@ -82,14 +83,18 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
 
   return fakeValueOfType(fieldDef.type);
 
+  function fakeListOf(itemType: GraphQLType): Array<unknown> {
+    const listLength = fieldDirectives.listLength || { min: 2, max: 4 };
+    let length = getRandomInt(listLength.min, listLength.max);
+    return Array(length).fill(null).map(() => fakeValueOfType(itemType));
+  }
+
   function fakeValueOfType(type) {
     if (isNonNullType(type)) {
       return fakeValueOfType(type.ofType);
     }
     if (isListType(type)) {
-      const listLength = fieldDirectives.listLength || { min: 2, max: 4 };
-      return Array(getRandomInt(listLength.min, listLength.max))
-        .fill(() => fakeValueOfType(type.ofType));
+      return fakeListOf(type.ofType);
     }
 
     const {fake, examples} = {
@@ -105,12 +110,12 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
       return fakeLeafValue(type);
     } else {
       // TODO: error on fake directive
-      const possibleTypes = isAbstractType(type)
-        ? schema.getPossibleTypes(type)
-        : [type];
+      const __typename: string = isAbstractType(type)
+        ? getRandomItem(schema.getPossibleTypes(type)).name
+        : type.name;
 
       return {
-        __typename: getRandomItem(possibleTypes),
+        __typename,
         ...(examples ? getRandomItem(examples.values) : {}),
       };
     }

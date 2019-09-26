@@ -7,7 +7,6 @@ import {
   isEnumType,
   isLeafType,
   isAbstractType,
-  GraphQLType,
   GraphQLLeafType,
   GraphQLTypeResolver,
   GraphQLFieldResolver,
@@ -64,7 +63,6 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
 ) => {
   const { schema, parentType, fieldName } = info;
   const fieldDef = parentType.getFields()[fieldName];
-  const fieldDirectives = getFakeDirectives(schema, fieldDef);
 
   let defaultResolved = await defaultFieldResolver(source, args, context, info);
   if (defaultResolved instanceof Error) {
@@ -83,31 +81,25 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
 
   return fakeValueOfType(fieldDef.type);
 
-  function fakeListOf(itemType: GraphQLType): Array<unknown> {
-    const listLength = fieldDirectives.listLength || { min: 2, max: 4 };
-    let length = getRandomInt(listLength.min, listLength.max);
-    return Array(length).fill(null).map(() => fakeValueOfType(itemType));
-  }
-
   function fakeValueOfType(type) {
     if (isNonNullType(type)) {
       return fakeValueOfType(type.ofType);
     }
+
     if (isListType(type)) {
-      return fakeListOf(type.ofType);
+      return Array(getListLength(fieldDef))
+        .fill(null)
+        .map(() => fakeValueOfType(type.ofType));
     }
 
-    const {fake, examples} = {
-      ...getFakeDirectives(schema, type),
-      ...fieldDirectives,
-    };
+    const valueCB = getExampleValueCB(fieldDef) || getFakeValueCB(fieldDef) ||
+        getExampleValueCB(type) || getFakeValueCB(type);
 
     if (isLeafType(type)) {
-      if (examples) return getRandomItem(examples.values);
-      if (fake) {
-        return fakeValue(fake.type, fake.options, fake.locale);
+      if (valueCB) {
+        return valueCB();
       }
-      return fakeLeafValue(type);
+      return fakeLeafValueCB(type)
     } else {
       // TODO: error on fake directive
       const __typename: string = isAbstractType(type)
@@ -116,13 +108,31 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
 
       return {
         __typename,
-        ...(examples ? getRandomItem(examples.values) : {}),
+        ...(valueCB ? valueCB() : {}),
       };
     }
   }
+
+  function getFakeValueCB(object) {
+    const fakeDirective = schema.getDirective('fake');
+    const args = getDirectiveArgs(fakeDirective, object) as FakeArgs;
+    return args && (() => fakeValue(args.type, args.options, args.locale));
+  }
+
+  function getExampleValueCB(object) {
+    const examplesDirective = schema.getDirective('examples');
+    const args = getDirectiveArgs(examplesDirective, object) as ExamplesArgs;
+    return args && (() => getRandomItem(args.values));
+  }
+
+  function getListLength(object): ListLenghtArgs {
+    const listLength = schema.getDirective('listLength');
+    const args = getDirectiveArgs(listLength, object) as ListLenghtArgs;
+    return args ? getRandomInt(args.min, args.max) : getRandomInt(2, 4);
+  }
 };
 
-function fakeLeafValue(type: GraphQLLeafType) {
+function fakeLeafValueCB(type: GraphQLLeafType) {
   if (isEnumType(type)) {
     const values = type.getValues().map(x => x.value);
     return getRandomItem(values);
@@ -149,25 +159,20 @@ function isRelayMutation(fieldDef) {
   );
 }
 
-function getFakeDirectives(schema, object): DirectiveArgs {
-  const fakeDirective = schema.getDirective('fake');
-  const examplesDirective = schema.getDirective('examples');
-  const listLenghtDirective = schema.getDirective('listLength');
-  assert(fakeDirective != null && examplesDirective != null);
+function getDirectiveArgs(directive, object): DirectiveArgs {
+  assert(directive != null);
 
-  const nodes = [];
+  let args = undefined;
+
   if (object.astNode != null) {
-    nodes.push(object.astNode);
-  }
-  if (object.extensionNodes != null) {
-    nodes.push(...object.extensionNodes);
+    args = getDirectiveValues(directive, object.astNode);
   }
 
-  const result = {} as DirectiveArgs;
-  for (const node of nodes) {
-    result.fake = getDirectiveValues(fakeDirective, node) as FakeArgs;
-    result.examples = getDirectiveValues(examplesDirective, node) as ExamplesArgs;
-    result.listLength = getDirectiveValues(listLenghtDirective, node) as ListLenghtArgs;
+  if (object.extensionNodes != null) {
+    for (const node of object.extensionNodes) {
+      args = getDirectiveValues(directive, node);
+    }
   }
-  return result;
+
+  return args;
 }

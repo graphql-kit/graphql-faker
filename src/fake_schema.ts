@@ -25,14 +25,14 @@ type FakeArgs = {
 type ExamplesArgs = {
   values: [any];
 };
-type ListLenghtArgs = {
+type ListLengthArgs = {
   min: number;
   max: number;
 };
 type DirectiveArgs = {
   fake?: FakeArgs;
   examples?: ExamplesArgs;
-  listLength?: ListLenghtArgs;
+  listLength?: ListLengthArgs;
 };
 
 export const fakeTypeResolver: GraphQLTypeResolver<unknown, unknown> = async (
@@ -125,9 +125,9 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
     return args && (() => getRandomItem(args.values));
   }
 
-  function getListLength(object): ListLenghtArgs {
+  function getListLength(object): ListLengthArgs {
     const listLength = schema.getDirective('listLength');
-    const args = getDirectiveArgs(listLength, object) as ListLenghtArgs;
+    const args = getDirectiveArgs(listLength, object) as ListLengthArgs;
     return args ? getRandomInt(args.min, args.max) : getRandomInt(2, 4);
   }
 };

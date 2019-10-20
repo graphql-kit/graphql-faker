@@ -2,11 +2,11 @@ import * as assert from 'assert';
 import {
   isListType,
   isNonNullType,
-  isObjectType,
-  isInputObjectType,
+  isCompositeType,
   isEnumType,
   isLeafType,
   isAbstractType,
+  getNullableType,
   GraphQLLeafType,
   GraphQLTypeResolver,
   GraphQLFieldResolver,
@@ -64,22 +64,30 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
   const { schema, parentType, fieldName } = info;
   const fieldDef = parentType.getFields()[fieldName];
 
-  let defaultResolved = await defaultFieldResolver(source, args, context, info);
+  const defaultResolved = await defaultFieldResolver(source, args, context, info);
   if (defaultResolved instanceof Error) {
     return defaultResolved;
   }
 
-  const mutationType = schema.getMutationType();
-  const isMutation = parentType === mutationType;
-  if (isMutation && isRelayMutation(fieldDef)) {
-    return { ...args['input'], ...(defaultResolved || {}) };
+  const resolved = defaultResolved === undefined
+    ? fakeValueOfType(fieldDef.type)
+    : defaultResolved;
+
+  const isMutation = parentType === schema.getMutationType();
+  const isCompositeReturn = isCompositeType(getNullableType(fieldDef.type));
+  if (isMutation && isCompositeReturn && isPlainObject(resolved)) {
+    const inputArg = args['input'];
+    return {
+      ...resolved,
+      ...(
+        Object.keys(args).length === 1 && isPlainObject(inputArg)
+          ? inputArg
+          : args
+      ),
+    };
   }
 
-  if (defaultResolved != null) {
-    return defaultResolved;
-  }
-
-  return fakeValueOfType(fieldDef.type);
+  return resolved;
 
   function fakeValueOfType(type) {
     if (isNonNullType(type)) {
@@ -144,21 +152,6 @@ function fakeLeafValueCB(type: GraphQLLeafType) {
   return `<${type.name}>`;
 }
 
-function isRelayMutation(fieldDef) {
-  const { args } = fieldDef;
-  if (args.length !== 1 || args[0].name !== 'input') {
-    return false;
-  }
-
-  const inputType = args[0].type;
-  // TODO: check presence of 'clientMutationId'
-  return (
-    isNonNullType(inputType) &&
-    isInputObjectType(inputType.ofType) &&
-    isObjectType(fieldDef.type)
-  );
-}
-
 function getDirectiveArgs(directive, object): DirectiveArgs {
   assert(directive != null);
 
@@ -175,4 +168,10 @@ function getDirectiveArgs(directive, object): DirectiveArgs {
   }
 
   return args;
+}
+
+function isPlainObject(maybeObject) {
+  return typeof maybeObject === 'object' &&
+    maybeObject !== null &&
+    !Array.isArray(maybeObject);
 }

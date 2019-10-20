@@ -5,7 +5,7 @@ import {
   Source,
   GraphQLSchema,
   buildClientSchema,
-  introspectionQuery,
+  getIntrospectionQuery,
 } from 'graphql';
 
 export function existsSync(filePath: string): boolean {
@@ -28,7 +28,7 @@ export function getRemoteSchema(
   url: string,
   headers: { [name: string]: string },
 ): Promise<GraphQLSchema> {
-  return graphqlRequest(url, headers, introspectionQuery)
+  return graphqlRequest(url, headers, getIntrospectionQuery())
     .then(response => {
       if (response.errors) {
         throw Error(JSON.stringify(response.errors, null, 2));

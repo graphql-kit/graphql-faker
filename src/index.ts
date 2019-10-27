@@ -84,7 +84,30 @@ function runServer(
   remoteSDL?: Source,
   customExecuteFn?
 ) {
-  const { port, openEditor } = options;
+
+
+	// Adding CLI params for HTTPS
+	const { useHttps, tlsKeyFile, tlsCert, tlsCaCert }  = options;
+  
+  var protocol;
+	if (useHttps) {
+		var https = require('https');
+		var fs = require('fs');
+		var https_options = {
+		  key: fs.readFileSync(tlsKeyFile),
+		  cert: fs.readFileSync(tlsCert),
+		  ca: [ 
+				fs.readFileSync(String(tlsCaCert)),
+				 
+			   ]
+		};
+		protocol = 'https';
+	} else {
+		protocol = 'http';
+	}
+	
+
+  const { port, openEditor, hostname } = options;
   const corsOptions = {
     credentials: true,
     origin: options.corsOrigin,
@@ -125,7 +148,13 @@ function runServer(
 
   app.use('/editor', express.static(path.join(__dirname, 'editor')));
 
-  const server = app.listen(port);
+  // launch server w/ HTTPS options
+  var server;
+  if (useHttps) {		
+       server = https.createServer(https_options, app).listen(port);
+  } else {	
+       server = app.listen(port);
+  }
 
   const shutdown = () => {
     server.close();
@@ -138,14 +167,13 @@ function runServer(
   log(`\n${chalk.green('✔')} Your GraphQL Fake API is ready to use 🚀
   Here are your links:
 
-  ${chalk.blue('❯')} Interactive Editor: http://localhost:${port}/editor
-  ${chalk.blue('❯')} GraphQL API:        http://localhost:${port}/graphql
+  ${chalk.blue('❯')} Interactive Editor: ${protocol}://${hostname}:${port}/editor
+  ${chalk.blue('❯')} GraphQL API:        ${protocol}://${hostname}:${port}/graphql
 
   `);
-
-  if (openEditor) {
-    setTimeout(() => open(`http://localhost:${port}/editor`), 500);
-  }
+    if (openEditor) {
+        setTimeout(() => open(`${protocol}://${hostname}:${port}/editor`), 500);
+    }
 }
 
 function buildSchema(schemaSDL: Source, extendSDL?: Source): GraphQLSchema {

@@ -64,14 +64,18 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
   const { schema, parentType, fieldName } = info;
   const fieldDef = parentType.getFields()[fieldName];
 
-  const defaultResolved = await defaultFieldResolver(source, args, context, info);
-  if (defaultResolved instanceof Error) {
-    return defaultResolved;
+  let resolved = await defaultFieldResolver(source, args, context, info);
+  if (resolved === undefined) {
+    resolved = source[info.path.key]; // alias value
   }
 
-  const resolved = defaultResolved === undefined
-    ? fakeValueOfType(fieldDef.type)
-    : defaultResolved;
+  if (resolved === undefined) {
+    resolved = fakeValueOfType(fieldDef.type);
+  }
+
+  if (resolved instanceof Error) {
+    return resolved;
+  }
 
   const isMutation = parentType === schema.getMutationType();
   const isCompositeReturn = isCompositeType(getNullableType(fieldDef.type));

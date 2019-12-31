@@ -65,7 +65,7 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
   const fieldDef = parentType.getFields()[fieldName];
 
   let resolved = await defaultFieldResolver(source, args, context, info);
-  if (resolved === undefined) {
+  if (resolved === undefined && source && typeof source === 'object') {
     resolved = source[info.path.key]; // alias value
   }
 

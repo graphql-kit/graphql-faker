@@ -115,9 +115,9 @@ const fakeFunctions = {
 
   // Image section
   imageUrl: {
-    args: ['imageHeight', 'imageWidth', 'imageCategory', 'randomizeImageUrl'],
-    func: (height, width, category, randomize) =>
-      faker.image.imageUrl(height, width, category, randomize, false),
+    args: ['imageWidth', 'imageHeight', 'imageCategory', 'randomizeImageUrl'],
+    func: (width, height, category, randomize) =>
+      faker.image.imageUrl(width, height, category, randomize, false),
   },
 
   // Internet section

@@ -12,12 +12,14 @@
 # Developed with ❤️ by APIs.guru | https://github.com/APIs-guru/graphql-faker
 
 type Company {
+  id: ID
   name: String @fake(type:companyName)
   industry: String @examples(values: ["IT", "Manufacturing", "Medicine", "Media"])
   employees: [Employee!] @listLength(min: 5, max: 10)
 }
 
 type Employee {
+  id: ID
   firstName: String @fake(type: firstName, locale:en_CA)
   lastName: String @fake(type: lastName, locale:en_CA)
   address: String @fake(type:streetAddress, options: { useFullAddress: true })

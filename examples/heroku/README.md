@@ -40,7 +40,7 @@ docker push registry.heroku.com/<HEROKU APP NAME>/web
 heroku ps:scale web=1
 ```
 
-Shoutout to [graphql-ufc-api](https://github.com/jgcmarins/graphql-ufc-api) where got the demo schema.
+Shoutout to [graphql-ufc-api](https://github.com/jgcmarins/graphql-ufc-api) where we got the demo schema.
 
 # FAQ
 

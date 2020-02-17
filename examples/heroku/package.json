@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"description": "Deploy your graphl api to Heroku using graphql-faker",
 	"scripts": {
-		"convert-graphql-json": "graphql-json-to-sdl ./test.json ./test.sdl"
+		"convert-graphql-json": "graphql-json-to-sdl ./schema.json ./schema.sdl"
 	},
 	"author": {
         "name": "Marc Schipperheyn",

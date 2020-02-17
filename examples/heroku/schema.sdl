@@ -1,17 +1,18 @@
 type Fighter {
-  # The ID of an object
-  id: ID!
   _id: Int
-  profileImage: String
+  beltThumbnail: String
+  draws: Int
   firstName: String
+
+  """The ID of an object"""
+  id: ID!
   lastName: String
+  link: String
+  losses: Int
   nickname: String
+  profileImage: String
   weightClass: String
   wins: Int
-  losses: Int
-  draws: Int
-  beltThumbnail: String
-  link: String
 }
 
 type Query {

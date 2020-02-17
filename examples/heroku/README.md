@@ -28,7 +28,7 @@ The steps here are:
 
 * Create a graphql-faker image that includes the created graphql schema.
 * Deploy that image to the heroku image registry.
-* Run the image
+* Run the image and test locally
 * Access the image at `https://<HEROKU APP NAME>/herokuapp.com/graphql`
 
 ```
@@ -47,3 +47,7 @@ Shoutout to [graphql-ufc-api](https://github.com/jgcmarins/graphql-ufc-api) wher
 ## How do I get the docker image ID?
 
 Run `docker image ls`.
+
+## I'm using a schema.graphql file but it's not working?
+
+A `graphql` file is similar but not the same as an `sdl` file. Try changing your `graphql` file to `sdl` and rebuild the image.

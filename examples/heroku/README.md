@@ -47,7 +47,3 @@ Shoutout to [graphql-ufc-api](https://github.com/jgcmarins/graphql-ufc-api) wher
 ## How do I get the docker image ID?
 
 Run `docker image ls`.
-
-## I'm using a schema.graphql file but it's not working?
-
-A `graphql` file is similar but not the same as an `sdl` file. Try changing your `graphql` file to `sdl` and rebuild the image.

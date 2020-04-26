@@ -82,12 +82,12 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
   if (isMutation && isCompositeReturn && isPlainObject(resolved)) {
     const inputArg = args['input'];
     return {
-      ...resolved,
       ...(
         Object.keys(args).length === 1 && isPlainObject(inputArg)
           ? inputArg
           : args
       ),
+      ...resolved
     };
   }
 

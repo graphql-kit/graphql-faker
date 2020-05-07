@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon -e ts --exec ts-node src/index.ts",
+    "start": "nodemon src/index.ts",
     "debug": "ts-node --inspect --compilerOptions '{\"inlineSources\":true}' src/index.ts",
     "build:editor": "cd src/editor && yarn && npm run build && cd ../..",
     "build:typescript": "tsc",

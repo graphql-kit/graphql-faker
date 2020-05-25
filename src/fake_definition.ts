@@ -94,6 +94,8 @@ enum fake__Types {
 
   "An image url. Configure image with options: \`imageCategory\`, \`imageWidth\`, \`imageHeight\` and \`randomizeImageUrl\`"
   imageUrl
+  "An unplash url. Configure image with options: \`searchTerm\`, \`imageWidth\` and \`imageHeight\`"
+  unplashUrl
   "An URL for an avatar"
   avatarUrl
   "Configure email provider with option: \`emailProvider\`"
@@ -171,14 +173,16 @@ input fake__options {
   maxMoney: Float
   "Only for type \`money\`"
   decimalPlaces: Int
-  "Only for type \`imageUrl\`"
+  "Only for types \`imageUrl\`, \`unplashUrl\`"
   imageWidth: Int
-  "Only for type \`imageUrl\`"
+  "Only for types \`imageUrl\`, \`unplashUrl\`"
   imageHeight: Int
   "Only for type \`imageUrl\`"
   imageCategory: fake__imageCategory
   "Only for type \`imageUrl\`"
   randomizeImageUrl: Boolean
+  "Only for type \`unplashUrl\`"
+  searchTerm: String
   "Only for type \`email\`"
   emailProvider: String
   "Only for type \`password\`"

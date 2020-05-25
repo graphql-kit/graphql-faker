@@ -120,6 +120,15 @@ const fakeFunctions = {
       faker.image.imageUrl(width, height, category, randomize, false),
   },
 
+  unplashUrl: {
+    args: ['imageWidth', 'imageHeight', 'searchTerm'],
+    func: (width, height, searchTerm) => {
+      const dimensionQuery = width && height ? `/${width}x${height}` : '';
+      const searchQuery = searchTerm ? `/?${searchTerm}` : '';
+      return `https://source.unsplash.com/random${dimensionQuery}${searchQuery}`;
+    }
+  },
+
   // Internet section
   avatarUrl: () => faker.internet.avatar(),
   email: {

@@ -110,7 +110,7 @@ const fakeFunctions = {
   bankIdentifierCode: () => faker.finance.bic(),
 
   // Hacker section
-  hackerAbbr: () => faker.hacker.itAbbr(),
+  hackerAbbreviation: () => faker.hacker.abbreviation(),
   hackerPhrase: () => faker.hacker.phrase(),
 
   // Image section

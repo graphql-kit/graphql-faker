@@ -89,7 +89,7 @@ enum fake__Types {
   internationalBankAccountNumber
   bankIdentifierCode
 
-  hackerAbbr
+  hackerAbbreviation
   hackerPhrase
 
   "An image url. Configure image with options: \`imageCategory\`, \`imageWidth\`, \`imageHeight\` and \`randomizeImageUrl\`"

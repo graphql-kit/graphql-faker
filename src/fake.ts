@@ -22,6 +22,13 @@ function toBase64(str) {
   return Buffer.from(str).toString('base64');
 }
 
+function formatDate(date, dateFormat) {
+  if (dateFormat == null) {
+    return date;
+  }
+  return moment(date).format(dateFormat);
+}
+
 const fakeFunctions = {
   // Address section
   zipCode: () => faker.address.zipCode(),
@@ -76,33 +83,22 @@ const fakeFunctions = {
   dbEngine: () => faker.database.engine(),
 
   // Date section
+  date: {
+    args: ['dateFormat', 'dateFrom', 'dateTo'],
+    func: (dateFormat, dateFrom, dateTo) =>
+      formatDate(faker.date.between(dateFrom, dateTo), dateFormat),
+  },
   pastDate: {
     args: ['dateFormat'],
-    func: (dateFormat) => {
-      const date = faker.date.past()
-      return (dateFormat !== undefined ? moment(date).format(dateFormat) : date)
-    }
+    func: dateFormat => formatDate(faker.date.past(), dateFormat),
   },
   futureDate: {
     args: ['dateFormat'],
-    func: (dateFormat) => {
-      const date = faker.date.future()
-      return (dateFormat !== undefined ? moment(date).format(dateFormat) : date)
-    }
+    func: dateFormat => formatDate(faker.date.future(), dateFormat),
   },
   recentDate: {
     args: ['dateFormat'],
-    func: (dateFormat) => {
-      const date = faker.date.recent()
-      return (dateFormat !== undefined ? moment(date).format(dateFormat) : date)
-    }
-  },
-  betweenDate: {
-    args: ['dateFormat', 'date1', 'date2'],
-    func: (dateFormat, date1 = '2000-01-01', date2 = '2030-12-31') => {
-      const date = faker.date.between(date1, date2);
-      return (dateFormat !== undefined ? moment(date).format(dateFormat) : date);
-    }
+    func: dateFormat => formatDate(faker.date.recent(), dateFormat),
   },
 
   // Finance section

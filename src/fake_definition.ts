@@ -73,14 +73,17 @@ enum fake__Types {
   dbCollation
   dbEngine
 
+  """
+  By default returns dates beetween 2000-01-01 and 2030-01-01.
+  Configure date format with options \`dateFormat\` \`dateFrom\` \`dateTo\`.
+  """
+  date
   "Configure date format with option \`dateFormat\`"
   pastDate
   "Configure date format with option \`dateFormat\`"
   futureDate
   "Configure date format with option \`dateFormat\`"
   recentDate
-  "Configure date format with options \`dateFormat\` \`date1\` \`date2\`"
-  betweenDate
 
   financeAccountName
   financeTransactionType
@@ -189,10 +192,10 @@ input fake__options {
   loremSize: fake__loremSize
   "Only for types \`*Date\`. Example value: \`YYYY MM DD\`. [Full Specification](http://momentjs.com/docs/#/displaying/format/)"
   dateFormat: String
-  "Only for types \`*Date\`. Example value: \`YYYY-MM-DD\`. Default 2000-01-01"
-  date1: String
-  "Only for types \`*Date\`. Example value: \`YYYY-MM-DD\`. Default 2030-01-01"
-  date2: String
+  "Only for types \`betweenDate\`. Example value: \`1986-11-02\`."
+  dateFrom: String = "2010-01-01"
+  "Only for types \`betweenDate\`. Example value: \`2038-01-19\`."
+  dateTo: String = "2030-01-01"
   "Only for type \`colorHex\`. [Details here](https://stackoverflow.com/a/43235/4989887)"
   baseColor: fake__color = { red255: 0, green255: 0, blue255: 0 }
   "Only for type \`number\`"

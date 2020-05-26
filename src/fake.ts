@@ -97,6 +97,13 @@ const fakeFunctions = {
       return (dateFormat !== undefined ? moment(date).format(dateFormat) : date)
     }
   },
+  betweenDate: {
+    args: ['dateFormat', 'date1', 'date2'],
+    func: (dateFormat, date1 = '2000-01-01', date2 = '2030-12-31') => {
+      const date = faker.date.between(date1, date2);
+      return (dateFormat !== undefined ? moment(date).format(dateFormat) : date);
+    }
+  },
 
   // Finance section
   financeAccountName: () => faker.finance.accountName(),

@@ -79,6 +79,8 @@ enum fake__Types {
   futureDate
   "Configure date format with option \`dateFormat\`"
   recentDate
+  "Configure date format with options \`dateFormat\` \`date1\` \`date2\`"
+  betweenDate
 
   financeAccountName
   financeTransactionType
@@ -187,6 +189,10 @@ input fake__options {
   loremSize: fake__loremSize
   "Only for types \`*Date\`. Example value: \`YYYY MM DD\`. [Full Specification](http://momentjs.com/docs/#/displaying/format/)"
   dateFormat: String
+  "Only for types \`*Date\`. Example value: \`YYYY-MM-DD\`. Default 2000-01-01"
+  date1: String
+  "Only for types \`*Date\`. Example value: \`YYYY-MM-DD\`. Default 2030-01-01"
+  date2: String
   "Only for type \`colorHex\`. [Details here](https://stackoverflow.com/a/43235/4989887)"
   baseColor: fake__color = { red255: 0, green255: 0, blue255: 0 }
   "Only for type \`number\`"

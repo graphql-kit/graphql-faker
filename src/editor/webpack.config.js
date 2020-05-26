@@ -67,6 +67,6 @@ module.exports = {
       allChunks: true,
     }),
     // Workaround for https://github.com/graphql/graphql-language-service/issues/128
-    new webpack.IgnorePlugin(/\.js\.flow$/, /graphql-language-service-interface[\\/]dist$/)
+    new webpack.IgnorePlugin(/\.js\.flow$/, /graphql-language-service-interface[\\/]dist$/),
   ],
 };

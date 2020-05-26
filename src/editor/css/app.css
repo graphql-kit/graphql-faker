@@ -1,5 +1,6 @@
 body {
-  font-family: system, -apple-system, 'San Francisco', '.SFNSDisplay-Regular', 'Segoe UI', Segoe, 'Segoe WP', 'Helvetica Neue', helvetica, 'Lucida Grande', arial, sans-serif;
+  font-family: system, -apple-system, 'San Francisco', '.SFNSDisplay-Regular', 'Segoe UI', Segoe,
+    'Segoe WP', 'Helvetica Neue', helvetica, 'Lucida Grande', arial, sans-serif;
 }
 
 .faker-editor-container {
@@ -49,7 +50,7 @@ nav li.-active {
   background-color: rgba(255, 255, 255, 0.2);
 }
 nav li.-active::after {
-  content: "";
+  content: '';
   display: block;
   position: absolute;
   top: 0;
@@ -63,26 +64,27 @@ nav li:hover {
 }
 
 nav li.-dirty::before {
-  content: "*";
+  content: '*';
   color: white;
   font-weight: bold;
   position: absolute;
   right: 10px;
 }
 
-nav li.-disabled, nav li.-disabled:hover {
+nav li.-disabled,
+nav li.-disabled:hover {
   cursor: default;
   background: transparent;
 }
 
-nav li.-disabled path, nav li.-disabled:hover path {
+nav li.-disabled path,
+nav li.-disabled:hover path {
   fill: rgba(255, 255, 255, 0.2);
 }
 
 nav li.-pulldown {
   margin-top: auto;
 }
-
 
 nav li.-link {
   padding: 0;
@@ -93,11 +95,9 @@ nav li.-link > a {
   padding: 15px 14px 15px 10px;
 }
 
-
 nav > .logo {
   padding: 5px;
 }
-
 
 .editor-container {
   display: flex;
@@ -133,19 +133,20 @@ nav > .logo {
   border-width: 0;
   outline: none;
   border-radius: 2px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 
   background-color: #1c5a15;
   color: #ecf0f1;
 
-  transition: background-color .3s;
+  transition: background-color 0.3s;
   cursor: pointer;
   text-transform: uppercase;
   user-select: none;
   letter-spacing: 2px;
 }
 
-.material-button:hover, .material-button:focus {
+.material-button:hover,
+.material-button:focus {
   background-color: #2c6a25;
 }
 
@@ -159,14 +160,14 @@ nav > .logo {
 }
 
 .material-button:active:before {
-  content: "";
+  content: '';
 
   position: absolute;
   top: 0;
   left: 0;
 
   display: block;
-  background-color: rgba(0, 0, 0, .2);
+  background-color: rgba(0, 0, 0, 0.2);
   height: 100%;
   width: 100%;
 }

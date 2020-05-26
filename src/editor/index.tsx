@@ -36,17 +36,12 @@ function buildSchema(sdl, extensionSDL?) {
   const userSDL = mergeWithFakeDefinitions(parseSDL(sdl));
   const schema = buildASTSchema(userSDL, { commentDescriptions: true });
   if (extensionSDL) {
-    return extendSchema(
-      schema,
-      parseSDL(extensionSDL),
-      { commentDescriptions: true }
-    );
+    return extendSchema(schema, parseSDL(extensionSDL), { commentDescriptions: true });
   }
   return schema;
 }
 
 class FakeEditor extends React.Component<any, FakeEditorState> {
-
   constructor(props) {
     super(props);
 
@@ -65,8 +60,8 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
 
   componentDidMount() {
     this.fetcher('/user-sdl')
-      .then(response => response.json())
-      .then(SDLs => {
+      .then((response) => response.json())
+      .then((SDLs) => {
         this.updateValue(SDLs);
       });
 
@@ -76,7 +71,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   }
 
   fetcher(url, options = {}) {
-    const baseUrl = '..'
+    const baseUrl = '..';
     return fetch(baseUrl + url, {
       credentials: 'include',
       ...options,
@@ -88,7 +83,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(graphQLParams),
-    }).then(response => response.json());
+    }).then((response) => response.json());
   }
 
   updateValue({ userSDL, remoteSDL }) {
@@ -119,7 +114,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   updateIdl(value, noError = false) {
     try {
       const schema = this.buildSchema(value);
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         ...prevState,
         schema,
         error: null,
@@ -127,16 +122,16 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       return true;
     } catch (e) {
       if (noError) return;
-      this.setState(prevState => ({ ...prevState, error: e.message }));
+      this.setState((prevState) => ({ ...prevState, error: e.message }));
       return false;
     }
   }
 
   setStatus(status, delay) {
-    this.setState(prevState => ({ ...prevState, status: status }));
+    this.setState((prevState) => ({ ...prevState, status: status }));
     if (!delay) return;
     setTimeout(() => {
-      this.setState(prevState => ({ ...prevState, status: null }));
+      this.setState((prevState) => ({ ...prevState, status: null }));
     }, delay);
   }
 
@@ -146,10 +141,10 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
 
     if (!this.updateIdl(value)) return;
 
-    this.postSDL(value).then(res => {
+    this.postSDL(value).then((res) => {
       if (res.ok) {
         this.setStatus('Saved!', 2000);
-        return this.setState(prevState => ({
+        return this.setState((prevState) => ({
           ...prevState,
           cachedValue: value,
           dirty: false,
@@ -157,8 +152,8 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
           error: null,
         }));
       } else {
-        res.text().then(errorMessage => {
-          return this.setState(prevState => ({
+        res.text().then((errorMessage) => {
+          return this.setState((prevState) => ({
             ...prevState,
             error: errorMessage,
           }));
@@ -168,7 +163,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   };
 
   switchTab(tab) {
-    this.setState(prevState => ({ ...prevState, activeTab: tab }));
+    this.setState((prevState) => ({ ...prevState, activeTab: tab }));
   }
 
   onEdit = (val) => {
@@ -176,9 +171,9 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     let dirtySchema = null as GraphQLSchema | null;
     try {
       dirtySchema = this.buildSchema(val);
-    } catch(_) { }
+    } catch (_) {}
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       ...prevState,
       value: val,
       dirty: val !== this.state.cachedValue,
@@ -187,7 +182,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   };
 
   render() {
-    let { value, activeTab, schema , dirty, dirtySchema } = this.state;
+    let { value, activeTab, schema, dirty, dirtySchema } = this.state;
     return (
       <div className="faker-editor-container">
         <nav>
@@ -240,10 +235,11 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
             />
             <div className="action-panel">
               <a
-                className={classNames("material-button", {
+                className={classNames('material-button', {
                   '-disabled': !dirty,
                 })}
-                onClick={this.saveUserSDL}>
+                onClick={this.saveUserSDL}
+              >
                 <span> Save </span>
               </a>
               <div className="status-bar">
@@ -258,7 +254,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
             })}
           >
             {this.state.schema && (
-              <GraphiQL fetcher={e => this.graphQLFetcher(e)} schema={this.state.schema} />
+              <GraphiQL fetcher={(e) => this.graphQLFetcher(e)} schema={this.state.schema} />
             )}
           </div>
         </div>

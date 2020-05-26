@@ -8,44 +8,47 @@ type Options = {
   extendURL: string | undefined;
   headers: { [key: string]: string };
   forwardHeaders: [string];
-}
+};
 
 function builder(cmd) {
   return cmd
     .positional('SDLFile', {
-      describe: 'path to file with SDL. If this argument is omitted Faker uses default file name',
+      describe:
+        'path to file with SDL. If this argument is omitted Faker uses default file name',
       type: 'string',
       nargs: 1,
     })
     .options({
-      'port': {
+      port: {
         alias: 'p',
         describe: 'HTTP Port',
         type: 'number',
         requiresArg: true,
         default: process.env.PORT || 9002,
       },
-      'open': {
+      open: {
         alias: 'o',
         describe: 'Open page with SDL editor and GraphiQL in browser',
         type: 'boolean',
       },
       'cors-origin': {
         alias: 'co',
-        describe: 'CORS: Specify the custom origin for the Access-Control-Allow-Origin header, by default it is the same as `Origin` header from the request',
+        describe:
+          'CORS: Specify the custom origin for the Access-Control-Allow-Origin header, by default it is the same as `Origin` header from the request',
         type: 'string',
         requiresArg: true,
         default: true,
       },
-      'extend': {
+      extend: {
         alias: 'e',
         describe: 'URL to existing GraphQL server to extend',
         type: 'string',
         requiresArg: true,
       },
-      'header': {
+      header: {
         alias: 'H',
-        describe: 'Specify headers to the proxied server in cURL format, e.g.: "Authorization: bearer XXXXXXXXX"',
+        describe:
+          'Specify headers to the proxied server in cURL format, e.g.: "Authorization: bearer XXXXXXXXX"',
         array: true,
         type: 'string',
         requiresArg: true,
@@ -60,12 +63,13 @@ function builder(cmd) {
         },
       },
       'forward-headers': {
-        describe: 'Specify which headers should be forwarded to the proxied server',
+        describe:
+          'Specify which headers should be forwarded to the proxied server',
         array: true,
         type: 'string',
         implies: 'extend',
         coerce(arr) {
-          return arr.map(str => str.toLowerCase());
+          return arr.map((str) => str.toLowerCase());
         },
       },
     })
@@ -74,10 +78,7 @@ function builder(cmd) {
 }
 
 export function parseCLI(commandCB: (options: Options) => void) {
-  yargs
-    .usage('$0 [SDLFile]', '', builder, handler)
-    .help('h')
-    .alias('h', 'help')
+  yargs.usage('$0 [SDLFile]', '', builder, handler).help('h').alias('h', 'help')
     .argv;
 
   function handler(argv) {

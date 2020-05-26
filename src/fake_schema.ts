@@ -15,11 +15,16 @@ import {
   getDirectiveValues,
 } from 'graphql';
 
-import { getRandomInt, getRandomItem, stdScalarFakers, fakeValue } from './fake';
+import {
+  getRandomInt,
+  getRandomItem,
+  stdScalarFakers,
+  fakeValue,
+} from './fake';
 
 type FakeArgs = {
   type: string;
-  options: {[key: string]: any};
+  options: { [key: string]: any };
   locale: string;
 };
 type ExamplesArgs = {
@@ -82,12 +87,10 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
   if (isMutation && isCompositeReturn && isPlainObject(resolved)) {
     const inputArg = args['input'];
     return {
-      ...(
-        Object.keys(args).length === 1 && isPlainObject(inputArg)
-          ? inputArg
-          : args
-      ),
-      ...resolved
+      ...(Object.keys(args).length === 1 && isPlainObject(inputArg)
+        ? inputArg
+        : args),
+      ...resolved,
     };
   }
 
@@ -104,14 +107,17 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
         .map(() => fakeValueOfType(type.ofType));
     }
 
-    const valueCB = getExampleValueCB(fieldDef) || getFakeValueCB(fieldDef) ||
-        getExampleValueCB(type) || getFakeValueCB(type);
+    const valueCB =
+      getExampleValueCB(fieldDef) ||
+      getFakeValueCB(fieldDef) ||
+      getExampleValueCB(type) ||
+      getFakeValueCB(type);
 
     if (isLeafType(type)) {
       if (valueCB) {
         return valueCB();
       }
-      return fakeLeafValueCB(type)
+      return fakeLeafValueCB(type);
     } else {
       // TODO: error on fake directive
       const __typename: string = isAbstractType(type)
@@ -146,7 +152,7 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
 
 function fakeLeafValueCB(type: GraphQLLeafType) {
   if (isEnumType(type)) {
-    const values = type.getValues().map(x => x.value);
+    const values = type.getValues().map((x) => x.value);
     return getRandomItem(values);
   }
 
@@ -175,7 +181,9 @@ function getDirectiveArgs(directive, object): DirectiveArgs {
 }
 
 function isPlainObject(maybeObject) {
-  return typeof maybeObject === 'object' &&
+  return (
+    typeof maybeObject === 'object' &&
     maybeObject !== null &&
-    !Array.isArray(maybeObject);
+    !Array.isArray(maybeObject)
+  );
 }

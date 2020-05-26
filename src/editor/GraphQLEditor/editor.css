@@ -4,12 +4,7 @@
 
 .graphql-editor .CodeMirror {
   color: #141823;
-  font-family:
-    'Consolas',
-    'Inconsolata',
-    'Droid Sans Mono',
-    'Monaco',
-    monospace;
+  font-family: 'Consolas', 'Inconsolata', 'Droid Sans Mono', 'Monaco', monospace;
   font-size: 13px;
   height: 100%;
 }
@@ -22,7 +17,8 @@
   box-orient: vertical;
   color: #141823;
   display: flex;
-  font-family: system, -apple-system, 'San Francisco', '.SFNSDisplay-Regular', 'Segoe UI', Segoe, 'Segoe WP', 'Helvetica Neue', helvetica, 'Lucida Grande', arial, sans-serif;
+  font-family: system, -apple-system, 'San Francisco', '.SFNSDisplay-Regular', 'Segoe UI', Segoe,
+    'Segoe WP', 'Helvetica Neue', helvetica, 'Lucida Grande', arial, sans-serif;
   font-size: 13px;
   line-clamp: 3;
   line-height: 16px;
@@ -40,7 +36,7 @@
 }
 
 .CodeMirror-hint-information .infoType {
-  color: #CA9800;
+  color: #ca9800;
   cursor: pointer;
   display: inline;
   margin-right: 0.5em;
@@ -56,12 +52,14 @@
 }
 
 @keyframes insertionFade {
-  from, to {
+  from,
+  to {
     background: rgba(255, 255, 255, 0);
     border-color: rgba(255, 255, 255, 0);
   }
 
-  15%, 85% {
+  15%,
+  85% {
     background: #fbffc9;
     border-color: #f0f3c0;
   }
@@ -73,19 +71,8 @@ div.CodeMirror-lint-tooltip {
   border: 0;
   color: #141823;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-  font-family:
-    system,
-    -apple-system,
-    'San Francisco',
-    '.SFNSDisplay-Regular',
-    'Segoe UI',
-    Segoe,
-    'Segoe WP',
-    'Helvetica Neue',
-    helvetica,
-    'Lucida Grande',
-    arial,
-    sans-serif;
+  font-family: system, -apple-system, 'San Francisco', '.SFNSDisplay-Regular', 'Segoe UI', Segoe,
+    'Segoe WP', 'Helvetica Neue', helvetica, 'Lucida Grande', arial, sans-serif;
   font-size: 13px;
   line-height: 16px;
   max-width: 430px;
@@ -108,10 +95,8 @@ div.CodeMirror-lint-tooltip > * + * {
 .graphql-editor .CodeMirror-foldmarker {
   border-radius: 4px;
   background: #08f;
-  background: linear-gradient(#43A8FF, #0F83E8);
-  box-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.2),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(#43a8ff, #0f83e8);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   color: white;
   font-family: arial;
   font-size: 12px;
@@ -144,64 +129,63 @@ div.CodeMirror-lint-tooltip > * + * {
 
 /* Keyword */
 .cm-s-graphiql .cm-keyword {
-  color: #B11A04;
+  color: #b11a04;
 }
 
 /* OperationName, FragmentName */
 .cm-s-graphiql .cm-def {
-  color: #D2054E;
+  color: #d2054e;
 }
 
 /* FieldName */
 .cm-s-graphiql .cm-property {
-  color: #1F61A0;
+  color: #1f61a0;
 }
 
 /* FieldAlias */
 .cm-s-graphiql .cm-qualifier {
-  color: #1C92A9;
+  color: #1c92a9;
 }
 
 /* ArgumentName and ObjectFieldName */
 .cm-s-graphiql .cm-attribute {
-  color: #8B2BB9;
+  color: #8b2bb9;
 }
 
 /* Number */
 .cm-s-graphiql .cm-number {
-  color: #2882F9;
+  color: #2882f9;
 }
 
 /* String */
 .cm-s-graphiql .cm-string {
-  color: #D64292;
+  color: #d64292;
 }
 
 /* Boolean */
 .cm-s-graphiql .cm-builtin {
-  color: #D47509;
+  color: #d47509;
 }
 
 /* EnumValue */
 .cm-s-graphiql .cm-string-2 {
-  color: #0B7FC7;
+  color: #0b7fc7;
 }
 
 /* Variable */
 .cm-s-graphiql .cm-variable {
-  color: #397D13;
+  color: #397d13;
 }
 
 /* Directive */
 .cm-s-graphiql .cm-meta {
-  color: #B33086;
+  color: #b33086;
 }
 
 /* Type */
 .cm-s-graphiql .cm-atom {
-  color: #CA9800;
+  color: #ca9800;
 }
-
 
 /**
   Hint styling
@@ -256,20 +240,9 @@ li.CodeMirror-hint-active {
 .CodeMirror-hint-deprecation {
   background: #fffae8;
   box-shadow: inset 0 1px 1px -1px #bfb063;
-  color: #867F70;
-  font-family:
-    system,
-    -apple-system,
-    'San Francisco',
-    '.SFNSDisplay-Regular',
-    'Segoe UI',
-    Segoe,
-    'Segoe WP',
-    'Helvetica Neue',
-    helvetica,
-    'Lucida Grande',
-    arial,
-    sans-serif;
+  color: #867f70;
+  font-family: system, -apple-system, 'San Francisco', '.SFNSDisplay-Regular', 'Segoe UI', Segoe,
+    'Segoe WP', 'Helvetica Neue', helvetica, 'Lucida Grande', arial, sans-serif;
   font-size: 13px;
   line-height: 16px;
   margin-top: 4px;
@@ -299,7 +272,6 @@ li.CodeMirror-hint-active {
   margin-bottom: 0;
 }
 
-
 /**
   The lint marker gutter
 **/
@@ -319,27 +291,27 @@ li.CodeMirror-hint-active {
   overflow: hidden;
   padding: 2px 5px;
   position: fixed;
-  transition: opacity .4s;
+  transition: opacity 0.4s;
   white-space: pre-wrap;
   z-index: 100;
 }
 
-.CodeMirror-lint-mark-error, .CodeMirror-lint-mark-warning {
+.CodeMirror-lint-mark-error,
+.CodeMirror-lint-mark-warning {
   background-position: left bottom;
   background-repeat: repeat-x;
 }
 
 .CodeMirror-lint-mark-error {
-  background-image:
-  url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJDw4cOCW1/KIAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAHElEQVQI12NggIL/DAz/GdA5/xkY/qPKMDAwAADLZwf5rvm+LQAAAABJRU5ErkJggg==")
-  ;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJDw4cOCW1/KIAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAHElEQVQI12NggIL/DAz/GdA5/xkY/qPKMDAwAADLZwf5rvm+LQAAAABJRU5ErkJggg==');
 }
 
 .CodeMirror-lint-mark-warning {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJFhQXEbhTg7YAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAMklEQVQI12NkgIIvJ3QXMjAwdDN+OaEbysDA4MPAwNDNwMCwiOHLCd1zX07o6kBVGQEAKBANtobskNMAAAAASUVORK5CYII=");
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJFhQXEbhTg7YAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAMklEQVQI12NkgIIvJ3QXMjAwdDN+OaEbysDA4MPAwNDNwMCwiOHLCd1zX07o6kBVGQEAKBANtobskNMAAAAASUVORK5CYII=');
 }
 
-.CodeMirror-lint-marker-error, .CodeMirror-lint-marker-warning {
+.CodeMirror-lint-marker-error,
+.CodeMirror-lint-marker-warning {
   background-position: center center;
   background-repeat: no-repeat;
   cursor: pointer;
@@ -350,23 +322,27 @@ li.CodeMirror-hint-active {
   width: 16px;
 }
 
-.CodeMirror-lint-message-error, .CodeMirror-lint-message-warning {
+.CodeMirror-lint-message-error,
+.CodeMirror-lint-message-warning {
   background-position: top left;
   background-repeat: no-repeat;
   padding-left: 18px;
 }
 
-.CodeMirror-lint-marker-error, .CodeMirror-lint-message-error {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAHlBMVEW7AAC7AACxAAC7AAC7AAAAAAC4AAC5AAD///+7AAAUdclpAAAABnRSTlMXnORSiwCK0ZKSAAAATUlEQVR42mWPOQ7AQAgDuQLx/z8csYRmPRIFIwRGnosRrpamvkKi0FTIiMASR3hhKW+hAN6/tIWhu9PDWiTGNEkTtIOucA5Oyr9ckPgAWm0GPBog6v4AAAAASUVORK5CYII=");
+.CodeMirror-lint-marker-error,
+.CodeMirror-lint-message-error {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAHlBMVEW7AAC7AACxAAC7AAC7AAAAAAC4AAC5AAD///+7AAAUdclpAAAABnRSTlMXnORSiwCK0ZKSAAAATUlEQVR42mWPOQ7AQAgDuQLx/z8csYRmPRIFIwRGnosRrpamvkKi0FTIiMASR3hhKW+hAN6/tIWhu9PDWiTGNEkTtIOucA5Oyr9ckPgAWm0GPBog6v4AAAAASUVORK5CYII=');
 }
 
-.CodeMirror-lint-marker-warning, .CodeMirror-lint-message-warning {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAANlBMVEX/uwDvrwD/uwD/uwD/uwD/uwD/uwD/uwD/uwD6twD/uwAAAADurwD2tQD7uAD+ugAAAAD/uwDhmeTRAAAADHRSTlMJ8mN1EYcbmiixgACm7WbuAAAAVklEQVR42n3PUQqAIBBFUU1LLc3u/jdbOJoW1P08DA9Gba8+YWJ6gNJoNYIBzAA2chBth5kLmG9YUoG0NHAUwFXwO9LuBQL1giCQb8gC9Oro2vp5rncCIY8L8uEx5ZkAAAAASUVORK5CYII=");
+.CodeMirror-lint-marker-warning,
+.CodeMirror-lint-message-warning {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAANlBMVEX/uwDvrwD/uwD/uwD/uwD/uwD/uwD/uwD/uwD6twD/uwAAAADurwD2tQD7uAD+ugAAAAD/uwDhmeTRAAAADHRSTlMJ8mN1EYcbmiixgACm7WbuAAAAVklEQVR42n3PUQqAIBBFUU1LLc3u/jdbOJoW1P08DA9Gba8+YWJ6gNJoNYIBzAA2chBth5kLmG9YUoG0NHAUwFXwO9LuBQL1giCQb8gC9Oro2vp5rncCIY8L8uEx5ZkAAAAASUVORK5CYII=');
 }
 
 .CodeMirror-lint-marker-multiple {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAMAAADzjKfhAAAACVBMVEUAAAAAAAC/v7914kyHAAAAAXRSTlMAQObYZgAAACNJREFUeNo1ioEJAAAIwmz/H90iFFSGJgFMe3gaLZ0od+9/AQZ0ADosbYraAAAAAElFTkSuQmCC");
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAMAAADzjKfhAAAACVBMVEUAAAAAAAC/v7914kyHAAAAAXRSTlMAQObYZgAAACNJREFUeNo1ioEJAAAIwmz/H90iFFSGJgFMe3gaLZ0od+9/AQZ0ADosbYraAAAAAElFTkSuQmCC');
   background-position: right bottom;
   background-repeat: no-repeat;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
 }

@@ -8,14 +8,16 @@
     "node": ">= 8.x"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run prettier:check",
     "start": "nodemon src/index.ts",
     "debug": "ts-node --inspect --compilerOptions '{\"inlineSources\":true}' src/index.ts",
     "build:editor": "cd src/editor && yarn && npm run build && cd ../..",
     "build:typescript": "tsc",
     "copy:graphql": "cp src/*.graphql dist/",
     "copy:editor": "mkdir \"dist/editor\" && cp src/editor/*.{html,js,css,svg} dist/editor",
-    "build:all": "mkdir dist && npm run build:editor && npm run build:typescript && npm run copy:graphql && npm run copy:editor"
+    "build:all": "mkdir dist && npm run build:editor && npm run build:typescript && npm run copy:graphql && npm run copy:editor",
+    "prettier": "prettier --ignore-path .gitignore --write --list-different .",
+    "prettier:check": "prettier --ignore-path .gitignore --check ."
   },
   "repository": {
     "type": "git",
@@ -34,6 +36,7 @@
     "@types/faker": "4.1.6",
     "@types/yargs": "13.0.3",
     "nodemon": "1.19.4",
+    "prettier": "^2.0.5",
     "ts-node": "8.4.1",
     "typescript": "3.6.4"
   },

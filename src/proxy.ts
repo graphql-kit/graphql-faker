@@ -19,7 +19,7 @@ export function getProxyExecuteFn(url, headers, forwardHeaders) {
   return (args: ExecutionArgs) => {
     const { schema, document, contextValue, operationName } = args;
 
-    const request = (contextValue as Request);
+    const request = contextValue as Request;
     const proxyHeaders = Object.create(null);
     for (const name of forwardHeaders) {
       proxyHeaders[name] = request.headers[name];
@@ -40,7 +40,7 @@ export function getProxyExecuteFn(url, headers, forwardHeaders) {
       print(operationAST),
       args.variableValues,
       operationName,
-    ).then(result => proxyResponse(result, args));
+    ).then((result) => proxyResponse(result, args));
   };
 }
 
@@ -48,7 +48,7 @@ function proxyResponse(response, args) {
   const rootValue = response.data || {};
   const globalErrors = [];
 
-  for (const error of (response.errors || [])) {
+  for (const error of response.errors || []) {
     const { message, path, extensions } = error;
     const errorObj = new GraphQLError(
       message,
@@ -111,20 +111,26 @@ function injectTypename(node) {
 function stripExtensionFields(schema, operationAST) {
   const typeInfo = new TypeInfo(schema);
 
-  return visit(operationAST, visitWithTypeInfo(typeInfo, {
-    [Kind.FIELD]: () => {
-      const fieldDef = typeInfo.getFieldDef();
-      if (fieldDef.name.startsWith('__') || (fieldDef as any).isExtensionField)
-        return null;
-    },
-    [Kind.SELECTION_SET]: {
-      leave(node) {
-        const type = typeInfo.getParentType()
-        if (isAbstractType(type) || node.selections.length === 0)
-          return injectTypename(node);
-      }
-    },
-  }));
+  return visit(
+    operationAST,
+    visitWithTypeInfo(typeInfo, {
+      [Kind.FIELD]: () => {
+        const fieldDef = typeInfo.getFieldDef();
+        if (
+          fieldDef.name.startsWith('__') ||
+          (fieldDef as any).isExtensionField
+        )
+          return null;
+      },
+      [Kind.SELECTION_SET]: {
+        leave(node) {
+          const type = typeInfo.getParentType();
+          if (isAbstractType(type) || node.selections.length === 0)
+            return injectTypename(node);
+        },
+      },
+    }),
+  );
 }
 
 function removeUnusedVariables(documentAST) {
@@ -142,6 +148,6 @@ function removeUnusedVariables(documentAST) {
       if (!seenVariables[node.variable.name.value]) {
         return null;
       }
-    }
+    },
   });
 }

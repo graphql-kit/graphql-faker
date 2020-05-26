@@ -22,7 +22,7 @@ import * as React from 'react';
 type GraphQLEditorProps = {
   value: string;
   schema: GraphQLSchema | null;
-  onEdit: (val: string) => void,
+  onEdit: (val: string) => void;
   onCommand: () => void;
 };
 
@@ -67,7 +67,7 @@ export default class GraphQLEditor extends React.Component<GraphQLEditorProps> {
       },
       info: {
         schema,
-        renderDescription: text => marked(text, { sanitize: true }),
+        renderDescription: (text) => marked(text, { sanitize: true }),
       },
       jump: {
         schema,
@@ -106,7 +106,7 @@ export default class GraphQLEditor extends React.Component<GraphQLEditorProps> {
     return (
       <div
         className="graphql-editor"
-        ref={node => {
+        ref={(node) => {
           this._node = node;
         }}
       />
@@ -205,7 +205,7 @@ function onHasCompletion(cm, data, onHintInformationRender?) {
       let onRemoveFn;
       hintsUl.addEventListener(
         'DOMNodeRemoved',
-        (onRemoveFn = event => {
+        (onRemoveFn = (event) => {
           if (event.target === hintsUl) {
             hintsUl.removeEventListener('DOMNodeRemoved', onRemoveFn);
             information = null;
@@ -220,9 +220,7 @@ function onHasCompletion(cm, data, onHintInformationRender?) {
     const description = ctx.description
       ? marked(ctx.description, { sanitize: true })
       : 'Self descriptive.';
-    const type = ctx.type
-      ? '<span class="infoType">' + renderType(ctx.type) + '</span>'
-      : '';
+    const type = ctx.type ? '<span class="infoType">' + renderType(ctx.type) + '</span>' : '';
 
     information.innerHTML =
       '<div class="content">' +
@@ -232,11 +230,8 @@ function onHasCompletion(cm, data, onHintInformationRender?) {
       '</div>';
 
     if (ctx.isDeprecated) {
-      const reason = ctx.deprecationReason
-        ? marked(ctx.deprecationReason, { sanitize: true })
-        : '';
-      deprecation.innerHTML =
-        '<span class="deprecation-label">Deprecated</span>' + reason;
+      const reason = ctx.deprecationReason ? marked(ctx.deprecationReason, { sanitize: true }) : '';
+      deprecation.innerHTML = '<span class="deprecation-label">Deprecated</span>' + reason;
       deprecation.style.display = 'block';
     } else {
       deprecation.style.display = 'none';

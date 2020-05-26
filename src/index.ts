@@ -30,19 +30,25 @@ const log = console.log;
 
 parseCLI((options) => {
   const { extendURL, headers, forwardHeaders } = options;
-  const fileName = options.fileName ||
+  const fileName =
+    options.fileName ||
     (extendURL ? './schema_extension.faker.graphql' : './schema.faker.graphql');
 
   if (!options.fileName) {
-    log(chalk.yellow(`Default file ${chalk.magenta(fileName)} is used. ` +
-    `Specify [file] parameter to change.`));
+    log(
+      chalk.yellow(
+        `Default file ${chalk.magenta(fileName)} is used. ` +
+          `Specify [file] parameter to change.`,
+      ),
+    );
   }
 
   let userSDL = existsSync(fileName) && readSDL(fileName);
 
-  if (extendURL) { // run in proxy mode
+  if (extendURL) {
+    // run in proxy mode
     getRemoteSchema(extendURL, headers)
-      .then(schema => {
+      .then((schema) => {
         const remoteSDL = new Source(
           printSchema(schema),
           `Inrospection from "${extendURL}"`,
@@ -63,14 +69,17 @@ parseCLI((options) => {
         const executeFn = getProxyExecuteFn(extendURL, headers, forwardHeaders);
         runServer(options, userSDL, remoteSDL, executeFn);
       })
-      .catch(error => {
+      .catch((error) => {
         log(chalk.red(error.stack));
         process.exit(1);
       });
   } else {
     if (!userSDL) {
       userSDL = new Source(
-        fs.readFileSync(path.join(__dirname, 'default-schema.graphql'), 'utf-8'),
+        fs.readFileSync(
+          path.join(__dirname, 'default-schema.graphql'),
+          'utf-8',
+        ),
         fileName,
       );
     }
@@ -82,7 +91,7 @@ function runServer(
   options,
   userSDL: Source,
   remoteSDL?: Source,
-  customExecuteFn?
+  customExecuteFn?,
 ) {
   const { port, openEditor } = options;
   const corsOptions = {
@@ -92,13 +101,19 @@ function runServer(
   const app = express();
 
   app.options('/graphql', cors(corsOptions));
-  app.use('/graphql', cors(corsOptions), graphqlHTTP(() => ({
-    schema: remoteSDL ? buildSchema(remoteSDL, userSDL) : buildSchema(userSDL),
-    typeResolver: fakeTypeResolver,
-    fieldResolver: fakeFieldResolver,
-    customExecuteFn,
-    graphiql: true,
-  })));
+  app.use(
+    '/graphql',
+    cors(corsOptions),
+    graphqlHTTP(() => ({
+      schema: remoteSDL
+        ? buildSchema(remoteSDL, userSDL)
+        : buildSchema(userSDL),
+      typeResolver: fakeTypeResolver,
+      fieldResolver: fakeFieldResolver,
+      customExecuteFn,
+      graphiql: true,
+    })),
+  );
 
   app.get('/user-sdl', (_, res) => {
     res.status(200).json({
@@ -107,19 +122,23 @@ function runServer(
     });
   });
 
-  app.use('/user-sdl', bodyParser.text({limit: '8mb'}));
+  app.use('/user-sdl', bodyParser.text({ limit: '8mb' }));
   app.post('/user-sdl', (req, res) => {
     try {
       const fileName = userSDL.name;
       fs.writeFileSync(fileName, req.body);
       userSDL = new Source(req.body, fileName);
 
-      const date = (new Date()).toLocaleString();
-      log(`${chalk.green('✚')} schema saved to ${chalk.magenta(fileName)} on ${date}`);
+      const date = new Date().toLocaleString();
+      log(
+        `${chalk.green('✚')} schema saved to ${chalk.magenta(
+          fileName,
+        )} on ${date}`,
+      );
 
       res.status(200).send('ok');
-    } catch(err) {
-      res.status(500).send(err.message)
+    } catch (err) {
+      res.status(500).send(err.message);
     }
   });
 

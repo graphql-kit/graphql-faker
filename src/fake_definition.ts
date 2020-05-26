@@ -233,7 +233,7 @@ export function mergeWithFakeDefinitions(
   // tools, see: https://github.com/APIs-guru/graphql-faker/issues/75
   const filteredAST = {
     ...schemaAST,
-    definitions: schemaAST.definitions.filter(def => {
+    definitions: schemaAST.definitions.filter((def) => {
       const name = defToName(def);
       return name === '' || !fakeDefinitionsSet.has(name);
     }),

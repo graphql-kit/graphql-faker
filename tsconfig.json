@@ -15,11 +15,5 @@
     "lib": ["es2017"]
   },
   "compileOnSave": false,
-  "exclude": [
-    "src/editor",
-    "node_modules",
-    ".tmp",
-    "dist",
-    "lib"
-  ]
+  "exclude": ["src/editor", "node_modules", ".tmp", "dist", "lib"]
 }

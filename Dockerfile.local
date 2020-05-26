@@ -1,0 +1,13 @@
+FROM node:8.8.1-alpine
+
+RUN apk --no-cache update && \
+    apk --no-cache add gettext ca-certificates && \
+    rm -rf /var/cache/apk/*
+
+WORKDIR /workdir
+COPY ./ ./
+
+RUN yarn
+ENTRYPOINT ["npm", "start"]
+
+EXPOSE 9002

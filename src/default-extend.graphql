@@ -10,7 +10,7 @@
 #
 # Developed with ❤️ by APIs.guru | https://github.com/APIs-guru/graphql-faker
 
-extend type <RootTypeName> {
+extend type ___RootTypeName___ {
   pet: Pet
   pets: [Pet] @listLength(min: 1, max: 10)
 }

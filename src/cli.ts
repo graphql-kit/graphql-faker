@@ -3,6 +3,11 @@ import * as yargs from 'yargs';
 type Options = {
   fileName: string | undefined;
   port: number;
+  hostname: string,
+  tlsKeyFile: string,
+  tlsCert: string,
+  tlsCaCert: string,
+  useHttps: boolean,
   corsOrigin: string | true;
   openEditor: boolean;
   extendURL: string | undefined;
@@ -25,6 +30,42 @@ function builder(cmd) {
         requiresArg: true,
         default: process.env.PORT || 9002,
       },
+      	// Start of CLI params for HTTPS		
+		'hostname': {
+      alias: 'ho',
+      describe: 'Host/Server Name',
+      type: 'string',
+      requiresArg: true,
+      default: process.env.GQLF_HOSTNAME || 'localhost',
+  },
+'tlskeyfile': {
+      alias: 'tk',
+      describe: 'Path to the private key file for the TLS certificate',
+      type: 'string',
+      requiresArg: true,
+      default: process.env.GQLF_KEY || "missing",
+  },
+'tlscert': {
+      alias: 'tc',
+      describe: 'Path to the TLS certificate file',
+      type: 'string',
+      requiresArg: true,
+      default: process.env.GQLF_CERT || "missing",
+  },
+'tlscacert': {
+      alias: 'tca',
+      describe: 'Path to the issuing CA TLS certificate',
+      type: 'string',
+      requiresArg: true,
+      default: process.env.GQLF_CACERT || "missing",
+  },
+'https': {
+alias: 's',
+      describe: 'Use TLS encryption. Requires key, cert, and cacert.',
+      type: 'boolean',
+default: process.env.GQLF_HTTPS || false,
+  },
+// End of CLI params for HTTPS
       'open': {
         alias: 'o',
         describe: 'Open page with SDL editor and GraphiQL in browser',
@@ -84,6 +125,14 @@ export function parseCLI(commandCB: (options: Options) => void) {
     commandCB({
       fileName: argv.SDLFile,
       port: argv.port,
+
+
+			// https params
+			hostname: argv.hostname,
+			tlsKeyFile: argv['tlskeyfile'],
+			tlsCert: argv['tlscert'],
+			tlsCaCert: argv['tlscacert'],
+			useHttps: argv.https,
       corsOrigin: argv['cors-origin'],
       openEditor: argv.open,
       extendURL: argv.extend,

@@ -120,7 +120,7 @@ const fakeFunctions = {
       faker.image.imageUrl(width, height, category, randomize, false),
   },
 
-  unplashUrl: {
+  unsplashUrl: {
     args: ['imageWidth', 'imageHeight', 'searchTerm'],
     func: (width, height, searchTerm) => {
       const dimensionQuery = width && height ? `/${width}x${height}` : '';

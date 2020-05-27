@@ -136,20 +136,9 @@ enum fake__Types {
   semver
 }
 
-enum fake__imageCategory {
-  abstract
-  animals
-  business
-  cats
-  city
-  food
-  nightlife
-  fashion
-  people
-  nature
-  sports
-  technics
-  transport
+input fake__imageSize {
+  width: Int!
+  height: Int!
 }
 
 enum fake__loremSize {
@@ -177,11 +166,9 @@ input fake__options {
   "Only for type \`money\`"
   decimalPlaces: Int
   "Only for type \`imageUrl\`"
-  imageWidth: Int
-  "Only for type \`imageUrl\`"
-  imageHeight: Int
-  "Only for type \`imageUrl\`"
-  imageCategory: fake__imageCategory
+  imageSize: fake__imageSize
+  "Only for type \`imageUrl\`. Example value: \`[\\"nature\\", \\"water\\"]\`."
+  imageKeywords: [String!]
   "Only for type \`imageUrl\`"
   randomizeImageUrl: Boolean
   "Only for type \`email\`"

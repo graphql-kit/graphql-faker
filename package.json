@@ -15,7 +15,7 @@
     "build:typescript": "tsc",
     "copy:graphql": "cp src/*.graphql dist/",
     "copy:editor": "mkdir \"dist/editor\" && cp src/editor/*.{html,js,css,svg} dist/editor",
-    "build:all": "mkdir dist && npm run build:editor && npm run build:typescript && npm run copy:graphql && npm run copy:editor",
+    "build:all": "rm -rf dist && mkdir dist && npm run build:editor && npm run build:typescript && npm run copy:graphql && npm run copy:editor",
     "prettier": "prettier --ignore-path .gitignore --write --list-different .",
     "prettier:check": "prettier --ignore-path .gitignore --check ."
   },

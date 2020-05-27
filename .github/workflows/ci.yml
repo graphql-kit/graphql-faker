@@ -19,3 +19,4 @@ jobs:
 
       - name: Build package
         run: npm run build:all
+        shell: bash

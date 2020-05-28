@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { IncomingMessage } from 'http';
 import {
   Kind,
   print,
@@ -19,7 +19,7 @@ export function getProxyExecuteFn(url, headers, forwardHeaders) {
   return (args: ExecutionArgs) => {
     const { schema, document, contextValue, operationName } = args;
 
-    const request = contextValue as Request;
+    const request = contextValue as IncomingMessage;
     const proxyHeaders = Object.create(null);
     for (const name of forwardHeaders) {
       proxyHeaders[name] = request.headers[name];

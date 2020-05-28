@@ -15,7 +15,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as express from 'express';
 import * as graphqlHTTP from 'express-graphql';
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 import * as open from 'open';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';

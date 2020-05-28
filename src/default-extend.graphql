@@ -17,5 +17,5 @@ extend type ___RootTypeName___ {
 
 type Pet {
   name: String @fake(type: firstName)
-  image: String @fake(type:imageUrl, options: { imageKeywords: ["cats"] })
+  image: String @fake(type: imageUrl, options: { imageKeywords: ["cats"] })
 }

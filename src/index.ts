@@ -145,8 +145,16 @@ function runServer(
 
   app.use('/editor', express.static(path.join(__dirname, 'editor')));
   app.use('/voyager', voyagerMiddleware({ endpointUrl: '/graphql' }));
-  app.use('/voyager.worker.js', express.static(path.join(__dirname, '../node_modules/graphql-voyager/dist/voyager.worker.js')));
-  
+  app.use(
+    '/voyager.worker.js',
+    express.static(
+      path.join(
+        __dirname,
+        '../node_modules/graphql-voyager/dist/voyager.worker.js',
+      ),
+    ),
+  );
+
   const server = app.listen(port);
 
   const shutdown = () => {

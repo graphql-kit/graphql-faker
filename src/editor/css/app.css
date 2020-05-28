@@ -200,6 +200,6 @@ nav > .logo {
   display: none;
 }
 
-.tab-content .graphql-voyager>.menu-content {
+.tab-content .graphql-voyager > .menu-content {
   left: 435px;
 }

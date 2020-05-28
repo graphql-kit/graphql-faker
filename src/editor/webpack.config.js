@@ -20,6 +20,7 @@ module.exports = {
     proxy: {
       '/user-sdl': 'http://localhost:9002',
       '/graphql': 'http://localhost:9002',
+      '/voyager.worker.js': 'http://localhost:9002',
     },
   },
   resolve: {

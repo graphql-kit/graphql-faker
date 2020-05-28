@@ -25,6 +25,7 @@ import { getProxyExecuteFn } from './proxy';
 import { mergeWithFakeDefinitions } from './fake_definition';
 import { existsSync, readSDL, getRemoteSchema } from './utils';
 import { fakeTypeResolver, fakeFieldResolver } from './fake_schema';
+import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 
 const log = console.log;
 
@@ -143,7 +144,9 @@ function runServer(
   });
 
   app.use('/editor', express.static(path.join(__dirname, 'editor')));
-
+  app.use('/voyager', voyagerMiddleware({ endpointUrl: '/graphql' }));
+  app.use('/voyager.worker.js', express.static(path.join(__dirname, '../node_modules/graphql-voyager/dist/voyager.worker.js')));
+  
   const server = app.listen(port);
 
   const shutdown = () => {
@@ -159,6 +162,7 @@ function runServer(
 
   ${chalk.blue('❯')} Interactive Editor: http://localhost:${port}/editor
   ${chalk.blue('❯')} GraphQL API:        http://localhost:${port}/graphql
+  ${chalk.blue('❯')} GraphQL Voyager:    http://localhost:${port}/voyager
 
   `);
 

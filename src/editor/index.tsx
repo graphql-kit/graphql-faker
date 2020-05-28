@@ -2,6 +2,7 @@ import './css/app.css';
 import './css/codemirror.css';
 import './GraphQLEditor/editor.css';
 import 'graphiql/graphiql.css';
+import 'graphql-voyager/dist/voyager.css';
 
 import * as classNames from 'classnames';
 import * as GraphiQL from 'graphiql';
@@ -11,7 +12,9 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import GraphQLEditor from './GraphQLEditor/GraphQLEditor';
-import { ConsoleIcon, EditIcon, GithubIcon } from './icons';
+import { ConsoleIcon, EditIcon, GithubIcon, VoyagerIcon } from './icons';
+
+import {Voyager} from 'graphql-voyager';
 
 type FakeEditorState = {
   value: string | null;
@@ -213,6 +216,16 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
               {' '}
               <ConsoleIcon />{' '}
             </li>
+            <li
+              onClick={() => this.state.schema && this.switchTab(2)}
+              className={classNames({
+                '-disabled': !this.state.schema,
+                '-active': activeTab === 2,
+              })}
+            >
+              {' '}
+              <VoyagerIcon />{' '}
+            </li>
             <li className="-pulldown -link">
               <a href="https://github.com/APIs-guru/graphql-faker" target="_blank">
                 {' '}
@@ -255,6 +268,15 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
           >
             {this.state.schema && (
               <GraphiQL fetcher={(e) => this.graphQLFetcher(e)} schema={this.state.schema} />
+            )}
+          </div>
+          <div
+            className={classNames('tab-content', {
+              '-active': activeTab === 2,
+            })}
+          >
+            {this.state.schema && (
+              <Voyager introspection={e => this.graphQLFetcher({query: e})} hideSettings={activeTab !== 2} workerURI="/voyager.worker.js" />
             )}
           </div>
         </div>

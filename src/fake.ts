@@ -123,7 +123,7 @@ const fakeFunctions = {
       let url = 'https://source.unsplash.com/random/';
 
       if (size != null) {
-        url += `${size.width}x${size.height}/`
+        url += `${size.width}x${size.height}/`;
       }
 
       if (keywords != null && keywords.length > 0) {
@@ -131,7 +131,7 @@ const fakeFunctions = {
       }
 
       if (randomize === true) {
-        url += '#' + faker.random.number()
+        url += '#' + faker.random.number();
       }
 
       return url;

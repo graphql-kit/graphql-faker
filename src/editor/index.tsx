@@ -92,7 +92,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       cachedValue: userSDL,
       remoteSDL,
     });
-    this.updateIdl(userSDL, true);
+    this.updateSDL(userSDL, true);
   }
 
   postSDL(sdl) {
@@ -111,7 +111,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     }
   }
 
-  updateIdl(value, noError = false) {
+  updateSDL(value, noError = false) {
     try {
       const schema = this.buildSchema(value);
       this.setState((prevState) => ({
@@ -139,7 +139,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     let { value, dirty } = this.state;
     if (!dirty) return;
 
-    if (!this.updateIdl(value)) return;
+    if (!this.updateSDL(value)) return;
 
     this.postSDL(value).then((res) => {
       if (res.ok) {
@@ -167,7 +167,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   }
 
   onEdit = (val) => {
-    if (this.state.error) this.updateIdl(val);
+    if (this.state.error) this.updateSDL(val);
     let dirtySchema = null as GraphQLSchema | null;
     try {
       dirtySchema = this.buildSchema(val);

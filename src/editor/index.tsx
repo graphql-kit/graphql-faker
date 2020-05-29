@@ -4,7 +4,7 @@ import './GraphQLEditor/editor.css';
 import 'graphiql/graphiql.css';
 
 import * as classNames from 'classnames';
-import * as GraphiQL from 'graphiql';
+import GraphiQL from 'graphiql';
 import { buildASTSchema, extendSchema, GraphQLSchema, parse } from 'graphql';
 import { mergeWithFakeDefinitions } from '../fake_definition';
 import * as React from 'react';

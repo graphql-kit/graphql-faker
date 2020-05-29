@@ -6,7 +6,6 @@
     "target": "es5",
     "outDir": "dist",
     "moduleResolution": "node",
-    "allowJs": true,
     "lib": ["es2017", "dom"],
     "jsx": "react"
   },

@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import fetch from 'node-fetch';
+import * as fetch from 'node-fetch';
 import { Headers } from 'node-fetch';
 import {
   Source,

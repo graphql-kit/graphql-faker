@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "inlineSources": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "module": "commonjs",
@@ -8,7 +7,6 @@
     "noImplicitAny": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "sourceMap": true,
     "outDir": "dist",
     "pretty": true,
     "moduleResolution": "node",

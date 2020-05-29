@@ -40,10 +40,6 @@ No need to remember or read any docs. Autocompletion is included!
 
     npm install -g graphql-faker
 
-or
-
-    yarn global add graphql-faker
-
 or run it in a Docker container, see **Usage with Docker**
 
 ## TL;DR
@@ -104,7 +100,7 @@ Because the process is running inside of the container, `--open` does not work.
 # Development
 
 ```sh
-yarn
+npm i
 npm run build:all
 npm run start
 ```

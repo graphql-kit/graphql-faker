@@ -171,7 +171,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
 
   render() {
     let { value, activeTab, schema, dirty, dirtySchema } = this.state;
-    if (value == null) {
+    if (value == null || schema == null) {
       return <div className="faker-editor-container">Loading...</div>;
     }
 
@@ -196,9 +196,9 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
               <EditIcon />{' '}
             </li>
             <li
-              onClick={() => this.state.schema && this.switchTab(1)}
+              onClick={() => !dirty && this.switchTab(1)}
               className={classNames({
-                '-disabled': !this.state.schema,
+                '-disabled': dirty,
                 '-active': activeTab === 1,
               })}
             >

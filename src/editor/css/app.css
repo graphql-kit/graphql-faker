@@ -63,7 +63,7 @@ nav li:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-nav li.-dirty::before {
+nav li.-unsaved::before {
   content: '*';
   color: white;
   font-weight: bold;

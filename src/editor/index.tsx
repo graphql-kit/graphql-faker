@@ -17,11 +17,11 @@ type FakeEditorState = {
   value: string | null;
   cachedValue: string | null;
   activeTab: number;
-  dirty: boolean;
+  hasUnsavedChanges: boolean;
   error: string | null;
   status: string | null;
   schema: GraphQLSchema | null;
-  dirtySchema: GraphQLSchema | null;
+  unsavedSchema: GraphQLSchema | null;
   remoteSDL: string | null;
 };
 
@@ -33,8 +33,8 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       value: null,
       cachedValue: null,
       activeTab: 0,
-      dirty: false,
-      dirtySchema: null,
+      hasUnsavedChanges: false,
+      unsavedSchema: null,
       error: null,
       status: null,
       schema: null,
@@ -50,7 +50,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       });
 
     window.onbeforeunload = () => {
-      if (this.state.dirty) return 'You have unsaved changes. Exit?';
+      if (this.state.hasUnsavedChanges) return 'You have unsaved changes. Exit?';
     };
   }
 
@@ -124,8 +124,8 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   }
 
   saveUserSDL = () => {
-    let { value, dirty } = this.state;
-    if (!dirty) return;
+    let { value, hasUnsavedChanges } = this.state;
+    if (!hasUnsavedChanges) return;
 
     if (!this.updateSDL(value)) return;
 
@@ -135,8 +135,8 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
         return this.setState((prevState) => ({
           ...prevState,
           cachedValue: value,
-          dirty: false,
-          dirtySchema: null,
+          hasUnsavedChanges: false,
+          unsavedSchema: null,
           error: null,
         }));
       } else {
@@ -156,21 +156,21 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
 
   onEdit = (val) => {
     if (this.state.error) this.updateSDL(val);
-    let dirtySchema = null as GraphQLSchema | null;
+    let unsavedSchema = null as GraphQLSchema | null;
     try {
-      dirtySchema = this.buildSchema(val, { skipValidation: true });
+      unsavedSchema = this.buildSchema(val, { skipValidation: true });
     } catch (_) {}
 
     this.setState((prevState) => ({
       ...prevState,
       value: val,
-      dirty: val !== this.state.cachedValue,
-      dirtySchema,
+      hasUnsavedChanges: val !== this.state.cachedValue,
+      unsavedSchema,
     }));
   };
 
   render() {
-    let { value, activeTab, schema, dirty, dirtySchema } = this.state;
+    let { value, activeTab, schema, hasUnsavedChanges, unsavedSchema } = this.state;
     if (value == null || schema == null) {
       return <div className="faker-editor-container">Loading...</div>;
     }
@@ -189,16 +189,16 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
               onClick={() => this.switchTab(0)}
               className={classNames({
                 '-active': activeTab === 0,
-                '-dirty': dirty,
+                '-unsaved': hasUnsavedChanges,
               })}
             >
               {' '}
               <EditIcon />{' '}
             </li>
             <li
-              onClick={() => !dirty && this.switchTab(1)}
+              onClick={() => !hasUnsavedChanges && this.switchTab(1)}
               className={classNames({
-                '-disabled': dirty,
+                '-disabled': hasUnsavedChanges,
                 '-active': activeTab === 1,
               })}
             >
@@ -220,7 +220,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
             })}
           >
             <GraphQLEditor
-              schema={dirtySchema || schema}
+              schema={unsavedSchema || schema}
               onEdit={this.onEdit}
               onCommand={this.saveUserSDL}
               value={value}
@@ -228,7 +228,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
             <div className="action-panel">
               <a
                 className={classNames('material-button', {
-                  '-disabled': !dirty,
+                  '-disabled': !hasUnsavedChanges,
                 })}
                 onClick={this.saveUserSDL}
               >

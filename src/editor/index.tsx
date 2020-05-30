@@ -171,6 +171,10 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
 
   render() {
     let { value, activeTab, schema, dirty, dirtySchema } = this.state;
+    if (value == null) {
+      return <div className="faker-editor-container">Loading...</div>;
+    }
+
     return (
       <div className="faker-editor-container">
         <nav>
@@ -219,7 +223,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
               schema={dirtySchema || schema}
               onEdit={this.onEdit}
               onCommand={this.saveUserSDL}
-              value={value || ''}
+              value={value}
             />
             <div className="action-panel">
               <a

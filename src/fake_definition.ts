@@ -234,7 +234,7 @@ const fakeDefinitionsSet = new Set(
 
 const schemaWithOnlyFakedDefinitions = buildASTSchema(fakeDefinitionAST);
 // FIXME: mark it as valid to be able to run `validate`
-schemaWithOnlyFakedDefinitions['__validationErrors'] = []
+schemaWithOnlyFakedDefinitions['__validationErrors'] = [];
 
 export function buildWithFakeDefinitions(
   schemaSDL: Source,
@@ -294,7 +294,9 @@ export function buildWithFakeDefinitions(
     if (!skipValidation) {
       const errors = [
         ...validateSDL(extensionAST, schema),
-        ...validate(schemaWithOnlyFakedDefinitions, extensionAST, [ValuesOfCorrectTypeRule]),
+        ...validate(schemaWithOnlyFakedDefinitions, extensionAST, [
+          ValuesOfCorrectTypeRule,
+        ]),
       ];
       if (errors.length !== 0) {
         throw new ValidationErrors(errors);
@@ -321,8 +323,8 @@ export class ValidationErrors extends Error {
 
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, this.constructor);
-    } else { 
-      this.stack = (new Error(message)).stack; 
+    } else {
+      this.stack = new Error(message).stack;
     }
   }
 }

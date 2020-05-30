@@ -15,7 +15,7 @@
     "build:editor": "webpack -p --config webpack.config.js",
     "build:typescript": "tsc",
     "copy:graphql": "cp src/*.graphql dist/",
-    "copy:editor": "mkdir \"dist/editor\" && cp src/editor/*.{html,js,css,svg} dist/editor",
+    "copy:editor": "mkdir \"dist/editor\" && cp src/editor/*.html dist/editor && cp src/editor/*.js dist/editor && cp src/editor/*.css dist/editor && cp src/editor/*.svg dist/editor",
     "build:all": "rm -rf dist && mkdir dist && npm run build:editor && npm run build:typescript && npm run copy:graphql && npm run copy:editor",
     "prettier": "prettier --ignore-path .gitignore --write --list-different .",
     "prettier:check": "prettier --ignore-path .gitignore --check ."
@@ -34,7 +34,7 @@
     "@types/body-parser": "1.19.0",
     "@types/classnames": "2.2.10",
     "@types/cors": "2.8.6",
-    "@types/express": "4.17.6",
+    "@types/express": "^4.17.1",
     "@types/faker": "4.1.12",
     "@types/react": "16.9.35",
     "@types/react-dom": "16.9.8",

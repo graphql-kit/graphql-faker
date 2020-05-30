@@ -1,28 +1,19 @@
 #!/usr/bin/env node
 
-import {
-  Source,
-  GraphQLSchema,
-  parse,
-  printSchema,
-  buildASTSchema,
-  extendSchema,
-  isObjectType,
-  isInterfaceType,
-} from 'graphql';
-
 import * as fs from 'fs';
 import * as path from 'path';
+
 import * as express from 'express';
 import * as graphqlHTTP from 'express-graphql';
 import * as chalk from 'chalk';
 import * as open from 'open';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
+import { Source, printSchema } from 'graphql';
 
 import { parseCLI } from './cli';
 import { getProxyExecuteFn } from './proxy';
-import { mergeWithFakeDefinitions } from './fake_definition';
+import { ValidationErrors, buildWithFakeDefinitions } from './fake_definition';
 import { existsSync, readSDL, getRemoteSchema } from './utils';
 import { fakeTypeResolver, fakeFieldResolver } from './fake_schema';
 
@@ -100,14 +91,24 @@ function runServer(
   };
   const app = express();
 
+  let schema;
+  try {
+    schema = remoteSDL
+      ? buildWithFakeDefinitions(remoteSDL, userSDL)
+      : buildWithFakeDefinitions(userSDL);
+  } catch (error) {
+    if (error instanceof ValidationErrors) {
+      prettyPrintValidationErrors(error);
+      process.exit(1);
+    }
+  }
+
   app.options('/graphql', cors(corsOptions));
   app.use(
     '/graphql',
     cors(corsOptions),
     graphqlHTTP(() => ({
-      schema: remoteSDL
-        ? buildSchema(remoteSDL, userSDL)
-        : buildSchema(userSDL),
+      schema,
       typeResolver: fakeTypeResolver,
       fieldResolver: fakeFieldResolver,
       customExecuteFn,
@@ -128,6 +129,9 @@ function runServer(
       const fileName = userSDL.name;
       fs.writeFileSync(fileName, req.body);
       userSDL = new Source(req.body, fileName);
+      schema = remoteSDL
+        ? buildWithFakeDefinitions(remoteSDL, userSDL)
+        : buildWithFakeDefinitions(userSDL);
 
       const date = new Date().toLocaleString();
       log(
@@ -167,25 +171,18 @@ function runServer(
   }
 }
 
-function buildSchema(schemaSDL: Source, extendSDL?: Source): GraphQLSchema {
-  let schemaAST = parse(schemaSDL);
-  let schema = buildASTSchema(mergeWithFakeDefinitions(schemaAST));
+function prettyPrintValidationErrors(validationErrors: ValidationErrors) {
+  const { subErrors } = validationErrors;
+  log(
+    chalk.red(
+      subErrors.length > 1
+        ? `\nYour schema constains ${subErrors.length} validation errors: \n`
+        : `\nYour schema constains a validation error: \n`,
+    ),
+  );
 
-  if (extendSDL) {
-    schema = extendSchema(schema, parse(extendSDL));
-
-    // FIXME: put in field extensions
-    for (const type of Object.values(schema.getTypeMap())) {
-      if (isObjectType(type) || isInterfaceType(type)) {
-        for (const field of Object.values(type.getFields())) {
-          const node = field.astNode;
-          if (node && node.loc && node.loc.source === extendSDL) {
-            (field as any).isExtensionField = true;
-          }
-        }
-      }
-    }
+  for (const error of subErrors) {
+    let [message, ...otherLines] = error.toString().split('\n');
+    log([chalk.yellow(message), ...otherLines].join('\n') + '\n\n');
   }
-
-  return schema;
 }

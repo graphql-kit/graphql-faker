@@ -5,8 +5,8 @@ import 'graphiql/graphiql.css';
 
 import * as classNames from 'classnames';
 import GraphiQL from 'graphiql';
-import { buildASTSchema, extendSchema, GraphQLSchema, parse } from 'graphql';
-import { mergeWithFakeDefinitions } from '../fake_definition';
+import { Source, GraphQLSchema } from 'graphql';
+import { buildWithFakeDefinitions } from '../fake_definition';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -24,22 +24,6 @@ type FakeEditorState = {
   dirtySchema: GraphQLSchema | null;
   remoteSDL: string | null;
 };
-
-function parseSDL(sdl) {
-  return parse(sdl, {
-    allowLegacySDLEmptyFields: true,
-    allowLegacySDLImplementsInterfaces: true,
-  });
-}
-
-function buildSchema(sdl, extensionSDL?) {
-  const userSDL = mergeWithFakeDefinitions(parseSDL(sdl));
-  const schema = buildASTSchema(userSDL, { commentDescriptions: true });
-  if (extensionSDL) {
-    return extendSchema(schema, parseSDL(extensionSDL), { commentDescriptions: true });
-  }
-  return schema;
-}
 
 class FakeEditor extends React.Component<any, FakeEditorState> {
   constructor(props) {
@@ -103,11 +87,15 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     });
   }
 
-  buildSchema(userSDL) {
+  buildSchema(userSDL, options?) {
     if (this.state.remoteSDL) {
-      return buildSchema(this.state.remoteSDL, userSDL);
+      return buildWithFakeDefinitions(
+        new Source(this.state.remoteSDL),
+        new Source(userSDL),
+        options,
+      );
     } else {
-      return buildSchema(userSDL);
+      return buildWithFakeDefinitions(new Source(userSDL), options);
     }
   }
 
@@ -170,7 +158,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     if (this.state.error) this.updateSDL(val);
     let dirtySchema = null as GraphQLSchema | null;
     try {
-      dirtySchema = this.buildSchema(val);
+      dirtySchema = this.buildSchema(val, { skipValidation: true });
     } catch (_) {}
 
     this.setState((prevState) => ({

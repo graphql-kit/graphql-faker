@@ -195,3 +195,11 @@ nav > .logo {
 .status {
   color: #1c5a15;
 }
+
+.tab-content .loading-box.visible {
+  display: none;
+}
+
+.tab-content .graphql-voyager > .menu-content {
+  left: 435px;
+}

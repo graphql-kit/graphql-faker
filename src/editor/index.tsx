@@ -14,7 +14,7 @@ import * as ReactDOM from 'react-dom';
 import GraphQLEditor from './GraphQLEditor/GraphQLEditor';
 import { ConsoleIcon, EditIcon, GithubIcon, VoyagerIcon } from './icons';
 
-import {Voyager} from 'graphql-voyager';
+import { Voyager } from 'graphql-voyager';
 
 type FakeEditorState = {
   value: string | null;
@@ -268,7 +268,11 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
             })}
           >
             {this.state.schema && (
-              <Voyager introspection={e => this.graphQLFetcher({query: e})} hideSettings={activeTab !== 2} workerURI="/voyager.worker.js" />
+              <Voyager
+                introspection={(e) => this.graphQLFetcher({ query: e })}
+                hideSettings={activeTab !== 2}
+                workerURI="/voyager.worker.js"
+              />
             )}
           </div>
         </div>

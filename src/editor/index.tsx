@@ -258,22 +258,18 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
               '-active': activeTab === 1,
             })}
           >
-            {this.state.schema && (
-              <GraphiQL fetcher={(e) => this.graphQLFetcher(e)} schema={this.state.schema} />
-            )}
+            <GraphiQL fetcher={(e) => this.graphQLFetcher(e)} schema={schema} />
           </div>
           <div
             className={classNames('tab-content', {
               '-active': activeTab === 2,
             })}
           >
-            {this.state.schema && (
-              <Voyager
-                introspection={(e) => this.graphQLFetcher({ query: e })}
-                hideSettings={activeTab !== 2}
-                workerURI="/voyager.worker.js"
-              />
-            )}
+            <Voyager
+              introspection={(e) => this.graphQLFetcher({ query: e })}
+              hideSettings={activeTab !== 2}
+              workerURI="/voyager.worker.js"
+            />
           </div>
         </div>
       </div>

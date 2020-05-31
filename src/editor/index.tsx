@@ -4,12 +4,14 @@ import './GraphQLEditor/editor.css';
 import 'graphiql/graphiql.css';
 import 'graphql-voyager/dist/voyager.css';
 
-import * as classNames from 'classnames';
 import GraphiQL from 'graphiql';
-import { Source, GraphQLSchema } from 'graphql';
-import { buildWithFakeDefinitions } from '../fake_definition';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import * as classNames from 'classnames';
+
+import { Source, GraphQLSchema } from 'graphql';
+
+import { buildWithFakeDefinitions } from '../fake_definition';
 
 import GraphQLEditor from './GraphQLEditor/GraphQLEditor';
 import { ConsoleIcon, EditIcon, GithubIcon, VoyagerIcon } from './icons';

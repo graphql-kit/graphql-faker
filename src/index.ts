@@ -4,19 +4,19 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import * as express from 'express';
-import * as graphqlHTTP from 'express-graphql';
 import * as chalk from 'chalk';
 import * as open from 'open';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
+import * as graphqlHTTP from 'express-graphql';
 import { Source, printSchema } from 'graphql';
+import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 
 import { parseCLI } from './cli';
 import { getProxyExecuteFn } from './proxy';
-import { ValidationErrors, buildWithFakeDefinitions } from './fake_definition';
 import { existsSync, readSDL, getRemoteSchema } from './utils';
 import { fakeTypeResolver, fakeFieldResolver } from './fake_schema';
-import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
+import { ValidationErrors, buildWithFakeDefinitions } from './fake_definition';
 
 const log = console.log;
 

@@ -13,6 +13,8 @@ import {
   isInterfaceType,
   ValuesOfCorrectTypeRule,
 } from 'graphql';
+
+// FIXME
 import { validateSDL } from 'graphql/validation/validate';
 
 const fakeDefinitionAST = parse(/* GraphQL */ `

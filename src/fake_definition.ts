@@ -267,14 +267,11 @@ export function buildWithFakeDefinitions(
   if (extensionSDL != null) {
     schema = extendSchemaWithAST(schema, parseSDL(extensionSDL));
 
-    // FIXME: put in field extensions
     for (const type of Object.values(schema.getTypeMap())) {
       if (isObjectType(type) || isInterfaceType(type)) {
         for (const field of Object.values(type.getFields())) {
-          const node = field.astNode;
-          if (node && node.loc && node.loc.source === extensionSDL) {
-            (field as any).isExtensionField = true;
-          }
+          const isExtensionField = field.astNode?.loc?.source === extensionSDL;
+          (field.extensions['isExtensionField'] as any) = isExtensionField;
         }
       }
     }

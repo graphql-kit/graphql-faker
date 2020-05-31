@@ -118,9 +118,10 @@ function stripExtensionFields(schema, operationAST) {
         const fieldDef = typeInfo.getFieldDef();
         if (
           fieldDef.name.startsWith('__') ||
-          (fieldDef as any).isExtensionField
-        )
+          fieldDef.extensions['isExtensionField'] === true
+        ) {
           return null;
+        }
       },
       [Kind.SELECTION_SET]: {
         leave(node) {

@@ -9,6 +9,7 @@ module.exports = {
     proxy: {
       '/graphql': 'http://localhost:9002',
       '/user-sdl': 'http://localhost:9002',
+      '/voyager.worker.js': 'http://localhost:9002',
     },
   },
   entry: './src/editor/index.tsx',
@@ -36,7 +37,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', '.ts', '.mjs', '.js'],
   },
   output: {
     filename: 'main.js',

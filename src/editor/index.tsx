@@ -209,9 +209,9 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
               <ConsoleIcon />{' '}
             </li>
             <li
-              onClick={() => this.state.schema && this.switchTab(2)}
+              onClick={() => !hasUnsavedChanges && this.switchTab(2)}
               className={classNames({
-                '-disabled': !this.state.schema,
+                '-disabled': hasUnsavedChanges,
                 '-active': activeTab === 2,
               })}
             >

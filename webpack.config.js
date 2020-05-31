@@ -22,11 +22,6 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.mjs$/,
-        include: /node_modules\/graphql/,
-        type: 'javascript/auto',
-      },
-      {
         test: /\.css$/,
         use: [
           'style-loader',

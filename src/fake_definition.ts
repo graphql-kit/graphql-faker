@@ -271,7 +271,7 @@ export function buildWithFakeDefinitions(
       if (isObjectType(type) || isInterfaceType(type)) {
         for (const field of Object.values(type.getFields())) {
           const isExtensionField = field.astNode?.loc?.source === extensionSDL;
-          (field.extensions['isExtensionField'] as any) = isExtensionField;
+          (field.extensions as any)['isExtensionField'] = isExtensionField;
         }
       }
     }

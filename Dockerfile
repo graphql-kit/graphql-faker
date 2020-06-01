@@ -1,4 +1,4 @@
-FROM node:8.8.1-alpine
+FROM node:14.3.0-alpine
 
 ENTRYPOINT ["node", "/usr/local/bin/graphql-faker"]
 WORKDIR /workdir

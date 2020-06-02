@@ -22,13 +22,6 @@ function toBase64(str) {
   return Buffer.from(str).toString('base64');
 }
 
-function formatDate(date, dateFormat) {
-  if (dateFormat == null) {
-    return date;
-  }
-  return moment(date).format(dateFormat);
-}
-
 const fakeFunctions = {
   // Address section
   zipCode: () => faker.address.zipCode(),
@@ -86,19 +79,19 @@ const fakeFunctions = {
   date: {
     args: ['dateFormat', 'dateFrom', 'dateTo'],
     func: (dateFormat, dateFrom, dateTo) =>
-      formatDate(faker.date.between(dateFrom, dateTo), dateFormat),
+      moment(faker.date.between(dateFrom, dateTo)).format(dateFormat).toString(),
   },
   pastDate: {
     args: ['dateFormat'],
-    func: (dateFormat) => formatDate(faker.date.past(), dateFormat),
+    func: (dateFormat) => moment(faker.date.past()).format(dateFormat),
   },
   futureDate: {
     args: ['dateFormat'],
-    func: (dateFormat) => formatDate(faker.date.future(), dateFormat),
+    func: (dateFormat) => moment(faker.date.future()).format(dateFormat),
   },
   recentDate: {
     args: ['dateFormat'],
-    func: (dateFormat) => formatDate(faker.date.recent(), dateFormat),
+    func: (dateFormat) => moment(faker.date.recent()).format(dateFormat),
   },
 
   // Finance section

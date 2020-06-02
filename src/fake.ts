@@ -79,7 +79,9 @@ const fakeFunctions = {
   date: {
     args: ['dateFormat', 'dateFrom', 'dateTo'],
     func: (dateFormat, dateFrom, dateTo) =>
-      moment(faker.date.between(dateFrom, dateTo)).format(dateFormat).toString(),
+      moment(faker.date.between(dateFrom, dateTo))
+        .format(dateFormat)
+        .toString(),
   },
   pastDate: {
     args: ['dateFormat'],

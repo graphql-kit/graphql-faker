@@ -53,7 +53,7 @@ parseCLI((options) => {
           );
 
           const rootTypeName = schema.getQueryType().name;
-          body = body.replace('__RootTypeName__', rootTypeName);
+          body = body.replace('___RootTypeName___', rootTypeName);
 
           userSDL = new Source(body, fileName);
         }

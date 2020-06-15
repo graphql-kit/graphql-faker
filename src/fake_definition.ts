@@ -274,7 +274,7 @@ export function buildWithFakeDefinitions(
           if (field.extensions) {
             (field.extensions as any)['isExtensionField'] = isExtensionField;
           } else {
-            field.extensions = { isExtensionField }
+            field.extensions = { isExtensionField };
           }
         }
       }

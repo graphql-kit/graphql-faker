@@ -71,20 +71,21 @@ Extend real data from GitHub API with faked data based on extension SDL (you can
 - `-e`, `--extend` URL to existing GraphQL server to extend
 - `-o`, `--open` Open page with SDL editor and GraphiQL in browser
 - `-H`, `--header` Specify headers to the proxied server in cURL format, e.g.: `Authorization: bearer XXXXXXXXX`
-- `--forward-headers` Specify which headers should be forwarded to the proxied server
+- `--forward-headers` Specify which headers should be forwarded to the proxied server. See [here](https://github.com/APIs-guru/graphql-faker/blob/master/src/headers.ts) for the list of headers forwarded by default.
+- `--return-headers` Specify which headers should be returned from the proxied server. See [here](https://github.com/APIs-guru/graphql-faker/blob/master/src/headers.ts) for the list of headers returned by default.
 - `--co`, `--cors-origin` CORS: Specify the custom origin for the Access-Control-Allow-Origin header, by default it is the same as `Origin` header from the request
 - `-h`, `--help` Show help
 
-When specifying the `[SDL file]` after the `--forward-headers` option you need to prefix it with `--` to clarify it's not another header. For example:
+When specifying the `[SDL file]` after the `--forward-headers` or `--return-headers` options you need to prefix it with `--` to clarify it's not another header. For example:
 
 ```
-graphql-faker --extend http://example.com/graphql --forward-headers Authorization -- ./temp.faker.graphql
+graphql-faker --extend http://example.com/graphql --forward-headers Authorization --return-headers Set-Cookie -- ./temp.faker.graphql
 ```
 
 When you finish with an other option there is no need for the `--`:
 
 ```
-graphql-faker --forward-headers Authorization --extend http://example.com/graphql ./temp.faker.graphql
+graphql-faker --forward-headers Authorization --return-headers Set-Cookie --extend http://example.com/graphql ./temp.faker.graphql
 ```
 
 ### Usage with Docker

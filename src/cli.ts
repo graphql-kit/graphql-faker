@@ -1,5 +1,7 @@
 import * as yargs from 'yargs';
 
+import { allowedRequestHeaders, allowedResponseHeaders } from './headers';
+
 type Options = {
   fileName: string | undefined;
   port: number;
@@ -8,6 +10,7 @@ type Options = {
   extendURL: string | undefined;
   headers: { [key: string]: string };
   forwardHeaders: [string];
+  returnHeaders: [string];
 };
 
 function builder(cmd) {
@@ -71,6 +74,18 @@ function builder(cmd) {
         coerce(arr) {
           return arr.map((str) => str.toLowerCase());
         },
+        default: allowedRequestHeaders,
+      },
+      'return-headers': {
+        describe:
+          'Specify which headers should be returned from the proxied server',
+        array: true,
+        type: 'string',
+        implies: 'extend',
+        coerce(arr) {
+          return arr.map((str) => str.toLowerCase());
+        },
+        default: allowedResponseHeaders,
       },
     })
     .epilog(epilog)
@@ -90,6 +105,7 @@ export function parseCLI(commandCB: (options: Options) => void) {
       extendURL: argv.extend,
       headers: argv.header || {},
       forwardHeaders: argv.forwardHeaders || [],
+      returnHeaders: argv.returnHeaders || [],
     });
   }
 }

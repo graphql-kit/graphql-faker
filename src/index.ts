@@ -21,7 +21,7 @@ import { ValidationErrors, buildWithFakeDefinitions } from './fake_definition';
 const log = console.log;
 
 parseCLI((options) => {
-  const { extendURL, headers, forwardHeaders } = options;
+  const { extendURL, headers, forwardHeaders, returnHeaders } = options;
   const fileName =
     options.fileName ||
     (extendURL ? './schema_extension.faker.graphql' : './schema.faker.graphql');
@@ -58,7 +58,12 @@ parseCLI((options) => {
           userSDL = new Source(body, fileName);
         }
 
-        const executeFn = getProxyExecuteFn(extendURL, headers, forwardHeaders);
+        const executeFn = getProxyExecuteFn(
+          extendURL,
+          headers,
+          forwardHeaders,
+          returnHeaders,
+        );
         runServer(options, userSDL, remoteSDL, executeFn);
       })
       .catch((error) => {
@@ -108,11 +113,12 @@ function runServer(
   app.use(
     '/graphql',
     cors(corsOptions),
-    graphqlHTTP(() => ({
+    graphqlHTTP((req, res) => ({
       schema,
       typeResolver: fakeTypeResolver,
       fieldResolver: fakeFieldResolver,
       customExecuteFn,
+      context: { req, res },
       graphiql: true,
     })),
   );

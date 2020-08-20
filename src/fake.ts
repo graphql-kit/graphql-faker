@@ -2,8 +2,8 @@
 const faker = require('faker');
 import * as moment from 'moment';
 
-export function getRandomInt(min:number, max:number) {
-  return faker.random.number({min, max});
+export function getRandomInt(min: number, max: number) {
+  return faker.random.number({ min, max });
 }
 
 export function getRandomItem<T>(array: ReadonlyArray<T>): T {
@@ -11,11 +11,11 @@ export function getRandomItem<T>(array: ReadonlyArray<T>): T {
 }
 
 export const stdScalarFakers = {
-  'Int': () => faker.random.number({ min: 0, max: 99999, precision: 1 }),
-  'Float': () => faker.random.number({ min: 0, max: 99999, precision: 0.01 }),
-  'String': () => 'string',
-  'Boolean': () => faker.random.boolean(),
-  'ID': () => toBase64(faker.random.number({max: 9999999999}).toString()),
+  Int: () => faker.random.number({ min: 0, max: 99999, precision: 1 }),
+  Float: () => faker.random.number({ min: 0, max: 99999, precision: 0.01 }),
+  String: () => 'string',
+  Boolean: () => faker.random.boolean(),
+  ID: () => toBase64(faker.random.number({ max: 9999999999 }).toString()),
 };
 
 function toBase64(str) {
@@ -76,26 +76,24 @@ const fakeFunctions = {
   dbEngine: () => faker.database.engine(),
 
   // Date section
+  date: {
+    args: ['dateFormat', 'dateFrom', 'dateTo'],
+    func: (dateFormat, dateFrom, dateTo) =>
+      moment(faker.date.between(dateFrom, dateTo))
+        .format(dateFormat)
+        .toString(),
+  },
   pastDate: {
     args: ['dateFormat'],
-    func: (dateFormat) => {
-      const date = faker.date.past()
-      return (dateFormat !== undefined ? moment(date).format(dateFormat) : date)
-    }
+    func: (dateFormat) => moment(faker.date.past()).format(dateFormat),
   },
   futureDate: {
     args: ['dateFormat'],
-    func: (dateFormat) => {
-      const date = faker.date.future()
-      return (dateFormat !== undefined ? moment(date).format(dateFormat) : date)
-    }
+    func: (dateFormat) => moment(faker.date.future()).format(dateFormat),
   },
   recentDate: {
     args: ['dateFormat'],
-    func: (dateFormat) => {
-      const date = faker.date.recent()
-      return (dateFormat !== undefined ? moment(date).format(dateFormat) : date)
-    }
+    func: (dateFormat) => moment(faker.date.recent()).format(dateFormat),
   },
 
   // Finance section
@@ -110,14 +108,29 @@ const fakeFunctions = {
   bankIdentifierCode: () => faker.finance.bic(),
 
   // Hacker section
-  hackerAbbr: () => faker.hacker.itAbbr(),
+  hackerAbbreviation: () => faker.hacker.abbreviation(),
   hackerPhrase: () => faker.hacker.phrase(),
 
   // Image section
   imageUrl: {
-    args: ['imageWidth', 'imageHeight', 'imageCategory', 'randomizeImageUrl'],
-    func: (width, height, category, randomize) =>
-      faker.image.imageUrl(width, height, category, randomize, false),
+    args: ['imageSize', 'imageKeywords', 'randomizeImageUrl'],
+    func: (size, keywords, randomize) => {
+      let url = 'https://source.unsplash.com/random/';
+
+      if (size != null) {
+        url += `${size.width}x${size.height}/`;
+      }
+
+      if (keywords != null && keywords.length > 0) {
+        url += '?' + keywords.join(',');
+      }
+
+      if (randomize === true) {
+        url += '#' + faker.random.number();
+      }
+
+      return url;
+    },
   },
 
   // Internet section
@@ -133,7 +146,7 @@ const fakeFunctions = {
   userAgent: () => faker.internet.userAgent(),
   colorHex: {
     args: ['baseColor'],
-    func: ({red255, green255, blue255}) => {
+    func: ({ red255, green255, blue255 }) => {
       return faker.internet.color(red255, green255, blue255);
     },
   },
@@ -182,17 +195,17 @@ const fakeFunctions = {
   semver: () => faker.system.semver(),
 };
 
-Object.keys(fakeFunctions).forEach(key => {
+Object.keys(fakeFunctions).forEach((key) => {
   var value = fakeFunctions[key];
   if (typeof fakeFunctions[key] === 'function')
-    fakeFunctions[key] = {args: [], func: value};
+    fakeFunctions[key] = { args: [], func: value };
 });
 
 export function fakeValue(type, options?, locale?) {
   const fakeGenerator = fakeFunctions[type];
   const argNames = fakeGenerator.args;
   //TODO: add check
-  const callArgs = argNames.map(name => options[name]);
+  const callArgs = argNames.map((name) => options[name]);
 
   const localeBackup = faker.locale;
   //faker.setLocale(locale || localeBackup);

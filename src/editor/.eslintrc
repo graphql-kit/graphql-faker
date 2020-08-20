@@ -3,9 +3,7 @@
     "jsx": true,
     "modules": true
   },
-  "extends": [
-    "eslint:recommended"
-  ],
+  "extends": ["eslint:recommended"],
   "env": {
     "browser": true,
     "node": true
@@ -18,7 +16,5 @@
     "react/jsx-uses-vars": 2,
     "react/react-in-jsx-scope": 2
   },
-  "plugins": [
-    "react"
-  ]
+  "plugins": ["react"]
 }

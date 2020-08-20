@@ -1,6 +1,6 @@
 {
   "name": "graphql-faker",
-  "version": "2.0.0-rc.17",
+  "version": "2.0.0-rc.23",
   "description": "Mock or extend your GraphQL API with faked data. No coding required",
   "main": "dist/index.js",
   "bin": "dist/index.js",
@@ -8,14 +8,17 @@
     "node": ">= 8.x"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon -e ts --exec 'ts-node src/index.ts'",
+    "test": "npm run prettier:check",
+    "start": "nodemon src/index.ts",
     "debug": "ts-node --inspect --compilerOptions '{\"inlineSources\":true}' src/index.ts",
-    "build:editor": "cd src/editor && yarn && npm run build && cd -",
+    "start:editor": "webpack-dev-server --config webpack.config.js",
+    "build:editor": "webpack -p --config webpack.config.js",
     "build:typescript": "tsc",
     "copy:graphql": "cp src/*.graphql dist/",
-    "copy:editor": "mkdir -p dist/editor && cp src/editor/*.{html,js,css,svg} dist/editor",
-    "build:all": "npm run build:editor && npm run build:typescript && npm run copy:graphql && npm run copy:editor"
+    "copy:editor": "mkdir \"dist/editor\" && cp src/editor/*.html dist/editor && cp src/editor/*.js dist/editor && cp src/editor/*.css dist/editor && cp src/editor/*.svg dist/editor",
+    "build:all": "rm -rf dist && mkdir dist && npm run build:editor && npm run build:typescript && npm run copy:graphql && npm run copy:editor",
+    "prettier": "prettier --ignore-path .gitignore --write --list-different .",
+    "prettier:check": "prettier --ignore-path .gitignore --check ."
   },
   "repository": {
     "type": "git",
@@ -28,26 +31,45 @@
   },
   "homepage": "https://github.com/APIs-guru/graphql-faker#readme",
   "devDependencies": {
-    "@types/body-parser": "1.17.1",
+    "@types/body-parser": "1.19.0",
+    "@types/classnames": "2.2.10",
     "@types/cors": "2.8.6",
-    "@types/express": "4.17.1",
-    "@types/faker": "4.1.6",
-    "@types/yargs": "13.0.3",
-    "nodemon": "1.19.4",
-    "ts-node": "8.4.1",
-    "typescript": "3.6.4"
+    "@types/express": "4.17.6",
+    "@types/faker": "4.1.12",
+    "@types/react": "16.9.35",
+    "@types/react-dom": "16.9.8",
+    "@types/yargs": "15.0.5",
+    "classnames": "2.2.6",
+    "codemirror": "5.54.0",
+    "codemirror-graphql": "0.11.6",
+    "css-loader": "3.5.3",
+    "graphiql": "0.17.5",
+    "marked": "1.1.0",
+    "mini-css-extract-plugin": "0.9.0",
+    "nodemon": "2.0.4",
+    "prettier": "2.0.5",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "style-loader": "1.2.1",
+    "ts-loader": "7.0.5",
+    "ts-node": "8.10.2",
+    "typescript": "3.9.3",
+    "webpack": "4.43.0",
+    "webpack-cli": "3.3.11",
+    "webpack-dev-server": "3.11.0"
   },
   "dependencies": {
     "body-parser": "1.19.0",
-    "chalk": "2.4.2",
+    "chalk": "4.0.0",
     "cors": "2.8.5",
     "express": "4.17.1",
     "express-graphql": "0.9.0",
     "faker": "4.1.0",
     "graphql": "14.5.8",
-    "moment": "2.24.0",
+    "graphql-voyager": "1.0.0-rc.31",
+    "moment": "2.26.0",
     "node-fetch": "2.6.0",
-    "open": "7.0.0",
-    "yargs": "14.2.0"
+    "open": "7.0.4",
+    "yargs": "15.3.1"
   }
 }

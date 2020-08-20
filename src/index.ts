@@ -1,48 +1,46 @@
 #!/usr/bin/env node
 
-import {
-  Source,
-  GraphQLSchema,
-  parse,
-  printSchema,
-  buildASTSchema,
-  extendSchema,
-  isObjectType,
-  isInterfaceType,
-} from 'graphql';
-
 import * as fs from 'fs';
 import * as path from 'path';
+
 import * as express from 'express';
-import * as graphqlHTTP from 'express-graphql';
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 import * as open from 'open';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
+import * as graphqlHTTP from 'express-graphql';
+import { Source, printSchema } from 'graphql';
+import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 
 import { parseCLI } from './cli';
 import { getProxyExecuteFn } from './proxy';
-import { mergeWithFakeDefinitions } from './fake_definition';
 import { existsSync, readSDL, getRemoteSchema } from './utils';
 import { fakeTypeResolver, fakeFieldResolver } from './fake_schema';
+import { ValidationErrors, buildWithFakeDefinitions } from './fake_definition';
 
 const log = console.log;
 
 parseCLI((options) => {
   const { extendURL, headers, forwardHeaders } = options;
-  const fileName = options.fileName ||
+  const fileName =
+    options.fileName ||
     (extendURL ? './schema_extension.faker.graphql' : './schema.faker.graphql');
 
   if (!options.fileName) {
-    log(chalk.yellow(`Default file ${chalk.magenta(fileName)} is used. ` +
-    `Specify [file] parameter to change.`));
+    log(
+      chalk.yellow(
+        `Default file ${chalk.magenta(fileName)} is used. ` +
+          `Specify [file] parameter to change.`,
+      ),
+    );
   }
 
   let userSDL = existsSync(fileName) && readSDL(fileName);
 
-  if (extendURL) { // run in proxy mode
+  if (extendURL) {
+    // run in proxy mode
     getRemoteSchema(extendURL, headers)
-      .then(schema => {
+      .then((schema) => {
         const remoteSDL = new Source(
           printSchema(schema),
           `Inrospection from "${extendURL}"`,
@@ -55,7 +53,7 @@ parseCLI((options) => {
           );
 
           const rootTypeName = schema.getQueryType().name;
-          body = body.replace('<RootTypeName>', rootTypeName);
+          body = body.replace('___RootTypeName___', rootTypeName);
 
           userSDL = new Source(body, fileName);
         }
@@ -63,14 +61,17 @@ parseCLI((options) => {
         const executeFn = getProxyExecuteFn(extendURL, headers, forwardHeaders);
         runServer(options, userSDL, remoteSDL, executeFn);
       })
-      .catch(error => {
+      .catch((error) => {
         log(chalk.red(error.stack));
         process.exit(1);
       });
   } else {
     if (!userSDL) {
       userSDL = new Source(
-        fs.readFileSync(path.join(__dirname, 'default-schema.graphql'), 'utf-8'),
+        fs.readFileSync(
+          path.join(__dirname, 'default-schema.graphql'),
+          'utf-8',
+        ),
         fileName,
       );
     }
@@ -82,7 +83,7 @@ function runServer(
   options,
   userSDL: Source,
   remoteSDL?: Source,
-  customExecuteFn?
+  customExecuteFn?,
 ) {
   const { port, openEditor } = options;
   const corsOptions = {
@@ -91,14 +92,30 @@ function runServer(
   };
   const app = express();
 
+  let schema;
+  try {
+    schema = remoteSDL
+      ? buildWithFakeDefinitions(remoteSDL, userSDL)
+      : buildWithFakeDefinitions(userSDL);
+  } catch (error) {
+    if (error instanceof ValidationErrors) {
+      prettyPrintValidationErrors(error);
+      process.exit(1);
+    }
+  }
+
   app.options('/graphql', cors(corsOptions));
-  app.use('/graphql', cors(corsOptions), graphqlHTTP(() => ({
-    schema: remoteSDL ? buildSchema(remoteSDL, userSDL) : buildSchema(userSDL),
-    typeResolver: fakeTypeResolver,
-    fieldResolver: fakeFieldResolver,
-    customExecuteFn,
-    graphiql: true,
-  })));
+  app.use(
+    '/graphql',
+    cors(corsOptions),
+    graphqlHTTP(() => ({
+      schema,
+      typeResolver: fakeTypeResolver,
+      fieldResolver: fakeFieldResolver,
+      customExecuteFn,
+      graphiql: true,
+    })),
+  );
 
   app.get('/user-sdl', (_, res) => {
     res.status(200).json({
@@ -107,23 +124,40 @@ function runServer(
     });
   });
 
-  app.use('/user-sdl', bodyParser.text({limit: '8mb'}));
+  app.use('/user-sdl', bodyParser.text({ limit: '8mb' }));
   app.post('/user-sdl', (req, res) => {
     try {
       const fileName = userSDL.name;
       fs.writeFileSync(fileName, req.body);
       userSDL = new Source(req.body, fileName);
+      schema = remoteSDL
+        ? buildWithFakeDefinitions(remoteSDL, userSDL)
+        : buildWithFakeDefinitions(userSDL);
 
-      const date = (new Date()).toLocaleString();
-      log(`${chalk.green('✚')} schema saved to ${chalk.magenta(fileName)} on ${date}`);
+      const date = new Date().toLocaleString();
+      log(
+        `${chalk.green('✚')} schema saved to ${chalk.magenta(
+          fileName,
+        )} on ${date}`,
+      );
 
       res.status(200).send('ok');
-    } catch(err) {
-      res.status(500).send(err.message)
+    } catch (err) {
+      res.status(500).send(err.message);
     }
   });
 
   app.use('/editor', express.static(path.join(__dirname, 'editor')));
+  app.use('/voyager', voyagerMiddleware({ endpointUrl: '/graphql' }));
+  app.use(
+    '/voyager.worker.js',
+    express.static(
+      path.join(
+        __dirname,
+        '../node_modules/graphql-voyager/dist/voyager.worker.js',
+      ),
+    ),
+  );
 
   const server = app.listen(port);
 
@@ -140,6 +174,7 @@ function runServer(
 
   ${chalk.blue('❯')} Interactive Editor: http://localhost:${port}/editor
   ${chalk.blue('❯')} GraphQL API:        http://localhost:${port}/graphql
+  ${chalk.blue('❯')} GraphQL Voyager:    http://localhost:${port}/voyager
 
   `);
 
@@ -148,25 +183,18 @@ function runServer(
   }
 }
 
-function buildSchema(schemaSDL: Source, extendSDL?: Source): GraphQLSchema {
-  let schemaAST = parse(schemaSDL);
-  let schema = buildASTSchema(mergeWithFakeDefinitions(schemaAST));
+function prettyPrintValidationErrors(validationErrors: ValidationErrors) {
+  const { subErrors } = validationErrors;
+  log(
+    chalk.red(
+      subErrors.length > 1
+        ? `\nYour schema constains ${subErrors.length} validation errors: \n`
+        : `\nYour schema constains a validation error: \n`,
+    ),
+  );
 
-  if (extendSDL) {
-    schema = extendSchema(schema, parse(extendSDL));
-
-    // FIXME: put in field extensions
-    for (const type of Object.values(schema.getTypeMap())) {
-      if (isObjectType(type) || isInterfaceType(type)) {
-        for (const field of Object.values(type.getFields())) {
-          const node = field.astNode;
-          if (node && node.loc && node.loc.source === extendSDL) {
-            (field as any).isExtensionField = true;
-          }
-        }
-      }
-    }
+  for (const error of subErrors) {
+    let [message, ...otherLines] = error.toString().split('\n');
+    log([chalk.yellow(message), ...otherLines].join('\n') + '\n\n');
   }
-
-  return schema;
 }

@@ -27,8 +27,7 @@ coverage
 build/Release
 
 # Dependency directories
-node_modules
-jspm_packages
+/node_modules
 
 # Optional npm cache directory
 .npm
@@ -44,3 +43,10 @@ jspm_packages
 
 # Apple
 .DS_Store
+
+# editor output
+src/editor/main.js
+src/editor/main.js.map
+src/editor/main.css
+src/editor/main.css.map
+

@@ -2,51 +2,35 @@ import './css/app.css';
 import './css/codemirror.css';
 import './GraphQLEditor/editor.css';
 import 'graphiql/graphiql.css';
+import 'graphql-voyager/dist/voyager.css';
 
-import * as classNames from 'classnames';
-import * as GraphiQL from 'graphiql';
-import { buildASTSchema, extendSchema, GraphQLSchema, parse } from 'graphql';
-import { mergeWithFakeDefinitions } from '../fake_definition';
+import GraphiQL from 'graphiql';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import * as classNames from 'classnames';
+
+import { Source, GraphQLSchema } from 'graphql';
+
+import { buildWithFakeDefinitions } from '../fake_definition';
 
 import GraphQLEditor from './GraphQLEditor/GraphQLEditor';
-import { ConsoleIcon, EditIcon, GithubIcon } from './icons';
+import { ConsoleIcon, EditIcon, GithubIcon, VoyagerIcon } from './icons';
+
+import { Voyager } from 'graphql-voyager';
 
 type FakeEditorState = {
   value: string | null;
   cachedValue: string | null;
   activeTab: number;
-  dirty: boolean;
+  hasUnsavedChanges: boolean;
   error: string | null;
   status: string | null;
   schema: GraphQLSchema | null;
-  dirtySchema: GraphQLSchema | null;
+  unsavedSchema: GraphQLSchema | null;
   remoteSDL: string | null;
 };
 
-function parseSDL(sdl) {
-  return parse(sdl, {
-    allowLegacySDLEmptyFields: true,
-    allowLegacySDLImplementsInterfaces: true,
-  });
-}
-
-function buildSchema(sdl, extensionSDL?) {
-  const userSDL = mergeWithFakeDefinitions(parseSDL(sdl));
-  const schema = buildASTSchema(userSDL, { commentDescriptions: true });
-  if (extensionSDL) {
-    return extendSchema(
-      schema,
-      parseSDL(extensionSDL),
-      { commentDescriptions: true }
-    );
-  }
-  return schema;
-}
-
 class FakeEditor extends React.Component<any, FakeEditorState> {
-
   constructor(props) {
     super(props);
 
@@ -54,8 +38,8 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       value: null,
       cachedValue: null,
       activeTab: 0,
-      dirty: false,
-      dirtySchema: null,
+      hasUnsavedChanges: false,
+      unsavedSchema: null,
       error: null,
       status: null,
       schema: null,
@@ -65,18 +49,18 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
 
   componentDidMount() {
     this.fetcher('/user-sdl')
-      .then(response => response.json())
-      .then(SDLs => {
+      .then((response) => response.json())
+      .then((SDLs) => {
         this.updateValue(SDLs);
       });
 
     window.onbeforeunload = () => {
-      if (this.state.dirty) return 'You have unsaved changes. Exit?';
+      if (this.state.hasUnsavedChanges) return 'You have unsaved changes. Exit?';
     };
   }
 
   fetcher(url, options = {}) {
-    const baseUrl = '..'
+    const baseUrl = '..';
     return fetch(baseUrl + url, {
       credentials: 'include',
       ...options,
@@ -88,7 +72,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(graphQLParams),
-    }).then(response => response.json());
+    }).then((response) => response.json());
   }
 
   updateValue({ userSDL, remoteSDL }) {
@@ -97,7 +81,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       cachedValue: userSDL,
       remoteSDL,
     });
-    this.updateIdl(userSDL, true);
+    this.updateSDL(userSDL, true);
   }
 
   postSDL(sdl) {
@@ -108,18 +92,22 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     });
   }
 
-  buildSchema(userSDL) {
+  buildSchema(userSDL, options?) {
     if (this.state.remoteSDL) {
-      return buildSchema(this.state.remoteSDL, userSDL);
+      return buildWithFakeDefinitions(
+        new Source(this.state.remoteSDL),
+        new Source(userSDL),
+        options,
+      );
     } else {
-      return buildSchema(userSDL);
+      return buildWithFakeDefinitions(new Source(userSDL), options);
     }
   }
 
-  updateIdl(value, noError = false) {
+  updateSDL(value, noError = false) {
     try {
       const schema = this.buildSchema(value);
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         ...prevState,
         schema,
         error: null,
@@ -127,38 +115,38 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       return true;
     } catch (e) {
       if (noError) return;
-      this.setState(prevState => ({ ...prevState, error: e.message }));
+      this.setState((prevState) => ({ ...prevState, error: e.message }));
       return false;
     }
   }
 
   setStatus(status, delay) {
-    this.setState(prevState => ({ ...prevState, status: status }));
+    this.setState((prevState) => ({ ...prevState, status: status }));
     if (!delay) return;
     setTimeout(() => {
-      this.setState(prevState => ({ ...prevState, status: null }));
+      this.setState((prevState) => ({ ...prevState, status: null }));
     }, delay);
   }
 
   saveUserSDL = () => {
-    let { value, dirty } = this.state;
-    if (!dirty) return;
+    let { value, hasUnsavedChanges } = this.state;
+    if (!hasUnsavedChanges) return;
 
-    if (!this.updateIdl(value)) return;
+    if (!this.updateSDL(value)) return;
 
-    this.postSDL(value).then(res => {
+    this.postSDL(value).then((res) => {
       if (res.ok) {
         this.setStatus('Saved!', 2000);
-        return this.setState(prevState => ({
+        return this.setState((prevState) => ({
           ...prevState,
           cachedValue: value,
-          dirty: false,
-          dirtySchema: null,
+          hasUnsavedChanges: false,
+          unsavedSchema: null,
           error: null,
         }));
       } else {
-        res.text().then(errorMessage => {
-          return this.setState(prevState => ({
+        res.text().then((errorMessage) => {
+          return this.setState((prevState) => ({
             ...prevState,
             error: errorMessage,
           }));
@@ -168,26 +156,30 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   };
 
   switchTab(tab) {
-    this.setState(prevState => ({ ...prevState, activeTab: tab }));
+    this.setState((prevState) => ({ ...prevState, activeTab: tab }));
   }
 
   onEdit = (val) => {
-    if (this.state.error) this.updateIdl(val);
-    let dirtySchema = null as GraphQLSchema | null;
+    if (this.state.error) this.updateSDL(val);
+    let unsavedSchema = null as GraphQLSchema | null;
     try {
-      dirtySchema = this.buildSchema(val);
-    } catch(_) { }
+      unsavedSchema = this.buildSchema(val, { skipValidation: true });
+    } catch (_) {}
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       ...prevState,
       value: val,
-      dirty: val !== this.state.cachedValue,
-      dirtySchema,
+      hasUnsavedChanges: val !== this.state.cachedValue,
+      unsavedSchema,
     }));
   };
 
   render() {
-    let { value, activeTab, schema , dirty, dirtySchema } = this.state;
+    let { value, activeTab, schema, hasUnsavedChanges, unsavedSchema } = this.state;
+    if (value == null || schema == null) {
+      return <div className="faker-editor-container">Loading...</div>;
+    }
+
     return (
       <div className="faker-editor-container">
         <nav>
@@ -202,21 +194,31 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
               onClick={() => this.switchTab(0)}
               className={classNames({
                 '-active': activeTab === 0,
-                '-dirty': dirty,
+                '-unsaved': hasUnsavedChanges,
               })}
             >
               {' '}
               <EditIcon />{' '}
             </li>
             <li
-              onClick={() => this.state.schema && this.switchTab(1)}
+              onClick={() => !hasUnsavedChanges && this.switchTab(1)}
               className={classNames({
-                '-disabled': !this.state.schema,
+                '-disabled': hasUnsavedChanges,
                 '-active': activeTab === 1,
               })}
             >
               {' '}
               <ConsoleIcon />{' '}
+            </li>
+            <li
+              onClick={() => !hasUnsavedChanges && this.switchTab(2)}
+              className={classNames({
+                '-disabled': hasUnsavedChanges,
+                '-active': activeTab === 2,
+              })}
+            >
+              {' '}
+              <VoyagerIcon />{' '}
             </li>
             <li className="-pulldown -link">
               <a href="https://github.com/APIs-guru/graphql-faker" target="_blank">
@@ -233,17 +235,18 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
             })}
           >
             <GraphQLEditor
-              schema={dirtySchema || schema}
+              schema={unsavedSchema || schema}
               onEdit={this.onEdit}
               onCommand={this.saveUserSDL}
-              value={value || ''}
+              value={value}
             />
             <div className="action-panel">
               <a
-                className={classNames("material-button", {
-                  '-disabled': !dirty,
+                className={classNames('material-button', {
+                  '-disabled': !hasUnsavedChanges,
                 })}
-                onClick={this.saveUserSDL}>
+                onClick={this.saveUserSDL}
+              >
                 <span> Save </span>
               </a>
               <div className="status-bar">
@@ -257,9 +260,18 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
               '-active': activeTab === 1,
             })}
           >
-            {this.state.schema && (
-              <GraphiQL fetcher={e => this.graphQLFetcher(e)} schema={this.state.schema} />
-            )}
+            <GraphiQL fetcher={(e) => this.graphQLFetcher(e)} schema={schema} />
+          </div>
+          <div
+            className={classNames('tab-content', {
+              '-active': activeTab === 2,
+            })}
+          >
+            <Voyager
+              introspection={(e) => this.graphQLFetcher({ query: e })}
+              hideSettings={activeTab !== 2}
+              workerURI="/voyager.worker.js"
+            />
           </div>
         </div>
       </div>

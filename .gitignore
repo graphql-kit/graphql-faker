@@ -41,3 +41,6 @@ jspm_packages
 
 # es5 output dir
 /dist/
+
+# Apple
+.DS_Store

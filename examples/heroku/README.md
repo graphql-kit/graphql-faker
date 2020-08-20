@@ -1,4 +1,4 @@
-# Heroky deployment graphql-faker
+# Heroku deployment graphql-faker
 
 We are going to create a package and deploy it to Heroku.
 

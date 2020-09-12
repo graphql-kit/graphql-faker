@@ -68,7 +68,7 @@
     "graphql": "14.5.8",
     "graphql-voyager": "1.0.0-rc.31",
     "moment": "2.26.0",
-    "node-fetch": "2.6.0",
+    "node-fetch": "2.6.1",
     "open": "7.0.4",
     "yargs": "15.3.1"
   }

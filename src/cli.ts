@@ -100,7 +100,7 @@ const epilog = `Examples:
 $0 --open
 
 # Extend real data from SWAPI with faked data based on extension SDL
-$0 ./ext-swapi.grqphql --extend http://swapi.apis.guru/
+$0 ./ext-swapi.graphql --extend http://swapi.apis.guru/
 
 # Extend real data from GitHub API with faked data based on extension SDL
 $0 ./ext-gh.graphql --extend https://api.github.com/graphql \\

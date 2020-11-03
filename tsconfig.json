@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "module": "commonjs",

@@ -12,6 +12,7 @@ import {
   isObjectType,
   isInterfaceType,
   ValuesOfCorrectTypeRule,
+  DefinitionNode,
 } from 'graphql';
 
 // FIXME
@@ -220,6 +221,8 @@ const fakeDefinitionAST = parse(/* GraphQL */ `
 
   scalar examples__JSON
   directive @examples(values: [examples__JSON]!) on FIELD_DEFINITION | SCALAR
+
+  directive @override on FIELD_DEFINITION
 `);
 
 function defToName(defNode) {
@@ -255,6 +258,14 @@ export function buildWithFakeDefinitions(
       return name === '' || !fakeDefinitionsSet.has(name);
     }),
   };
+
+  if (extensionSDL != null) {
+    // Remove fields marked with the @override annotation
+    filteredAST.definitions = filterFields(
+      filteredAST.definitions,
+      findFieldsWithOverrideDirective(extensionSDL),
+    );
+  }
 
   let schema = extendSchemaWithAST(schemaWithOnlyFakedDefinitions, filteredAST);
 
@@ -309,6 +320,55 @@ export function buildWithFakeDefinitions(
     return extendSchema(schema, extensionAST, {
       assumeValid: true,
       commentDescriptions: true,
+    });
+  }
+
+  function findFieldsWithOverrideDirective(
+    extensionSDL: Source,
+  ): Map<string, string[]> {
+    const res = new Map();
+    parseSDL(extensionSDL).definitions.map((d) => {
+      if (d.kind !== 'ObjectTypeExtension' || d.fields === undefined) {
+        return;
+      }
+
+      const filteredFields = d.fields
+        .filter(
+          (f) =>
+            f.directives?.findIndex((d) => d.name.value === 'override') !== -1,
+        )
+        .map((f) => f.name.value);
+
+      if (filteredFields.length > 0) {
+        res.set(d.name.value, filteredFields);
+      }
+    });
+
+    return res;
+  }
+
+  function filterFields(
+    definitions: DefinitionNode[],
+    fieldsToRemove: Map<string, string[]>,
+  ): DefinitionNode[] {
+    return definitions.map((d) => {
+      if (
+        d.kind === 'ObjectTypeDefinition' &&
+        d.fields !== undefined &&
+        fieldsToRemove.has(d.name.value)
+      ) {
+        const toRemove = fieldsToRemove.get(d.name.value);
+        const filteredFields = d.fields.filter(
+          (f) => toRemove!.indexOf(f.name.value) === -1,
+        );
+
+        return {
+          ...d,
+          fields: filteredFields,
+        };
+      }
+
+      return d;
     });
   }
 }

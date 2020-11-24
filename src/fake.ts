@@ -183,6 +183,14 @@ const fakeFunctions = {
   words: () => faker.random.words(),
   locale: () => faker.random.locale(),
 
+  // Vehicle section
+  vehicle: () => faker.vehicle.vehicle(),
+  vehicleColor: () => faker.vehicle.color(),
+  vehicleFuelType: () => faker.vehicle.fuel(),
+  vehicleManufacturer: () => faker.vehicle.manufacturer(),
+  vehicleModel: () => faker.vehicle.model(),
+  vehicleType: () => faker.vehicle.type(),
+
   // System section
   // Skipped: faker.system.fileName
   // TODO: Add ext and type

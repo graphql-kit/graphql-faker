@@ -148,6 +148,7 @@ const fakeDefinitionAST = parse(/* GraphQL */ `
     locale
 
     vehicle
+    vehicleColor
     vehicleFuelType
     vehicleManufacturer
     vehicleModel

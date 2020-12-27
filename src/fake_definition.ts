@@ -285,10 +285,10 @@ export function buildWithFakeDefinitions(
                 (correspondingExtensionTypeDefinition as any).fields.findIndex(
                   (extensionFieldDef) =>
                     overrideFields
-                      // match of field name is enough
-                      ? extensionFieldDef.name.value === fieldDef.name.value
-                      // check for both match of field name and `@override` directive usage
-                      : extensionFieldDef.name.value === fieldDef.name.value &&
+                      ? // match of field name is enough
+                        extensionFieldDef.name.value === fieldDef.name.value
+                      : // check for both match of field name and `@override` directive usage
+                        extensionFieldDef.name.value === fieldDef.name.value &&
                         extensionFieldDef.directives?.findIndex(
                           (x) => x.name.value === 'override',
                         ) !== -1,

@@ -46,3 +46,19 @@ src/editor/main.js
 src/editor/main.js.map
 src/editor/main.css
 src/editor/main.css.map
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json

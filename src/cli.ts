@@ -1,6 +1,6 @@
 import * as yargs from 'yargs';
 
-type Options = {
+export type Options = {
   fileName: string | undefined;
   port: number;
   corsOrigin: string | true;
@@ -8,6 +8,7 @@ type Options = {
   extendURL: string | undefined;
   headers: { [key: string]: string };
   forwardHeaders: [string];
+  overrideFields: boolean;
 };
 
 function builder(cmd) {
@@ -72,6 +73,12 @@ function builder(cmd) {
           return arr.map((str) => str.toLowerCase());
         },
       },
+      override: {
+        alias: 'or',
+        describe: 'Forces server to override existing field definitions',
+        type: 'boolean',
+        default: false,
+      },
     })
     .epilog(epilog)
     .strict();
@@ -90,6 +97,7 @@ export function parseCLI(commandCB: (options: Options) => void) {
       extendURL: argv.extend,
       headers: argv.header || {},
       forwardHeaders: argv.forwardHeaders || [],
+      overrideFields: argv.override,
     });
   }
 }

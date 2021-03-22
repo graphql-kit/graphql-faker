@@ -63,7 +63,7 @@
     "chalk": "4.0.0",
     "cors": "2.8.5",
     "express": "4.17.1",
-    "express-graphql": "0.9.0",
+    "express-graphql": "0.10.2",
     "faker": "4.1.0",
     "graphql": "14.5.8",
     "graphql-voyager": "1.0.0-rc.31",

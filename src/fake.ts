@@ -1,5 +1,4 @@
-//import * as faker from 'faker';
-const faker = require('faker');
+import * as faker from 'faker';
 import * as moment from 'moment';
 
 export function getRandomInt(min: number, max: number) {
@@ -208,10 +207,8 @@ export function fakeValue(type, options?, locale?) {
   const callArgs = argNames.map((name) => options[name]);
 
   const localeBackup = faker.locale;
-  //faker.setLocale(locale || localeBackup);
-  faker.locale = locale || localeBackup;
+  faker.setLocale(locale || localeBackup);
   const result = fakeGenerator.func(...callArgs);
-  //faker.setLocale(localeBackup);
-  faker.locale = localeBackup;
+  faker.setLocale(localeBackup);
   return result;
 }

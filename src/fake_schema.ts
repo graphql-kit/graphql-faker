@@ -143,7 +143,7 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
     return args && (() => getRandomItem(args.values));
   }
 
-  function getListLength(object): ListLengthArgs {
+  function getListLength(object) {
     const listLength = schema.getDirective('listLength');
     const args = getDirectiveArgs(listLength, object) as ListLengthArgs;
     return args ? getRandomInt(args.min, args.max) : getRandomInt(2, 4);

@@ -8,7 +8,8 @@
     "node": ">= 8.x"
   },
   "scripts": {
-    "test": "npm run prettier:check",
+    "test": "npm run check && npm run prettier:check",
+    "check": "tsc --noEmit",
     "start": "nodemon src/index.ts",
     "debug": "ts-node --inspect --compilerOptions '{\"inlineSources\":true}' src/index.ts",
     "start:editor": "webpack-dev-server --config webpack.config.js",

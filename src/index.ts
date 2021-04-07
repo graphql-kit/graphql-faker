@@ -8,7 +8,7 @@ import * as chalk from 'chalk';
 import * as open from 'open';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
-import * as graphqlHTTP from 'express-graphql';
+import { graphqlHTTP } from 'express-graphql';
 import { Source, printSchema } from 'graphql';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 

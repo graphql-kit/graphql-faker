@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "bin": "dist/index.js",
   "engines": {
-    "node": ">= 8.x"
+    "node": ">= 12.x"
   },
   "scripts": {
     "test": "npm run check && npm run prettier:check",

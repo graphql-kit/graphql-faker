@@ -113,7 +113,7 @@ function runServer(
       typeResolver: fakeTypeResolver,
       fieldResolver: fakeFieldResolver,
       customExecuteFn,
-      graphiql: true,
+      graphiql: { headerEditorEnabled: true },
     })),
   );
 

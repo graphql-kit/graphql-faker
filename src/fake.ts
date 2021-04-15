@@ -185,13 +185,11 @@ const fakeFunctions = {
   // System section
   // Skipped: faker.system.fileName
   // TODO: Add ext
-  // @ts-expect-error Remove once fix is merged https://github.com/DefinitelyTyped/DefinitelyTyped/pull/52229
   filename: () => faker.system.commonFileName(),
   mimeType: () => faker.system.mimeType(),
   // Skipped: faker.system.fileType
   // Skipped: faker.system.commonFileType
   // Skipped: faker.system.commonFileExt
-  // @ts-expect-error Remove once fix is merged https://github.com/DefinitelyTyped/DefinitelyTyped/pull/52229
   fileExtension: () => faker.system.fileExt(),
   semver: () => faker.system.semver(),
 };

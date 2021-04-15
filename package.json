@@ -36,7 +36,7 @@
   "devDependencies": {
     "@types/body-parser": "1.19.0",
     "@types/cors": "2.8.10",
-    "@types/faker": "5.5.0",
+    "@types/faker": "5.5.1",
     "@types/react": "16.9.35",
     "@types/react-dom": "16.9.8",
     "@types/yargs": "15.0.5",
@@ -54,7 +54,7 @@
     "style-loader": "1.2.1",
     "ts-loader": "7.0.5",
     "ts-node": "9.1.1",
-    "typescript": "4.2.3",
+    "typescript": "4.2.4",
     "webpack": "4.43.0",
     "webpack-cli": "3.3.11",
     "webpack-dev-server": "3.11.2"
@@ -65,7 +65,7 @@
     "cors": "2.8.5",
     "express": "4.17.1",
     "express-graphql": "0.12.0",
-    "faker": "5.5.2",
+    "faker": "5.5.3",
     "graphql": "14.7.0",
     "graphql-voyager": "1.0.0-rc.31",
     "moment": "2.29.1",

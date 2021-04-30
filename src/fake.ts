@@ -175,7 +175,8 @@ const fakeFunctions = {
   // Random section
   number: {
     args: ['minNumber', 'maxNumber', 'precisionNumber'],
-    func: (min, max, precision) => faker.datatype.number({ min, max, precision }),
+    func: (min, max, precision) =>
+      faker.datatype.number({ min, max, precision }),
   },
   uuid: () => faker.random.uuid(),
   word: () => faker.random.word(),

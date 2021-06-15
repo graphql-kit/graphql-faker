@@ -2,7 +2,7 @@ import * as faker from 'faker';
 import * as moment from 'moment';
 
 export function getRandomInt(min: number, max: number) {
-  return faker.random.number({ min, max });
+  return faker.datatype.number({ min, max });
 }
 
 export function getRandomItem<T>(array: ReadonlyArray<T>): T {
@@ -10,11 +10,11 @@ export function getRandomItem<T>(array: ReadonlyArray<T>): T {
 }
 
 export const stdScalarFakers = {
-  Int: () => faker.random.number({ min: 0, max: 99999, precision: 1 }),
-  Float: () => faker.random.number({ min: 0, max: 99999, precision: 0.01 }),
+  Int: () => faker.datatype.number({ min: 0, max: 99999, precision: 1 }),
+  Float: () => faker.datatype.number({ min: 0, max: 99999, precision: 0.01 }),
   String: () => 'string',
-  Boolean: () => faker.random.boolean(),
-  ID: () => toBase64(faker.random.number({ max: 9999999999 }).toString()),
+  Boolean: () => faker.datatype.boolean(),
+  ID: () => toBase64(faker.datatype.number({ max: 9999999999 }).toString()),
 };
 
 function toBase64(str) {
@@ -125,7 +125,7 @@ const fakeFunctions = {
       }
 
       if (randomize === true) {
-        url += '#' + faker.random.number();
+        url += '#' + faker.datatype.number();
       }
 
       return url;
@@ -175,7 +175,8 @@ const fakeFunctions = {
   // Random section
   number: {
     args: ['minNumber', 'maxNumber', 'precisionNumber'],
-    func: (min, max, precision) => faker.random.number({ min, max, precision }),
+    func: (min, max, precision) =>
+      faker.datatype.number({ min, max, precision }),
   },
   uuid: () => faker.random.uuid(),
   word: () => faker.random.word(),

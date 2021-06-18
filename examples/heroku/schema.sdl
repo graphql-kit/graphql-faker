@@ -1,0 +1,20 @@
+type Fighter {
+  _id: Int
+  beltThumbnail: String
+  draws: Int
+  firstName: String
+
+  """The ID of an object"""
+  id: ID!
+  lastName: String
+  link: String
+  losses: Int
+  nickname: String
+  profileImage: String
+  weightClass: String
+  wins: Int
+}
+
+type Query {
+  allFighters: [Fighter]
+}

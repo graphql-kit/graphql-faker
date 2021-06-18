@@ -97,6 +97,10 @@ To specify a custom file, mount a volume where the file is located to `/workdir`
 
 Because the process is running inside of the container, `--open` does not work.
 
+### Usage with Heroku
+
+An [example](./examples/heroku/README.md) has been added that deploys graphql-faker to Heroku using your custom schema.
+
 # Development
 
 ```sh

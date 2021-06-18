@@ -41,8 +41,12 @@ build/Release
 # es5 output dir
 /dist/
 
+# Apple
+.DS_Store
+
 # editor output
 src/editor/main.js
 src/editor/main.js.map
 src/editor/main.css
 src/editor/main.css.map
+

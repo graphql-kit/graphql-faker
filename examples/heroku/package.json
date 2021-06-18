@@ -1,0 +1,15 @@
+{
+	"name": "heroku",
+	"version": "1.0.0",
+	"description": "Deploy your graphl api to Heroku using graphql-faker",
+	"scripts": {
+		"convert-graphql-json": "npx graphql-json-to-sdl ./schema.json ./schema.sdl"
+	},
+	"author": {
+        "name": "Marc Schipperheyn",
+        "url": "https://github.com/mschipperheyn"
+    },
+	"license": "MIT",
+	"dependencies": {},
+	"devDependencies": {}
+}

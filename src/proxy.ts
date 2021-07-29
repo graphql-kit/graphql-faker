@@ -14,15 +14,17 @@ import {
 
 import { graphqlRequest } from './utils';
 
-export function getProxyExecuteFn(url, headers, forwardHeaders) {
+export function getProxyExecuteFn(url, headers, forwardHeaders, returnHeaders) {
   //TODO: proxy extensions
   return (args: ExecutionArgs) => {
     const { schema, document, contextValue, operationName } = args;
 
-    const request = contextValue as IncomingMessage;
+    const req = contextValue.req as IncomingMessage;
     const proxyHeaders = Object.create(null);
     for (const name of forwardHeaders) {
-      proxyHeaders[name] = request.headers[name];
+      if (req.headers[name]) {
+        proxyHeaders[name] = req.headers[name];
+      }
     }
 
     const strippedAST = removeUnusedVariables(
@@ -40,7 +42,12 @@ export function getProxyExecuteFn(url, headers, forwardHeaders) {
       print(operationAST),
       args.variableValues,
       operationName,
-    ).then((result) => proxyResponse(result, args));
+    ).then((response) => {
+      return response.json().then((result) => {
+        proxyResponseHeaders(returnHeaders, response.headers, contextValue.res);
+        return proxyResponse(result, args);
+      });
+    });
   };
 }
 
@@ -151,4 +158,14 @@ function removeUnusedVariables(documentAST) {
       }
     },
   });
+}
+
+function proxyResponseHeaders(returnHeaders, responseHeaders, res) {
+  const rawHeaders = responseHeaders.raw();
+  for (const name of returnHeaders) {
+    for (const value of rawHeaders[name] || []) {
+      // We need to append() rather than set() because some headers can occur multiple times (eg. Set-Cookie).
+      res.append(name, value);
+    }
+  }
 }

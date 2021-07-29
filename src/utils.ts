@@ -27,10 +27,12 @@ export function getRemoteSchema(
 ): Promise<GraphQLSchema> {
   return graphqlRequest(url, headers, getIntrospectionQuery())
     .then((response) => {
-      if (response.errors) {
-        throw Error(JSON.stringify(response.errors, null, 2));
-      }
-      return buildClientSchema(response.data);
+      return response.json().then((result) => {
+        if (result.errors) {
+          throw Error(JSON.stringify(result.errors, null, 2));
+        }
+        return buildClientSchema(result.data);
+      });
     })
     .catch((error) => {
       throw Error(`Can't get introspection from ${url}:\n${error.message}`);
@@ -55,10 +57,10 @@ export function graphqlRequest(
       query,
       variables,
     }),
-  }).then((responce) => {
-    if (responce.ok) return responce.json();
-    return responce.text().then((body) => {
-      throw Error(`${responce.status} ${responce.statusText}\n${body}`);
+  }).then((response) => {
+    if (response.ok) return response;
+    return response.text().then((body) => {
+      throw Error(`${response.status} ${response.statusText}\n${body}`);
     });
   });
 }

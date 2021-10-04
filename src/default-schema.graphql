@@ -13,7 +13,7 @@
 
 type Company {
   id: ID
-  name: String @fake(type: companyName)
+  name: String @stub(value: "This is a stubbed name")
   industry: String
     @examples(values: ["IT", "Manufacturing", "Medicine", "Media"])
   employees: [Employee!] @listLength(min: 5, max: 10)

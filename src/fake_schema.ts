@@ -34,9 +34,13 @@ type ListLengthArgs = {
   min: number;
   max: number;
 };
+type StubArgs = {
+  value: [any];
+};
 type DirectiveArgs = {
   fake?: FakeArgs;
   examples?: ExamplesArgs;
+  stub?: StubArgs;
   listLength?: ListLengthArgs;
 };
 
@@ -111,7 +115,9 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
       getExampleValueCB(fieldDef) ||
       getFakeValueCB(fieldDef) ||
       getExampleValueCB(type) ||
-      getFakeValueCB(type);
+      getFakeValueCB(type) ||
+      getStubValueCB(fieldDef) ||
+      getStubValueCB(type);
 
     if (isLeafType(type)) {
       if (valueCB) {
@@ -141,6 +147,12 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
     const examplesDirective = schema.getDirective('examples');
     const args = getDirectiveArgs(examplesDirective, object) as ExamplesArgs;
     return args && (() => getRandomItem(args.values));
+  }
+
+  function getStubValueCB(object) {
+    const stubDirective = schema.getDirective('stub');
+    const args = getDirectiveArgs(stubDirective, object) as StubArgs;
+    return args && (() => args.value);
   }
 
   function getListLength(object) {

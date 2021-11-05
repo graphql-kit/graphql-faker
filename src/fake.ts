@@ -178,7 +178,7 @@ const fakeFunctions = {
     func: (min, max, precision) =>
       faker.datatype.number({ min, max, precision }),
   },
-  uuid: () => faker.random.uuid(),
+  uuid: () => faker.datatype.uuid(),
   word: () => faker.random.word(),
   words: () => faker.random.words(),
   locale: () => faker.random.locale(),

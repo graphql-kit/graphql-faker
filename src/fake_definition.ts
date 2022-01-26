@@ -220,6 +220,8 @@ const fakeDefinitionAST = parse(/* GraphQL */ `
 
   scalar examples__JSON
   directive @examples(values: [examples__JSON]!) on FIELD_DEFINITION | SCALAR
+
+  directive @override on FIELD_DEFINITION
 `);
 
 function defToName(defNode) {
@@ -241,19 +243,62 @@ schemaWithOnlyFakedDefinitions['__validationErrors'] = [];
 export function buildWithFakeDefinitions(
   schemaSDL: Source,
   extensionSDL?: Source,
-  options?: { skipValidation: boolean },
+  options?: { skipValidation?: boolean; overrideFields?: boolean },
 ): GraphQLSchema {
   const skipValidation = options?.skipValidation ?? false;
-  const schemaAST = parseSDL(schemaSDL);
+  const overrideFields = options?.overrideFields ?? false;
 
-  // Remove Faker's own definitions that were added to have valid SDL for other
-  // tools, see: https://github.com/APIs-guru/graphql-faker/issues/75
+  const schemaAST = parseSDL(schemaSDL);
+  const extensionAST = extensionSDL && parseSDL(extensionSDL);
+
+  const extensionTypeDefinitions =
+    extensionAST !== undefined &&
+    extensionAST &&
+    extensionAST.definitions.filter(
+      (def) => def.kind === 'ObjectTypeExtension' && 'fields' in def,
+    );
+
   const filteredAST = {
     ...schemaAST,
-    definitions: schemaAST.definitions.filter((def) => {
-      const name = defToName(def);
-      return name === '' || !fakeDefinitionsSet.has(name);
-    }),
+    definitions: schemaAST.definitions
+      // Remove Faker's own definitions that were added to have valid SDL for other
+      // tools, see: https://github.com/APIs-guru/graphql-faker/issues/75
+      .filter((def) => {
+        const name = defToName(def);
+        return name === '' || !fakeDefinitionsSet.has(name);
+      })
+      // map DefinitionNodes to remove fields defined in the local schema from the remote schema
+      .map((schemaDefinition) => {
+        if (extensionTypeDefinitions) {
+          // looking for corresponding type definition extension in local schema
+          const correspondingExtensionTypeDefinition = extensionTypeDefinitions.find(
+            (extensionDef) =>
+              extensionDef.kind.slice(-9) === 'Extension' &&
+              (extensionDef as any).name.value ===
+                (schemaDefinition as any).name.value,
+          );
+
+          // remove field existing in both schemas from remote schema to make override possible
+          if (correspondingExtensionTypeDefinition) {
+            (schemaDefinition as any).fields = (schemaDefinition as any).fields.filter(
+              (fieldDef) =>
+                (correspondingExtensionTypeDefinition as any).fields.findIndex(
+                  (extensionFieldDef) =>
+                    overrideFields
+                      ? // match of field name is enough
+                        extensionFieldDef.name.value === fieldDef.name.value
+                      : // check for both match of field name and `@override` directive usage
+                        extensionFieldDef.name.value === fieldDef.name.value &&
+                        extensionFieldDef.directives?.findIndex(
+                          (x) => x.name.value === 'override',
+                        ) !== -1,
+                ) === -1,
+            );
+          }
+        }
+
+        return schemaDefinition;
+      }),
   };
 
   let schema = extendSchemaWithAST(schemaWithOnlyFakedDefinitions, filteredAST);
@@ -265,7 +310,7 @@ export function buildWithFakeDefinitions(
   });
 
   if (extensionSDL != null) {
-    schema = extendSchemaWithAST(schema, parseSDL(extensionSDL));
+    schema = extendSchemaWithAST(schema, extensionAST);
 
     for (const type of Object.values(schema.getTypeMap())) {
       if (isObjectType(type) || isInterfaceType(type)) {
@@ -292,9 +337,9 @@ export function buildWithFakeDefinitions(
 
   function extendSchemaWithAST(
     schema: GraphQLSchema,
-    extensionAST: DocumentNode,
+    extensionAST?: DocumentNode,
   ): GraphQLSchema {
-    if (!skipValidation) {
+    if (extensionAST && !skipValidation) {
       const errors = [
         ...validateSDL(extensionAST, schema),
         ...validate(schemaWithOnlyFakedDefinitions, extensionAST, [
@@ -306,10 +351,12 @@ export function buildWithFakeDefinitions(
       }
     }
 
-    return extendSchema(schema, extensionAST, {
-      assumeValid: true,
-      commentDescriptions: true,
-    });
+    return extensionAST
+      ? extendSchema(schema, extensionAST, {
+          assumeValid: true,
+          commentDescriptions: true,
+        })
+      : schema;
   }
 }
 

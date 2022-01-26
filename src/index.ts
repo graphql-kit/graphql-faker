@@ -12,7 +12,7 @@ import { graphqlHTTP } from 'express-graphql';
 import { Source, printSchema } from 'graphql';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 
-import { parseCLI } from './cli';
+import { Options, parseCLI } from './cli';
 import { getProxyExecuteFn } from './proxy';
 import { existsSync, readSDL, getRemoteSchema } from './utils';
 import { fakeTypeResolver, fakeFieldResolver } from './fake_schema';
@@ -80,12 +80,12 @@ parseCLI((options) => {
 });
 
 function runServer(
-  options,
+  options: Options,
   userSDL: Source,
   remoteSDL?: Source,
   customExecuteFn?,
 ) {
-  const { port, openEditor } = options;
+  const { port, openEditor, overrideFields } = options;
   const corsOptions = {
     credentials: true,
     origin: options.corsOrigin,
@@ -95,7 +95,7 @@ function runServer(
   let schema;
   try {
     schema = remoteSDL
-      ? buildWithFakeDefinitions(remoteSDL, userSDL)
+      ? buildWithFakeDefinitions(remoteSDL, userSDL, { overrideFields })
       : buildWithFakeDefinitions(userSDL);
   } catch (error) {
     if (error instanceof ValidationErrors) {
@@ -121,6 +121,8 @@ function runServer(
     res.status(200).json({
       userSDL: userSDL.body,
       remoteSDL: remoteSDL && remoteSDL.body,
+      // return cli options so frontend can properly work with fields overriding
+      serverOptions: options,
     });
   });
 
@@ -131,7 +133,7 @@ function runServer(
       fs.writeFileSync(fileName, req.body);
       userSDL = new Source(req.body, fileName);
       schema = remoteSDL
-        ? buildWithFakeDefinitions(remoteSDL, userSDL)
+        ? buildWithFakeDefinitions(remoteSDL, userSDL, { overrideFields })
         : buildWithFakeDefinitions(userSDL);
 
       const date = new Date().toLocaleString();

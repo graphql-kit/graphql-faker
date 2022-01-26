@@ -17,6 +17,7 @@ import GraphQLEditor from './GraphQLEditor/GraphQLEditor';
 import { ConsoleIcon, EditIcon, GithubIcon, VoyagerIcon } from './icons';
 
 import { Voyager } from 'graphql-voyager';
+import { Options } from '../cli';
 
 type FakeEditorState = {
   value: string | null;
@@ -28,6 +29,7 @@ type FakeEditorState = {
   schema: GraphQLSchema | null;
   unsavedSchema: GraphQLSchema | null;
   remoteSDL: string | null;
+  serverOptions: Options | null;
 };
 
 class FakeEditor extends React.Component<any, FakeEditorState> {
@@ -44,6 +46,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       status: null,
       schema: null,
       remoteSDL: null,
+      serverOptions: null,
     };
   }
 
@@ -75,11 +78,12 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     }).then((response) => response.json());
   }
 
-  updateValue({ userSDL, remoteSDL }) {
+  updateValue({ userSDL, remoteSDL, serverOptions }) {
     this.setState({
       value: userSDL,
       cachedValue: userSDL,
       remoteSDL,
+      serverOptions,
     });
     this.updateSDL(userSDL, true);
   }
@@ -92,7 +96,12 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     });
   }
 
-  buildSchema(userSDL, options?) {
+  buildSchema(userSDL, localOptions?) {
+    const options = {
+      ...localOptions,
+      overrideFields: this.state.serverOptions?.overrideFields,
+    };
+
     if (this.state.remoteSDL) {
       return buildWithFakeDefinitions(
         new Source(this.state.remoteSDL),

@@ -4,6 +4,7 @@
 # Also you can use following two directives to enhance fake data:
 #   - @fake
 #   - @examples
+#   - @override
 #
 # Press save or Cmd+Enter to apply the changes and update server. Switch to GraphiQL
 # on the left panel to immediately test your changes.

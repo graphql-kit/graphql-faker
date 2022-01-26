@@ -17,11 +17,12 @@ In the GIF below we add fields to types inside real GitHub API and you can make 
 
 ## How does it work?
 
-We use `@fake` directive to let you specify how to fake data. And if 60+ fakers is not enough for you, just use `@examples` directive to provide examples. Use `@listLength` directive to specify number of returned array items. Add a directive to any field or custom scalar definition:
+We use `@fake` directive to let you specify how to fake data. And if 60+ fakers is not enough for you, just use `@examples` directive to provide examples. Use `@override` directive to force existing field definition override. Use `@listLength` directive to specify number of returned array items. Add a directive to any field or custom scalar definition:
 
     type Person {
       name: String @fake(type: firstName)
       gender: String @examples(values: ["male", "female"])
+      age: Int @override @examples(values: [10, 20, 30])
       pets: [Pet] @listLength(min: 1, max: 10)
     }
 
@@ -73,6 +74,7 @@ Extend real data from GitHub API with faked data based on extension SDL (you can
 - `-H`, `--header` Specify headers to the proxied server in cURL format, e.g.: `Authorization: bearer XXXXXXXXX`
 - `--forward-headers` Specify which headers should be forwarded to the proxied server
 - `--co`, `--cors-origin` CORS: Specify the custom origin for the Access-Control-Allow-Origin header, by default it is the same as `Origin` header from the request
+- `--or`, `--override` Force overriding of existing field definitions (no need for `@override` directive). Frontend needs to be reloaded if option value has changed.
 - `-h`, `--help` Show help
 
 When specifying the `[SDL file]` after the `--forward-headers` option you need to prefix it with `--` to clarify it's not another header. For example:

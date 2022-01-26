@@ -7,7 +7,7 @@ import 'graphql-voyager/dist/voyager.css';
 import GraphiQL from 'graphiql';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import * as classNames from 'classnames';
+import classNames from 'classnames';
 
 import { Source, GraphQLSchema } from 'graphql';
 

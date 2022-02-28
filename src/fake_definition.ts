@@ -113,6 +113,13 @@ const fakeDefinitionAST = parse(/* GraphQL */ `
 
     hackerAbbreviation
     hackerPhrase
+    
+    """
+    datetime
+    by default ISO8601
+    """
+    dateTime
+    
 
     "An image url. Configure image with options: \`imageCategory\`, \`imageWidth\`, \`imageHeight\` and \`randomizeImageUrl\`"
     imageUrl
@@ -194,7 +201,7 @@ const fakeDefinitionAST = parse(/* GraphQL */ `
     passwordLength: Int
     "Only for type \`lorem\`"
     loremSize: fake__loremSize
-    "Only for types \`*Date\`. Example value: \`YYYY MM DD\`. [Full Specification](http://momentjs.com/docs/#/displaying/format/)"
+    "Only for types \`*Date, dateTime\`. Example value: \`YYYY MM DD\`. [Full Specification](http://momentjs.com/docs/#/displaying/format/)"
     dateFormat: String = "YYYY-MM-DDTHH:mm:ss[Z]"
     "Only for types \`betweenDate\`. Example value: \`1986-11-02\`."
     dateFrom: String = "2010-01-01"

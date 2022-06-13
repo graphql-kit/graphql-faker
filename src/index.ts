@@ -159,7 +159,7 @@ function runServer(
     ),
   );
 
-  const server = app.listen(port);
+  const server = app.listen(port, '0.0.0.0');
 
   const shutdown = () => {
     server.close();

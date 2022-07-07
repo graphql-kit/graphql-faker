@@ -68,7 +68,7 @@
     "faker": "5.5.3",
     "graphql": "14.7.0",
     "graphql-voyager": "1.0.0-rc.31",
-    "moment": "2.29.1",
+    "moment": "2.29.4",
     "node-fetch": "2.6.1",
     "open": "8.0.5",
     "yargs": "15.3.1"

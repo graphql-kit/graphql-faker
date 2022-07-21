@@ -20,7 +20,11 @@ import { ValidationErrors, buildWithFakeDefinitions } from './fake_definition';
 
 const log = console.log;
 
-parseCLI((options) => {
+function delay(ms: number) {
+  return new Promise( resolve => setTimeout(resolve, ms) );
+}
+
+parseCLI(async (options) => {
   const { extendURL, headers, forwardHeaders } = options;
   const fileName =
     options.fileName ||
@@ -38,9 +42,10 @@ parseCLI((options) => {
   let userSDL = existsSync(fileName) && readSDL(fileName);
 
   if (extendURL) {
-    // run in proxy mode
-    getRemoteSchema(extendURL, headers)
-      .then((schema) => {
+    // run in proxy mode and retry if remote schema is not found
+    while (true) {
+      try {
+        const schema = await getRemoteSchema(extendURL, headers);
         const remoteSDL = new Source(
           printSchema(schema),
           `Inrospection from "${extendURL}"`,
@@ -60,11 +65,13 @@ parseCLI((options) => {
 
         const executeFn = getProxyExecuteFn(extendURL, headers, forwardHeaders);
         runServer(options, userSDL, remoteSDL, executeFn);
-      })
-      .catch((error) => {
+        break;
+      } catch (error) {
         log(chalk.red(error.stack));
-        process.exit(1);
-      });
+        log("Retrying in 5 seconds...");
+        await delay(5000);
+      }
+    }
   } else {
     if (!userSDL) {
       userSDL = new Source(
@@ -105,6 +112,9 @@ function runServer(
   }
 
   app.options('/graphql', cors(corsOptions));
+  app.get('/graphql', (_, res) => {
+    res.status(200).json({});
+  });
   app.use(
     '/graphql',
     cors(corsOptions),
@@ -116,6 +126,13 @@ function runServer(
       graphiql: { headerEditorEnabled: true },
     })),
   );
+
+  app.get('/', (_, res) => {
+    res.status(200).json({});
+  });
+  app.get('/health', (_, res) => {
+    res.status(200).json({});
+  });
 
   app.get('/user-sdl', (_, res) => {
     res.status(200).json({

@@ -12,7 +12,7 @@
   "scripts": {
     "test": "npm run check && npm run prettier:check",
     "check": "tsc --noEmit",
-    "start": "nodemon src/index.ts",
+    "start": "nodemon src/index.ts --",
     "debug": "ts-node --inspect --compilerOptions '{\"inlineSources\":true}' src/index.ts",
     "start:editor": "webpack-dev-server --config webpack.config.js",
     "build:editor": "webpack -p --config webpack.config.js",

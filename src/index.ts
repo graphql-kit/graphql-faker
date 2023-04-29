@@ -9,6 +9,7 @@ import * as open from 'open';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 import { graphqlHTTP } from 'express-graphql';
+import { graphqlUploadExpress } from 'graphql-upload';
 import { Source, printSchema } from 'graphql';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 
@@ -108,6 +109,7 @@ function runServer(
   app.use(
     '/graphql',
     cors(corsOptions),
+    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
     graphqlHTTP(() => ({
       schema,
       typeResolver: fakeTypeResolver,

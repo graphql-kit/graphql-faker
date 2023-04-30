@@ -244,7 +244,7 @@ export function buildWithFakeDefinitions(
   options?: { skipValidation: boolean },
 ): GraphQLSchema {
   const skipValidation = options?.skipValidation ?? false;
-  const schemaAST = parseSDL(schemaSDL);
+  const schemaAST = parse(schemaSDL);
 
   // Remove Faker's own definitions that were added to have valid SDL for other
   // tools, see: https://github.com/APIs-guru/graphql-faker/issues/75
@@ -265,7 +265,7 @@ export function buildWithFakeDefinitions(
   });
 
   if (extensionSDL != null) {
-    schema = extendSchemaWithAST(schema, parseSDL(extensionSDL));
+    schema = extendSchemaWithAST(schema, parse(extensionSDL));
 
     for (const type of Object.values(schema.getTypeMap())) {
       if (isObjectType(type) || isInterfaceType(type)) {
@@ -308,7 +308,6 @@ export function buildWithFakeDefinitions(
 
     return extendSchema(schema, extensionAST, {
       assumeValid: true,
-      commentDescriptions: true,
     });
   }
 }
@@ -338,11 +337,4 @@ function getDefaultRootTypes(schema) {
     mutation: schema.getType('Mutation'),
     subscription: schema.getType('Subscription'),
   };
-}
-
-function parseSDL(sdl: Source) {
-  return parse(sdl, {
-    allowLegacySDLEmptyFields: true,
-    allowLegacySDLImplementsInterfaces: true,
-  });
 }

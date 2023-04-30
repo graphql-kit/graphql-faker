@@ -8,9 +8,11 @@ import * as chalk from 'chalk';
 import * as open from 'open';
 import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
-import { graphqlHTTP } from 'express-graphql';
 import { Source, printSchema } from 'graphql';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
+
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
 
 import { parseCLI } from './cli';
 import { getProxyExecuteFn } from './proxy';
@@ -79,7 +81,7 @@ parseCLI((options) => {
   }
 });
 
-function runServer(
+async function runServer(
   options,
   userSDL: Source,
   remoteSDL?: Source,
@@ -103,19 +105,29 @@ function runServer(
       process.exit(1);
     }
   }
+  // An optional function which will be used to execute instead of default `execute`
+  //  * from `graphql-js
+  // executor to gateway https://www.apollographql.com/docs/apollo-server/migration/#executor
+  //https://www.apollographql.com/docs/apollo-server/api/apollo-server/ only typeDef is required unless you provide a schema or a gateway
 
-  app.options('/graphql', cors(corsOptions));
-  app.use(
-    '/graphql',
-    cors(corsOptions),
-    graphqlHTTP(() => ({
-      schema,
-      typeResolver: fakeTypeResolver,
-      fieldResolver: fakeFieldResolver,
-      customExecuteFn,
-      graphiql: { headerEditorEnabled: true },
-    })),
-  );
+  const server = new ApolloServer({
+    schema,
+    resolvers: fakeTypeResolver,
+    fieldResolver: fakeFieldResolver,
+    gateway: {
+      async load() {
+        return customExecuteFn;
+      }
+    },
+    allowBatchedHttpRequests: true,
+  });
+
+  await server.start();
+
+  // Specify the path where we'd like to mount our server
+  app.use('/graphql', cors<cors.CorsRequest>(corsOptions), expressMiddleware(server));
+  // https://www.apollographql.com/docs/apollo-server/api/express-middleware/
+  // app.use('/graphql', cors<cors.CorsRequest>(), expressMiddleware(server));
 
   app.get('/user-sdl', (_, res) => {
     res.status(200).json({
@@ -159,10 +171,7 @@ function runServer(
     ),
   );
 
-  const server = app.listen(port);
-
   const shutdown = () => {
-    server.close();
     process.exit(0);
   };
 

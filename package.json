@@ -20,6 +20,7 @@
     "node": ">= 12.x"
   },
   "scripts": {
+    "preversion": "npm ci --ignore-scripts && npm test",
     "test": "npm run check && npm run prettier:check",
     "check": "tsc --noEmit",
     "start": "nodemon src/index.ts",

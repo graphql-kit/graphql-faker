@@ -9,6 +9,7 @@
     "type": "git",
     "url": "git+https://github.com/graphql-kit/graphql-faker.git"
   },
+  "funding": "https://github.com/graphql-kit/graphql-faker?sponsor=1",
   "bugs": {
     "url": "https://github.com/graphql-kit/graphql-faker/issues"
   },

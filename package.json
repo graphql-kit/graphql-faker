@@ -2,6 +2,16 @@
   "name": "graphql-faker",
   "version": "2.0.0-rc.25",
   "description": "Mock or extend your GraphQL API with faked data. No coding required",
+  "author": "IvanGoncharov <ivan.goncharov.ua@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/graphql-kit/graphql-faker#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/graphql-kit/graphql-faker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/graphql-kit/graphql-faker/issues"
+  },
   "main": "dist/index.js",
   "bin": {
     "graphql-faker": "dist/index.js"
@@ -23,16 +33,20 @@
     "prettier": "prettier --ignore-path .gitignore --write --list-different .",
     "prettier:check": "prettier --ignore-path .gitignore --check ."
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/graphql-kit/graphql-faker.git"
+  "dependencies": {
+    "body-parser": "1.19.0",
+    "chalk": "4.1.0",
+    "cors": "2.8.5",
+    "express": "4.17.1",
+    "express-graphql": "0.12.0",
+    "faker": "5.5.3",
+    "graphql": "14.7.0",
+    "graphql-voyager": "1.0.0-rc.31",
+    "moment": "2.29.1",
+    "node-fetch": "2.6.1",
+    "open": "8.0.5",
+    "yargs": "15.3.1"
   },
-  "author": "IvanGoncharov <ivan.goncharov.ua@gmail.com>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/graphql-kit/graphql-faker/issues"
-  },
-  "homepage": "https://github.com/graphql-kit/graphql-faker#readme",
   "devDependencies": {
     "@types/body-parser": "1.19.0",
     "@types/cors": "2.8.10",
@@ -58,19 +72,5 @@
     "webpack": "4.43.0",
     "webpack-cli": "3.3.11",
     "webpack-dev-server": "3.11.2"
-  },
-  "dependencies": {
-    "body-parser": "1.19.0",
-    "chalk": "4.1.0",
-    "cors": "2.8.5",
-    "express": "4.17.1",
-    "express-graphql": "0.12.0",
-    "faker": "5.5.3",
-    "graphql": "14.7.0",
-    "graphql-voyager": "1.0.0-rc.31",
-    "moment": "2.29.1",
-    "node-fetch": "2.6.1",
-    "open": "8.0.5",
-    "yargs": "15.3.1"
   }
 }

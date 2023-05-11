@@ -30,8 +30,8 @@
     "copy:graphql": "cp src/*.graphql dist/",
     "copy:editor": "mkdir \"dist/editor\" && cp src/editor/*.html dist/editor && cp src/editor/*.js dist/editor && cp src/editor/*.css dist/editor && cp src/editor/*.svg dist/editor",
     "build:all": "rm -rf dist && mkdir dist && npm run build:editor && npm run build:typescript && npm run copy:graphql && npm run copy:editor",
-    "prettier": "prettier --ignore-path .gitignore --write --list-different .",
-    "prettier:check": "prettier --ignore-path .gitignore --check ."
+    "prettier": "prettier --cache --cache-strategy metadata --ignore-path .gitignore --write --list-different .",
+    "prettier:check": "prettier --cache --cache-strategy metadata --ignore-path .gitignore --check ."
   },
   "dependencies": {
     "body-parser": "1.19.0",
@@ -62,7 +62,7 @@
     "marked": "1.1.0",
     "mini-css-extract-plugin": "0.9.0",
     "nodemon": "2.0.7",
-    "prettier": "2.2.1",
+    "prettier": "2.8.8",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "style-loader": "1.2.1",

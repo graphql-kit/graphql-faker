@@ -1,7 +1,8 @@
 ![GraphQL Faker logo](./docs/faker-logo-text.png)
 
 # GraphQL Faker
-graphql-kit[![Build Status](https://github.com/graphql-kit/graphql-faker/workflows/CI/badge.svg?branch=master)](https://github.com/graphql-kit/graphql-faker/actions?query=branch%3Amaster)
+
+[![Build Status](https://github.com/graphql-kit/graphql-faker/workflows/CI/badge.svg?branch=master)](https://github.com/graphql-kit/graphql-faker/actions?query=branch%3Amaster)
 [![npm](https://img.shields.io/npm/v/graphql-faker.svg)](https://www.npmjs.com/package/graphql-faker)
 [![David](https://img.shields.io/david/graphql-kit/graphql-faker.svg)](https://david-dm.org/graphql-kit/graphql-faker)
 [![David](https://img.shields.io/david/dev/graphql-kit/graphql-faker.svg)](https://david-dm.org/graphql-kit/graphql-faker?type=dev)

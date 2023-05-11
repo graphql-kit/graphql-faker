@@ -25,14 +25,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/APIs-guru/graphql-faker.git"
+    "url": "git+https://github.com/graphql-kit/graphql-faker.git"
   },
-  "author": "APIs.guru <founders@apis.guru>",
+  "author": "IvanGoncharov <ivan.goncharov.ua@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/APIs-guru/graphql-faker/issues"
+    "url": "https://github.com/graphql-kit/graphql-faker/issues"
   },
-  "homepage": "https://github.com/APIs-guru/graphql-faker#readme",
+  "homepage": "https://github.com/graphql-kit/graphql-faker#readme",
   "devDependencies": {
     "@types/body-parser": "1.19.0",
     "@types/cors": "2.8.10",

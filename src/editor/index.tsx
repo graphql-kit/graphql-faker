@@ -184,7 +184,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       <div className="faker-editor-container">
         <nav>
           <div className="logo">
-            <a href="https://github.com/APIs-guru/graphql-faker" target="_blank">
+            <a href="https://github.com/graphql-kit/graphql-faker" target="_blank">
               {' '}
               <img src="./logo.svg" />{' '}
             </a>
@@ -221,7 +221,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
               <VoyagerIcon />{' '}
             </li>
             <li className="-pulldown -link">
-              <a href="https://github.com/APIs-guru/graphql-faker" target="_blank">
+              <a href="https://github.com/graphql-kit/graphql-faker" target="_blank">
                 {' '}
                 <GithubIcon />{' '}
               </a>

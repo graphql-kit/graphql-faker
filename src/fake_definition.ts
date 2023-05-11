@@ -247,7 +247,7 @@ export function buildWithFakeDefinitions(
   const schemaAST = parseSDL(schemaSDL);
 
   // Remove Faker's own definitions that were added to have valid SDL for other
-  // tools, see: https://github.com/APIs-guru/graphql-faker/issues/75
+  // tools, see: https://github.com/graphql-kit/graphql-faker/issues/75
   const filteredAST = {
     ...schemaAST,
     definitions: schemaAST.definitions.filter((def) => {

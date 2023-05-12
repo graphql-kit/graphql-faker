@@ -91,7 +91,7 @@ const fakeDefinitionAST = parse(/* GraphQL */ `
     dbEngine
 
     """
-    By default returns dates beetween 2000-01-01 and 2030-01-01.
+    By default returns dates between 2000-01-01 and 2030-01-01.
     Configure date format with options \`dateFormat\` \`dateFrom\` \`dateTo\`.
     """
     date

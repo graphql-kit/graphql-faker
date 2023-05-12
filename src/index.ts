@@ -43,7 +43,7 @@ parseCLI((options) => {
       .then((schema) => {
         const remoteSDL = new Source(
           printSchema(schema),
-          `Inrospection from "${extendURL}"`,
+          `Introspection from "${extendURL}"`,
         );
 
         if (!userSDL) {
@@ -188,8 +188,8 @@ function prettyPrintValidationErrors(validationErrors: ValidationErrors) {
   log(
     chalk.red(
       subErrors.length > 1
-        ? `\nYour schema constains ${subErrors.length} validation errors: \n`
-        : `\nYour schema constains a validation error: \n`,
+        ? `\nYour schema contains ${subErrors.length} validation errors: \n`
+        : `\nYour schema contains a validation error: \n`,
     ),
   );
 

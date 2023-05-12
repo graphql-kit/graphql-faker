@@ -55,10 +55,10 @@ export function graphqlRequest(
       query,
       variables,
     }),
-  }).then((responce) => {
-    if (responce.ok) return responce.json();
-    return responce.text().then((body) => {
-      throw Error(`${responce.status} ${responce.statusText}\n${body}`);
+  }).then((response) => {
+    if (response.ok) return response.json();
+    return response.text().then((body) => {
+      throw Error(`${response.status} ${response.statusText}\n${body}`);
     });
   });
 }

@@ -196,7 +196,7 @@ const fakeFunctions = {
 };
 
 Object.keys(fakeFunctions).forEach((key) => {
-  var value = fakeFunctions[key];
+  const value = fakeFunctions[key];
   if (typeof fakeFunctions[key] === 'function')
     fakeFunctions[key] = { args: [], func: value };
 });

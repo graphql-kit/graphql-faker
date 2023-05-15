@@ -19,10 +19,6 @@ rules:
   'import/no-extraneous-dependencies':
     [error, { devDependencies: ['**/*.config.{js,ts}', 'tests/**'] }]
 
-  # FIXME: remove below rules
-  'no-var': off
-  'prefer-const': off
-
 overrides:
   - files: '**/*.js'
     env:
@@ -45,9 +41,6 @@ overrides:
         [error, index-signature]
 
       # FIXME: remove below rules
-      'no-empty': off
-      'no-var': off
-      'prefer-const': off
       'react/jsx-no-target-blank': off
       'import/no-duplicates': off
       'import/no-extraneous-dependencies': off

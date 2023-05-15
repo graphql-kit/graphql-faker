@@ -126,7 +126,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   }
 
   saveUserSDL = () => {
-    let { value, hasUnsavedChanges } = this.state;
+    const { value, hasUnsavedChanges } = this.state;
     if (!hasUnsavedChanges) return;
 
     if (!this.updateSDL(value)) return;
@@ -161,7 +161,9 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
     let unsavedSchema = null as GraphQLSchema | null;
     try {
       unsavedSchema = this.buildSchema(val, { skipValidation: true });
-    } catch (_) {}
+    } catch (_) {
+      // FIXME
+    }
 
     this.setState((prevState) => ({
       ...prevState,
@@ -172,7 +174,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   };
 
   render() {
-    let { value, activeTab, schema, hasUnsavedChanges, unsavedSchema } = this.state;
+    const { value, activeTab, schema, hasUnsavedChanges, unsavedSchema } = this.state;
     if (value == null || schema == null) {
       return <div className="faker-editor-container">Loading...</div>;
     }

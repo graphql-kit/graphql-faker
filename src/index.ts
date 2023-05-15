@@ -193,7 +193,7 @@ function prettyPrintValidationErrors(validationErrors: ValidationErrors) {
   );
 
   for (const error of subErrors) {
-    let [message, ...otherLines] = error.toString().split('\n');
+    const [message, ...otherLines] = error.toString().split('\n');
     log([chalk.yellow(message), ...otherLines].join('\n') + '\n\n');
   }
 }

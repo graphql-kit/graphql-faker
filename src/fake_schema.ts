@@ -1,25 +1,25 @@
 import * as assert from 'assert';
 import {
-  isListType,
-  isNonNullType,
+  defaultFieldResolver,
+  defaultTypeResolver,
+  getDirectiveValues,
+  getNullableType,
+  GraphQLFieldResolver,
+  GraphQLLeafType,
+  GraphQLTypeResolver,
+  isAbstractType,
   isCompositeType,
   isEnumType,
   isLeafType,
-  isAbstractType,
-  getNullableType,
-  GraphQLLeafType,
-  GraphQLTypeResolver,
-  GraphQLFieldResolver,
-  defaultTypeResolver,
-  defaultFieldResolver,
-  getDirectiveValues,
+  isListType,
+  isNonNullType,
 } from 'graphql';
 
 import {
+  fakeValue,
   getRandomInt,
   getRandomItem,
   stdScalarFakers,
-  fakeValue,
 } from './fake';
 
 type FakeArgs = {

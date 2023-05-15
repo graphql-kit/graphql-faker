@@ -1,19 +1,18 @@
 import {
-  Kind,
-  Source,
+  buildASTSchema,
   DocumentNode,
+  extendSchema,
   GraphQLError,
   GraphQLSchema,
-  parse,
-  validate,
-  extendSchema,
-  buildASTSchema,
-  validateSchema,
-  isObjectType,
   isInterfaceType,
+  isObjectType,
+  Kind,
+  parse,
+  Source,
+  validate,
+  validateSchema,
   ValuesOfCorrectTypeRule,
 } from 'graphql';
-
 // FIXME
 import { validateSDL } from 'graphql/validation/validate';
 

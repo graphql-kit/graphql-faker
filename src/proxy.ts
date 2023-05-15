@@ -1,16 +1,16 @@
-import { IncomingMessage } from 'http';
 import {
-  Kind,
-  print,
-  visit,
   execute,
-  TypeInfo,
-  isAbstractType,
-  visitWithTypeInfo,
-  separateOperations,
   ExecutionArgs,
   GraphQLError,
+  isAbstractType,
+  Kind,
+  print,
+  separateOperations,
+  TypeInfo,
+  visit,
+  visitWithTypeInfo,
 } from 'graphql';
+import { IncomingMessage } from 'http';
 
 import { graphqlRequest } from './utils';
 

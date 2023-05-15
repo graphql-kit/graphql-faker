@@ -1,12 +1,12 @@
 import * as fs from 'fs';
-import * as fetch from 'node-fetch';
-import { Headers } from 'node-fetch';
 import {
-  Source,
-  GraphQLSchema,
   buildClientSchema,
   getIntrospectionQuery,
+  GraphQLSchema,
+  Source,
 } from 'graphql';
+import * as fetch from 'node-fetch';
+import { Headers } from 'node-fetch';
 
 export function existsSync(filePath: string): boolean {
   try {

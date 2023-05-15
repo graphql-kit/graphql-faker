@@ -4,19 +4,16 @@ import './GraphQLEditor/editor.css';
 import 'graphiql/graphiql.css';
 import 'graphql-voyager/dist/voyager.css';
 
+import classNames from 'classnames';
 import GraphiQL from 'graphiql';
+import { GraphQLSchema, Source } from 'graphql';
+import { Voyager } from 'graphql-voyager';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import classNames from 'classnames';
-
-import { Source, GraphQLSchema } from 'graphql';
 
 import { buildWithFakeDefinitions } from '../fake_definition';
-
 import GraphQLEditor from './GraphQLEditor/GraphQLEditor';
 import { ConsoleIcon, EditIcon, GithubIcon, VoyagerIcon } from './icons';
-
-import { Voyager } from 'graphql-voyager';
 
 type FakeEditorState = {
   value: string | null;

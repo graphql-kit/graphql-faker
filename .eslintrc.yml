@@ -14,7 +14,7 @@ extends:
   - 'plugin:react/jsx-runtime'
   - 'plugin:react-hooks/recommended'
 rules:
-  # 'simple-import-sort/imports': error
+  'simple-import-sort/imports': error
   'simple-import-sort/exports': error
   'import/no-extraneous-dependencies':
     [error, { devDependencies: ['**/*.config.{js,ts}', 'tests/**'] }]
@@ -22,7 +22,6 @@ rules:
   # FIXME: remove below rules
   'no-var': off
   'prefer-const': off
-  'simple-import-sort/imports': off
 
 overrides:
   - files: '**/*.js'

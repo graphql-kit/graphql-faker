@@ -1,22 +1,21 @@
 #!/usr/bin/env node
 
+import * as bodyParser from 'body-parser';
+import * as chalk from 'chalk';
+import * as cors from 'cors';
+import * as express from 'express';
+import { graphqlHTTP } from 'express-graphql';
 import * as fs from 'fs';
+import { printSchema, Source } from 'graphql';
+import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
+import * as open from 'open';
 import * as path from 'path';
 
-import * as express from 'express';
-import * as chalk from 'chalk';
-import * as open from 'open';
-import * as cors from 'cors';
-import * as bodyParser from 'body-parser';
-import { graphqlHTTP } from 'express-graphql';
-import { Source, printSchema } from 'graphql';
-import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
-
 import { parseCLI } from './cli';
+import { buildWithFakeDefinitions, ValidationErrors } from './fake_definition';
+import { fakeFieldResolver, fakeTypeResolver } from './fake_schema';
 import { getProxyExecuteFn } from './proxy';
-import { existsSync, readSDL, getRemoteSchema } from './utils';
-import { fakeTypeResolver, fakeFieldResolver } from './fake_schema';
-import { ValidationErrors, buildWithFakeDefinitions } from './fake_definition';
+import { existsSync, getRemoteSchema, readSDL } from './utils';
 
 const log = console.log;
 

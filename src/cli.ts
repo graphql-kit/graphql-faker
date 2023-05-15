@@ -1,6 +1,6 @@
 import * as yargs from 'yargs';
 
-type Options = {
+interface Options {
   fileName: string | undefined;
   port: number;
   corsOrigin: string | true;
@@ -8,7 +8,7 @@ type Options = {
   extendURL: string | undefined;
   headers: { [key: string]: string };
   forwardHeaders: [string];
-};
+}
 
 function builder(cmd) {
   return cmd

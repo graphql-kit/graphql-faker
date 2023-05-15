@@ -119,7 +119,7 @@ function runServer(
   app.get('/user-sdl', (_, res) => {
     res.status(200).json({
       userSDL: userSDL.body,
-      remoteSDL: remoteSDL && remoteSDL.body,
+      remoteSDL: remoteSDL?.body,
     });
   });
 

@@ -314,7 +314,7 @@ export function buildWithFakeDefinitions(
 
 // FIXME: move to 'graphql-js'
 export class ValidationErrors extends Error {
-  subErrors: GraphQLError[];
+  subErrors: ReadonlyArray<GraphQLError>;
 
   constructor(errors) {
     const message = errors.map((error) => error.message).join('\n\n');

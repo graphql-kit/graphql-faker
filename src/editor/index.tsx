@@ -15,7 +15,7 @@ import { buildWithFakeDefinitions } from '../fake_definition';
 import GraphQLEditor from './GraphQLEditor/GraphQLEditor';
 import { ConsoleIcon, EditIcon, GithubIcon, VoyagerIcon } from './icons';
 
-type FakeEditorState = {
+interface FakeEditorState {
   value: string | null;
   cachedValue: string | null;
   activeTab: number;
@@ -25,7 +25,7 @@ type FakeEditorState = {
   schema: GraphQLSchema | null;
   unsavedSchema: GraphQLSchema | null;
   remoteSDL: string | null;
-};
+}
 
 class FakeEditor extends React.Component<any, FakeEditorState> {
   constructor(props) {
@@ -52,7 +52,8 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       });
 
     window.onbeforeunload = () => {
-      if (this.state.hasUnsavedChanges) return 'You have unsaved changes. Exit?';
+      if (this.state.hasUnsavedChanges)
+        return 'You have unsaved changes. Exit?';
     };
   }
 
@@ -174,7 +175,8 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
   };
 
   render() {
-    const { value, activeTab, schema, hasUnsavedChanges, unsavedSchema } = this.state;
+    const { value, activeTab, schema, hasUnsavedChanges, unsavedSchema } =
+      this.state;
     if (value == null || schema == null) {
       return <div className="faker-editor-container">Loading...</div>;
     }
@@ -183,7 +185,11 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
       <div className="faker-editor-container">
         <nav>
           <div className="logo">
-            <a href="https://github.com/graphql-kit/graphql-faker" target="_blank">
+            <a
+              href="https://github.com/graphql-kit/graphql-faker"
+              target="_blank"
+              rel="noreferrer"
+            >
               {' '}
               <img src="./logo.svg" />{' '}
             </a>
@@ -220,7 +226,11 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
               <VoyagerIcon />{' '}
             </li>
             <li className="-pulldown -link">
-              <a href="https://github.com/graphql-kit/graphql-faker" target="_blank">
+              <a
+                href="https://github.com/graphql-kit/graphql-faker"
+                target="_blank"
+                rel="noreferrer"
+              >
                 {' '}
                 <GithubIcon />{' '}
               </a>

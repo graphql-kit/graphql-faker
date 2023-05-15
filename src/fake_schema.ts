@@ -22,23 +22,23 @@ import {
   stdScalarFakers,
 } from './fake';
 
-type FakeArgs = {
+interface FakeArgs {
   type: string;
   options: { [key: string]: any };
   locale: string;
-};
-type ExamplesArgs = {
+}
+interface ExamplesArgs {
   values: [any];
-};
-type ListLengthArgs = {
+}
+interface ListLengthArgs {
   min: number;
   max: number;
-};
-type DirectiveArgs = {
+}
+interface DirectiveArgs {
   fake?: FakeArgs;
   examples?: ExamplesArgs;
   listLength?: ListLengthArgs;
-};
+}
 
 export const fakeTypeResolver: GraphQLTypeResolver<unknown, unknown> = async (
   value,

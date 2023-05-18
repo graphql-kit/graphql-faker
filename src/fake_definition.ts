@@ -147,6 +147,13 @@ const fakeDefinitionAST = parse(/* GraphQL */ `
     words
     locale
 
+    vehicle
+    vehicleColor
+    vehicleFuelType
+    vehicleManufacturer
+    vehicleModel
+    vehicleType
+
     filename
     mimeType
     fileExtension

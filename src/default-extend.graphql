@@ -8,7 +8,7 @@
 # Press save or Cmd+Enter to apply the changes and update server. Switch to GraphiQL
 # on the left panel to immediately test your changes.
 #
-# Developed with ❤️ by APIs.guru | https://github.com/APIs-guru/graphql-faker
+# Made in Ukraine 🇺🇦 | https://github.com/graphql-kit/graphql-faker
 
 extend type ___RootTypeName___ {
   pet: Pet

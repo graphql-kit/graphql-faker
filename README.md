@@ -2,11 +2,11 @@
 
 # GraphQL Faker
 
-[![Build Status](https://github.com/APIs-guru/graphql-faker/workflows/CI/badge.svg?branch=master)](https://github.com/APIs-guru/graphql-faker/actions?query=branch%3Amaster)
+[![Build Status](https://github.com/graphql-kit/graphql-faker/workflows/CI/badge.svg?branch=master)](https://github.com/graphql-kit/graphql-faker/actions?query=branch%3Amaster)
 [![npm](https://img.shields.io/npm/v/graphql-faker.svg)](https://www.npmjs.com/package/graphql-faker)
-[![David](https://img.shields.io/david/APIs-guru/graphql-faker.svg)](https://david-dm.org/APIs-guru/graphql-faker)
-[![David](https://img.shields.io/david/dev/APIs-guru/graphql-faker.svg)](https://david-dm.org/APIs-guru/graphql-faker?type=dev)
-[![npm](https://img.shields.io/npm/l/graphql-faker.svg)](https://github.com/APIs-guru/graphql-faker/blob/master/LICENSE)
+[![David](https://img.shields.io/david/graphql-kit/graphql-faker.svg)](https://david-dm.org/graphql-kit/graphql-faker)
+[![David](https://img.shields.io/david/dev/graphql-kit/graphql-faker.svg)](https://david-dm.org/graphql-kit/graphql-faker?type=dev)
+[![npm](https://img.shields.io/npm/l/graphql-faker.svg)](https://github.com/graphql-kit/graphql-faker/blob/master/LICENSE)
 [![docker](https://img.shields.io/docker/build/apisguru/graphql-faker.svg)](https://hub.docker.com/r/apisguru/graphql-faker/)
 
 Mock your future API or extend the existing API with realistic data from [faker.js](https://github.com/Marak/faker.js). **No coding required**.

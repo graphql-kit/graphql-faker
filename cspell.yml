@@ -1,0 +1,42 @@
+language: en
+useGitignore: true
+ignorePaths:
+  # Excluded from spelling check
+  - cspell.yml
+  - package.json
+dictionaries:
+  - fullstack
+
+overrides:
+  - filename: '**/*.svg'
+    dictionaries:
+      - html
+      - fonts
+
+  - filename: 'README.md'
+    dictionaries:
+      - docker
+
+words:
+  - DDTHH
+  - SFNS
+  - Graphi # GraphiQL
+  - SWAPI
+  - markselection
+  - foldmarker
+  - foldgutter
+  - guttermarker
+  - activeline
+  - lastline
+  - nargs
+  - keymap
+
+  - apisguru
+  # Upstream
+  - proxied
+  - proxying
+  - typeahead
+  - scrollbars
+  - subword
+  - graphiql
+  - iban

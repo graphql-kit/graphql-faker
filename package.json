@@ -2,6 +2,17 @@
   "name": "graphql-faker",
   "version": "2.0.0-rc.25",
   "description": "Mock or extend your GraphQL API with faked data. No coding required",
+  "author": "IvanGoncharov <ivan.goncharov.ua@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/graphql-kit/graphql-faker#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/graphql-kit/graphql-faker.git"
+  },
+  "funding": "https://github.com/graphql-kit/graphql-faker?sponsor=1",
+  "bugs": {
+    "url": "https://github.com/graphql-kit/graphql-faker/issues"
+  },
   "main": "dist/index.js",
   "bin": {
     "graphql-faker": "dist/index.js"
@@ -10,7 +21,8 @@
     "node": ">= 12.x"
   },
   "scripts": {
-    "test": "npm run check && npm run prettier:check",
+    "test": "npm run lint && npm run check && npm run prettier:check && npm run check:spelling",
+    "lint": "eslint --cache --max-warnings 0 .",
     "check": "tsc --noEmit",
     "start": "nodemon src/index.ts",
     "debug": "ts-node --inspect --compilerOptions '{\"inlineSources\":true}' src/index.ts",
@@ -21,44 +33,9 @@
     "copy:editor": "mkdir \"dist/editor\" && cp src/editor/*.html dist/editor && cp src/editor/*.js dist/editor && cp src/editor/*.css dist/editor && cp src/editor/*.svg dist/editor",
     "build:all": "rm -rf dist && mkdir dist && npm run build:editor && npm run build:typescript && npm run copy:graphql && npm run copy:editor",
     "prepare": "npm run build:all",
-    "prettier": "prettier --ignore-path .gitignore --write --list-different .",
-    "prettier:check": "prettier --ignore-path .gitignore --check ."
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/APIs-guru/graphql-faker.git"
-  },
-  "author": "APIs.guru <founders@apis.guru>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/APIs-guru/graphql-faker/issues"
-  },
-  "homepage": "https://github.com/APIs-guru/graphql-faker#readme",
-  "devDependencies": {
-    "@types/body-parser": "1.19.0",
-    "@types/cors": "2.8.10",
-    "@types/faker": "5.5.1",
-    "@types/react": "16.9.35",
-    "@types/react-dom": "16.9.8",
-    "@types/yargs": "15.0.5",
-    "classnames": "2.3.1",
-    "codemirror": "5.60.0",
-    "codemirror-graphql": "0.11.6",
-    "css-loader": "3.5.3",
-    "graphiql": "0.17.5",
-    "marked": "1.1.0",
-    "mini-css-extract-plugin": "0.9.0",
-    "nodemon": "2.0.7",
-    "prettier": "2.2.1",
-    "react": "16.13.1",
-    "react-dom": "16.13.1",
-    "style-loader": "1.2.1",
-    "ts-loader": "7.0.5",
-    "ts-node": "9.1.1",
-    "typescript": "4.2.4",
-    "webpack": "4.43.0",
-    "webpack-cli": "3.3.11",
-    "webpack-dev-server": "3.11.2"
+    "prettier": "prettier --cache --cache-strategy metadata --ignore-path .gitignore --write --list-different .",
+    "prettier:check": "prettier --cache --cache-strategy metadata --ignore-path .gitignore --check .",
+    "check:spelling": "cspell --cache --no-progress '**/*'"
   },
   "dependencies": {
     "body-parser": "1.19.0",
@@ -73,5 +50,39 @@
     "node-fetch": "2.6.1",
     "open": "8.0.5",
     "yargs": "15.3.1"
+  },
+  "devDependencies": {
+    "@types/body-parser": "1.19.0",
+    "@types/cors": "2.8.10",
+    "@types/faker": "5.5.1",
+    "@types/react": "16.9.35",
+    "@types/react-dom": "16.9.8",
+    "@types/yargs": "15.0.5",
+    "@typescript-eslint/eslint-plugin": "5.59.5",
+    "@typescript-eslint/parser": "5.59.5",
+    "classnames": "2.3.1",
+    "codemirror": "5.60.0",
+    "codemirror-graphql": "0.11.6",
+    "cspell": "6.31.1",
+    "css-loader": "3.5.3",
+    "eslint": "8.40.0",
+    "eslint-plugin-import": "2.27.5",
+    "eslint-plugin-react": "7.32.2",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "eslint-plugin-simple-import-sort": "10.0.0",
+    "graphiql": "0.17.5",
+    "marked": "1.1.0",
+    "mini-css-extract-plugin": "0.9.0",
+    "nodemon": "2.0.7",
+    "prettier": "2.8.8",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "style-loader": "1.2.1",
+    "ts-loader": "7.0.5",
+    "ts-node": "9.1.1",
+    "typescript": "4.2.4",
+    "webpack": "4.43.0",
+    "webpack-cli": "3.3.11",
+    "webpack-dev-server": "3.11.2"
   }
 }

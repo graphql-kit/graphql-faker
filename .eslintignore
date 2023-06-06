@@ -1,0 +1,10 @@
+# Copied from '.gitignore', please keep it in sync.
+/.eslintcache
+/.cspellcache
+/node_modules
+/dist
+/*.graphql
+src/editor/main.js
+src/editor/main.js.map
+src/editor/main.css
+src/editor/main.css.map

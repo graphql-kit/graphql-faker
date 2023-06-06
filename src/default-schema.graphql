@@ -9,7 +9,7 @@
 # on the left panel to immediately test your changes.
 # This tool also supports extending existing APIs. Check graphql-faker --help
 #
-# Developed with ❤️ by APIs.guru | https://github.com/APIs-guru/graphql-faker
+# Made in Ukraine 🇺🇦 | https://github.com/graphql-kit/graphql-faker
 
 type Company {
   id: ID

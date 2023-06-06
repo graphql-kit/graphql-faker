@@ -114,7 +114,7 @@ export default class GraphQLEditor extends React.Component<GraphQLEditorProps> {
   }
 
   componentDidUpdate(prevProps) {
-    // Ensure the changes caused by this update are not interpretted as
+    // Ensure the changes caused by this update are not interpreted as
     // user-input changes which could otherwise result in an infinite
     // event loop.
     this.ignoreChangeEvent = true;

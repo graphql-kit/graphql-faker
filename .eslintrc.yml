@@ -1,0 +1,78 @@
+parserOptions:
+  sourceType: script
+env:
+  es2022: true
+  browser: true
+plugins: ['simple-import-sort', 'react', 'react-hooks']
+settings:
+  react:
+    version: detect
+extends:
+  - 'eslint:recommended'
+  - 'plugin:import/recommended'
+  - 'plugin:react/recommended'
+  - 'plugin:react/jsx-runtime'
+  - 'plugin:react-hooks/recommended'
+rules:
+  # 'simple-import-sort/imports': error
+  'simple-import-sort/exports': error
+  'import/no-extraneous-dependencies':
+    [error, { devDependencies: ['**/*.config.{js,ts}', 'tests/**'] }]
+
+  # FIXME: remove below rules
+  'no-var': off
+  'prefer-const': off
+  'simple-import-sort/imports': off
+
+overrides:
+  - files: '**/*.js'
+    env:
+      node: true
+
+  - files: ['**/*.ts', '**/*.tsx']
+    parser: '@typescript-eslint/parser'
+    parserOptions:
+      sourceType: module
+      project: ['tsconfig.json', 'src/editor/tsconfig.json']
+    plugins: ['@typescript-eslint']
+    extends:
+      - 'plugin:import/typescript'
+      - 'plugin:@typescript-eslint/strict'
+      - 'plugin:@typescript-eslint/recommended'
+      - 'plugin:@typescript-eslint/recommended-requiring-type-checking'
+    rules:
+      # '@typescript-eslint/array-type': [error, { default: generic }]
+      '@typescript-eslint/consistent-indexed-object-style':
+        [error, index-signature]
+
+      # FIXME: remove below rules
+      'no-empty': off
+      'no-var': off
+      'prefer-const': off
+      'react/jsx-no-target-blank': off
+      'import/no-duplicates': off
+      'import/no-extraneous-dependencies': off
+      '@typescript-eslint/unbound-method': off
+      '@typescript-eslint/no-floating-promises': off
+      '@typescript-eslint/no-unused-vars': off
+      '@typescript-eslint/array-type': off
+      '@typescript-eslint/prefer-optional-chain': off
+      '@typescript-eslint/no-base-to-string': off
+      '@typescript-eslint/no-misused-promises': off
+      '@typescript-eslint/consistent-type-definitions': off
+      '@typescript-eslint/prefer-nullish-coalescing': off
+
+      # FIXME: blocked by improper type checking should be fixed
+      # after we switch TSC in strict mode
+      '@typescript-eslint/no-unnecessary-boolean-literal-compare': off
+      '@typescript-eslint/no-explicit-any': off
+      '@typescript-eslint/dot-notation': off
+      '@typescript-eslint/no-dynamic-delete': off
+      '@typescript-eslint/restrict-plus-operands': off
+      '@typescript-eslint/no-unsafe-call': off
+      '@typescript-eslint/no-unsafe-return': off
+      '@typescript-eslint/no-unsafe-argument': off
+      '@typescript-eslint/no-unsafe-assignment': off
+      '@typescript-eslint/no-unsafe-member-access': off
+      '@typescript-eslint/no-unnecessary-condition': off
+      '@typescript-eslint/restrict-template-expressions': off

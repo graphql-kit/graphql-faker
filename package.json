@@ -18,7 +18,7 @@
     "graphql-faker": "dist/index.js"
   },
   "engines": {
-    "node": ">= 12.x"
+    "node": ">= 18.12.0"
   },
   "scripts": {
     "test": "npm run lint && npm run check && npm run prettier:check && npm run check:spelling",
@@ -54,6 +54,7 @@
     "@types/body-parser": "1.19.0",
     "@types/cors": "2.8.10",
     "@types/faker": "5.5.1",
+    "@types/node": "20.2.5",
     "@types/react": "16.9.35",
     "@types/react-dom": "16.9.8",
     "@types/yargs": "15.0.5",

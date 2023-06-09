@@ -1,0 +1,9 @@
+name: Push
+on: push
+permissions: {}
+jobs:
+  ci:
+    permissions:
+      contents: read # for actions/checkout
+      security-events: write # for codeql-action
+    uses: ./.github/workflows/ci.yml

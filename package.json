@@ -31,7 +31,7 @@
     "build:typescript": "tsc",
     "copy:graphql": "cp src/*.graphql dist/",
     "copy:editor": "mkdir \"dist/editor\" && cp src/editor/*.html dist/editor && cp src/editor/*.js dist/editor && cp src/editor/*.css dist/editor && cp src/editor/*.svg dist/editor",
-    "build:all": "rm -rf dist && mkdir dist && npm run build:editor && npm run build:typescript && npm run copy:graphql && npm run copy:editor",
+    "build": "rm -rf dist && mkdir dist && npm run build:editor && npm run build:typescript && npm run copy:graphql && npm run copy:editor",
     "prettier": "prettier --cache --ignore-path .gitignore --write --list-different .",
     "prettier:check": "prettier --cache --ignore-path .gitignore --check .",
     "check:spelling": "cspell --cache --no-progress '**/*'"

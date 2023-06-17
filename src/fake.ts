@@ -1,8 +1,10 @@
-import * as faker from 'faker';
+import { allFakers } from '@faker-js/faker';
 import * as moment from 'moment';
+const baseLocal = 'en';
+let faker = allFakers[baseLocal];
 
 export function getRandomInt(min: number, max: number) {
-  return faker.datatype.number({ min, max });
+  return faker.number.int({ min, max });
 }
 
 export function getRandomItem<T>(array: ReadonlyArray<T>): T {
@@ -10,11 +12,11 @@ export function getRandomItem<T>(array: ReadonlyArray<T>): T {
 }
 
 export const stdScalarFakers = {
-  Int: () => faker.datatype.number({ min: 0, max: 99999, precision: 1 }),
-  Float: () => faker.datatype.number({ min: 0, max: 99999, precision: 0.01 }),
+  Int: () => faker.number.float({ min: 0, max: 99999, precision: 1 }),
+  Float: () => faker.number.float({ min: 0, max: 99999, precision: 0.01 }),
   String: () => 'string',
   Boolean: () => faker.datatype.boolean(),
-  ID: () => toBase64(faker.datatype.number({ max: 9999999999 }).toString()),
+  ID: () => toBase64(faker.number.int({ max: 9999999999 }).toString()),
 };
 
 function toBase64(str) {
@@ -23,33 +25,33 @@ function toBase64(str) {
 
 const fakeFunctions = {
   // Address section
-  zipCode: () => faker.address.zipCode(),
-  city: () => faker.address.city(),
+  zipCode: () => faker.location.zipCode(),
+  city: () => faker.location.city(),
   // Skipped: faker.address.cityPrefix
   // Skipped: faker.address.citySuffix
-  streetName: () => faker.address.streetName(),
+  streetName: () => faker.location.street(),
   streetAddress: {
     args: ['useFullAddress'],
-    func: (useFullAddress) => faker.address.streetAddress(useFullAddress),
+    func: (useFullAddress) => faker.location.streetAddress(useFullAddress),
   },
   // Skipped: faker.address.streetSuffix
   // Skipped: faker.address.streetPrefix
-  secondaryAddress: () => faker.address.secondaryAddress(),
-  county: () => faker.address.county(),
-  country: () => faker.address.country(),
-  countryCode: () => faker.address.countryCode(),
-  state: () => faker.address.state(),
-  stateAbbr: () => faker.address.stateAbbr(),
-  latitude: () => faker.address.latitude(),
-  longitude: () => faker.address.longitude(),
+  secondaryAddress: () => faker.location.secondaryAddress(),
+  county: () => faker.location.county(),
+  country: () => faker.location.country(),
+  countryCode: () => faker.location.countryCode(),
+  state: () => faker.location.state(),
+  stateAbbr: () => faker.location.state({ abbreviated: true }),
+  latitude: () => faker.location.latitude(),
+  longitude: () => faker.location.longitude(),
 
   // Commerce section
-  colorName: () => faker.commerce.color(),
+  colorName: () => faker.color.human(),
   productCategory: () => faker.commerce.department(),
   productName: () => faker.commerce.productName(),
   money: {
     args: ['minMoney', 'maxMoney', 'decimalPlaces'],
-    func: (min, max, dec) => faker.commerce.price(min, max, dec),
+    func: (min, max, dec) => faker.commerce.price({ min, max, dec }),
   },
   // Skipped: faker.commerce.productAdjective
   productMaterial: () => faker.commerce.productMaterial(),
@@ -57,10 +59,10 @@ const fakeFunctions = {
 
   // Company section
   // Skipped: faker.company.companySuffixes
-  companyName: () => faker.company.companyName(),
+  companyName: () => faker.company.name(),
   // Skipped: faker.company.companySuffix
   companyCatchPhrase: () => faker.company.catchPhrase(),
-  companyBs: () => faker.company.bs(),
+  companyBs: () => faker.company.buzzPhrase(),
   // Skipped: faker.company.catchPhraseAdjective
   // Skipped: faker.company.catchPhraseDescriptor
   // Skipped: faker.company.catchPhraseNoun
@@ -125,7 +127,7 @@ const fakeFunctions = {
       }
 
       if (randomize === true) {
-        url += '#' + faker.datatype.number();
+        url += '#' + faker.number.int();
       }
 
       return url;
@@ -162,26 +164,25 @@ const fakeFunctions = {
   },
 
   // Name section
-  firstName: () => faker.name.firstName(),
-  lastName: () => faker.name.lastName(),
-  fullName: () => faker.name.findName(),
-  jobTitle: () => faker.name.jobTitle(),
+  firstName: () => faker.person.firstName(),
+  lastName: () => faker.person.lastName(),
+  fullName: () => faker.person.fullName(),
+  jobTitle: () => faker.person.jobTitle(),
 
   // Phone section
-  phoneNumber: () => faker.phone.phoneNumber(),
+  phoneNumber: () => faker.phone.number(),
   // Skipped: faker.phone.phoneNumberFormat
   // Skipped: faker.phone.phoneFormats
 
   // Random section
   number: {
     args: ['minNumber', 'maxNumber', 'precisionNumber'],
-    func: (min, max, precision) =>
-      faker.datatype.number({ min, max, precision }),
+    func: (min, max, precision) => faker.number.float({ min, max, precision }),
   },
-  uuid: () => faker.random.uuid(),
-  word: () => faker.random.word(),
-  words: () => faker.random.words(),
-  locale: () => faker.random.locale(),
+  uuid: () => faker.string.uuid(),
+  word: () => faker.lorem.word(),
+  words: () => faker.lorem.words(),
+  locale: () => faker.location.countryCode(),
 
   // System section
   // Skipped: faker.system.fileName
@@ -201,15 +202,14 @@ Object.keys(fakeFunctions).forEach((key) => {
     fakeFunctions[key] = { args: [], func: value };
 });
 
-export function fakeValue(type, options?, locale?) {
+export function fakeValue(type, options?, locale?: string) {
   const fakeGenerator = fakeFunctions[type];
   const argNames = fakeGenerator.args;
   //TODO: add check
   const callArgs = argNames.map((name) => options[name]);
-
-  const localeBackup = faker.locale;
-  faker.setLocale(locale || localeBackup);
+  const desiredLocal = allFakers[locale || baseLocal];
+  faker = desiredLocal;
   const result = fakeGenerator.func(...callArgs);
-  faker.setLocale(localeBackup);
+  faker = allFakers[baseLocal];
   return result;
 }

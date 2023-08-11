@@ -1,107 +1,171 @@
-import * as yargs from 'yargs';
+import { basename }  from 'node:path';
+import { parseArgs } from 'node:util';
+
+import * as chalk from 'chalk';
 
 interface Options {
-  fileName: string | undefined;
+  fileName: string;
   port: number;
   corsOrigin: string | true;
   openEditor: boolean;
   extendURL: string | undefined;
   headers: { [key: string]: string };
-  forwardHeaders: [string];
+  forwardHeaders: ReadonlyArray<string>;
 }
 
-function builder(cmd) {
-  return cmd
-    .positional('SDLFile', {
-      describe:
-        'path to file with SDL. If this argument is omitted Faker uses default file name',
-      type: 'string',
-      nargs: 1,
-    })
-    .options({
-      port: {
-        alias: 'p',
-        describe: 'HTTP Port',
-        type: 'number',
-        requiresArg: true,
-        default: process.env.PORT || 9002,
-      },
-      open: {
-        alias: 'o',
-        describe: 'Open page with SDL editor and GraphiQL in browser',
-        type: 'boolean',
-      },
-      'cors-origin': {
-        alias: 'co',
-        describe:
-          'CORS: Specify the custom origin for the Access-Control-Allow-Origin header, by default it is the same as `Origin` header from the request',
-        type: 'string',
-        requiresArg: true,
-        default: true,
-      },
-      extend: {
-        alias: 'e',
-        describe: 'URL to existing GraphQL server to extend',
-        type: 'string',
-        requiresArg: true,
-      },
-      header: {
-        alias: 'H',
-        describe:
-          'Specify headers to the proxied server in cURL format, e.g.: "Authorization: bearer XXXXXXXXX"',
-        array: true,
-        type: 'string',
-        requiresArg: true,
-        implies: 'extend',
-        coerce(arr) {
-          const headers = {};
-          for (const str of arr) {
-            const [, name, value] = str.match(/(.*?):(.*)/);
-            headers[name.toLowerCase()] = value.trim();
-          }
-          return headers;
-        },
-      },
-      'forward-headers': {
-        describe:
-          'Specify which headers should be forwarded to the proxied server',
-        array: true,
-        type: 'string',
-        implies: 'extend',
-        coerce(arr) {
-          return arr.map((str) => str.toLowerCase());
-        },
-      },
-    })
-    .epilog(epilog)
-    .strict();
-}
+export function parseCLI(): Options {
+  const [_, execPath] = process.argv;
+  const execName = basename(execPath);
 
-export function parseCLI(commandCB: (options: Options) => void) {
-  yargs.usage('$0 [SDLFile]', '', builder, handler).help('h').alias('h', 'help')
-    .argv;
+  const { values, positionals } = parser();
 
-  function handler(argv) {
-    commandCB({
-      fileName: argv.SDLFile,
-      port: argv.port,
-      corsOrigin: argv['cors-origin'],
-      openEditor: argv.open,
-      extendURL: argv.extend,
-      headers: argv.header || {},
-      forwardHeaders: argv.forwardHeaders || [],
-    });
+  if (values.help === false) {
+    process.stderr.write(helpMessage());
+    process.exit(0);
+  }
+
+  if (values.extend == null) {
+    if (values.header.length > 0) {
+      reportError(
+        'Specifying `--header, -H` is supported only in `--extend, -e` mode',
+      );
+    }
+    if (values['forward-headers'].length > 0) {
+      reportError(
+        'Specifying `--forward-headers` is supported only in `--extend, -e` mode',
+      );
+    }
+  }
+
+  if (positionals.length > 1) {
+    reportError('Please specify single SDL file');
+  }
+
+  let fileName = positionals[0];
+  if (fileName == null) {
+    fileName = values.extend
+      ? './schema_extension.faker.graphql'
+      : './schema.faker.graphql';
+    process.stderr.write(
+      chalk.yellow(
+        `Default file ${chalk.magenta(fileName)} is used. ` +
+          `Specify [SDLFile] as argument to change.`,
+      ),
+    );
+  }
+
+  return {
+    fileName,
+    port: parsePortNumber(values.port),
+    corsOrigin: values['cors-origin'] ?? values.co ?? true,
+    openEditor: values.open,
+    extendURL: values.extend,
+    headers: Object.fromEntries(values.header.map(parseHeader)),
+    forwardHeaders: values['forward-headers'].map((str) => str.toLowerCase()),
+  };
+
+  function parsePortNumber(str: string): number {
+    const value = Number.parseInt(str);
+    if (!Number.isInteger(value) || value <= 0 || value.toString() !== str) {
+      reportError('Invalid port number: ' + str);
+    }
+    return value;
+  }
+
+  function parseHeader(str: string): [name: string, value: string] {
+    const [name, ...rest] = str.split(':');
+    if (rest.length === 0) {
+      reportError(`Header value "${str}" is missing colon`);
+    }
+    return [name, rest.join(':')];
+  }
+
+  function helpMessage(): string {
+    return `${execName} [SDLFile]
+
+    Positionals:
+      SDLFile  path to file with SDL. If this argument is omitted Faker uses default
+               file name                                                    [string]
+
+    Options:
+      --version            Show version number                             [boolean]
+      -h, --help           Show help                                       [boolean]
+      --port, -p           HTTP Port                        [number] [default: 9002]
+      --open, -o           Open page with SDL editor and GraphiQL in browser
+                                                                           [boolean]
+      --cors-origin, --co  CORS: Specify the custom origin for the
+                           Access-Control-Allow-Origin header, by default it is the
+                           same as \`Origin\` header from the request
+                                                                            [string]
+      --extend, -e         URL to existing GraphQL server to extend         [string]
+      --header, -H         Specify headers to the proxied server in cURL format,
+                           e.g.: "Authorization: bearer XXXXXXXXX"           [array]
+      --forward-headers    Specify which headers should be forwarded to the proxied
+                           server                                            [array]
+
+    Examples:
+
+    # Mock GraphQL API based on example SDL and open interactive editor
+    ${execName} --open
+
+    # Extend real data from SWAPI with faked data based on extension SDL
+    ${execName} ./ext-swapi.graphql --extend http://swapi.apis.guru/
+
+    # Extend real data from GitHub API with faked data based on extension SDL
+    ${execName} ./ext-gh.graphql --extend https://api.github.com/graphql \
+    --header "Authorization: bearer <TOKEN>"
+    `;
+  }
+
+  function parser() {
+    try {
+      return parseArgs({
+        strict: true,
+        allowPositionals: true,
+        options: {
+          help: {
+            short: 'h',
+            type: 'boolean',
+          },
+          port: {
+            short: 'p',
+            type: 'string',
+            default: process.env.PORT || '9002',
+          },
+          open: {
+            short: 'o',
+            type: 'boolean',
+          },
+          'cors-origin': {
+            type: 'string',
+          },
+          // alias for 'cors-origin'
+          co: { type: 'string' },
+          extend: {
+            short: 'e',
+            type: 'string',
+          },
+          header: {
+            short: 'H',
+            type: 'string',
+            multiple: true,
+            default: [],
+          },
+          'forward-headers': {
+            type: 'string',
+            multiple: true,
+            default: [],
+          },
+        },
+      });
+    } catch (error) {
+      reportError(error.message);
+    }
+  }
+
+  function reportError(message: string): never {
+    process.stderr.write(`${execName}: ${message}\n`);
+    process.exit(1);
   }
 }
 
-const epilog = `Examples:
-
-# Mock GraphQL API based on example SDL and open interactive editor
-$0 --open
-
-# Extend real data from SWAPI with faked data based on extension SDL
-$0 ./ext-swapi.graphql --extend http://swapi.apis.guru/
-
-# Extend real data from GitHub API with faked data based on extension SDL
-$0 ./ext-gh.graphql --extend https://api.github.com/graphql \\
---header "Authorization: bearer <TOKEN>"`;

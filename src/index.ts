@@ -19,64 +19,52 @@ import { existsSync, getRemoteSchema, readSDL } from './utils';
 
 const log = console.log;
 
-parseCLI((options) => {
-  const { extendURL, headers, forwardHeaders } = options;
-  const fileName =
-    options.fileName ||
-    (extendURL ? './schema_extension.faker.graphql' : './schema.faker.graphql');
+const cliOptions = parseCLI();
 
-  if (!options.fileName) {
-    log(
-      chalk.yellow(
-        `Default file ${chalk.magenta(fileName)} is used. ` +
-          `Specify [file] parameter to change.`,
-      ),
-    );
-  }
+const { fileName, extendURL, headers, forwardHeaders } = cliOptions;
 
-  let userSDL = existsSync(fileName) && readSDL(fileName);
+let userSDL = existsSync(fileName) && readSDL(fileName);
 
-  if (extendURL) {
-    // run in proxy mode
-    getRemoteSchema(extendURL, headers)
-      .then((schema) => {
-        const remoteSDL = new Source(
-          printSchema(schema),
-          `Introspection from "${extendURL}"`,
+if (extendURL) {
+  // run in proxy mode
+  getRemoteSchema(extendURL, headers)
+    .then((schema) => {
+      const remoteSDL = new Source(
+        printSchema(schema),
+        `Introspection from "${extendURL}"`,
+      );
+
+      if (!userSDL) {
+        let body = fs.readFileSync(
+          path.join(__dirname, 'default-extend.graphql'),
+          'utf-8',
         );
 
-        if (!userSDL) {
-          let body = fs.readFileSync(
-            path.join(__dirname, 'default-extend.graphql'),
-            'utf-8',
-          );
+        const rootTypeName = schema.getQueryType().name;
+        body = body.replace('___RootTypeName___', rootTypeName);
 
-          const rootTypeName = schema.getQueryType().name;
-          body = body.replace('___RootTypeName___', rootTypeName);
+        userSDL = new Source(body, fileName);
+      }
 
-          userSDL = new Source(body, fileName);
-        }
-
-        const executeFn = getProxyExecuteFn(extendURL, headers, forwardHeaders);
-        runServer(options, userSDL, remoteSDL, executeFn);
-      })
-      .catch((error) => {
-        log(chalk.red(error.stack));
-        process.exit(1);
-      });
-  } else {
-    if (!userSDL) {
-      userSDL = new Source(
-        fs.readFileSync(
-          path.join(__dirname, 'default-schema.graphql'),
-          'utf-8',
-        ),
-        fileName,
-      );
-    }
-    runServer(options, userSDL);
+      const executeFn = getProxyExecuteFn(extendURL, headers, forwardHeaders);
+      runServer(cliOptions, userSDL, remoteSDL, executeFn);
+    })
+    .catch((error) => {
+      log(chalk.red(error.stack));
+      process.exit(1);
+    });
+} else {
+  if (!userSDL) {
+    userSDL = new Source(
+      fs.readFileSync(
+        path.join(__dirname, 'default-schema.graphql'),
+        'utf-8',
+      ),
+      fileName,
+    );
   }
-});
+  runServer(cliOptions, userSDL);
+}
 
 function runServer(
   options,

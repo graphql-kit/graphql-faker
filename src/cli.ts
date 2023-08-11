@@ -1,4 +1,4 @@
-import { basename }  from 'node:path';
+import { basename } from 'node:path';
 import { parseArgs } from 'node:util';
 
 import * as chalk from 'chalk';
@@ -168,4 +168,3 @@ export function parseCLI(): Options {
     process.exit(1);
   }
 }
-

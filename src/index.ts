@@ -56,10 +56,7 @@ if (extendURL) {
 } else {
   if (!userSDL) {
     userSDL = new Source(
-      fs.readFileSync(
-        path.join(__dirname, 'default-schema.graphql'),
-        'utf-8',
-      ),
+      fs.readFileSync(path.join(__dirname, 'default-schema.graphql'), 'utf-8'),
       fileName,
     );
   }

@@ -11,6 +11,8 @@
 #
 # Made in Ukraine 🇺🇦 | https://github.com/graphql-kit/graphql-faker
 
+scalar DateTime
+
 type Company {
   id: ID
   name: String @fake(type: companyName)
@@ -26,6 +28,7 @@ type Employee {
   address: String @fake(type: streetAddress, options: { useFullAddress: true })
   subordinates: [Employee!] @listLength(min: 0, max: 3)
   company: Company
+  hiredAt: DateTime @fake(type: dateTime, options: {dateFrom: "2022-01-01", dateTo: "2022-02-28"})
 }
 
 type Query {

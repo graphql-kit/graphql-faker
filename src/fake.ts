@@ -94,6 +94,19 @@ const fakeFunctions = {
     args: ['dateFormat'],
     func: (dateFormat) => moment(faker.date.recent()).format(dateFormat),
   },
+  // DateTime section
+  dateTime: {
+    args: ['dateFormat', 'dateFrom', 'dateTo'],
+    func: (dateFormat, dateFrom, dateTo) => {
+      const date = moment(faker.date.between(dateFrom, dateTo));
+      const datetime = moment(faker.datatype.datetime());
+      return datetime.dayOfYear(date.dayOfYear())
+        .year(date.year())
+        .format(dateFormat)
+        .toString()
+      
+    }
+  },
 
   // Finance section
   financeAccountName: () => faker.finance.accountName(),

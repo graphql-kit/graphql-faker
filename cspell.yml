@@ -18,6 +18,7 @@ overrides:
       - docker
 
 words:
+  - positionals
   - DDTHH
   - SFNS
   - Graphi # GraphiQL

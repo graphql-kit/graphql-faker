@@ -1,3 +1,4 @@
+import { allFakers } from '@faker-js/faker';
 import {
   buildASTSchema,
   DocumentNode,
@@ -18,43 +19,7 @@ import { validateSDL } from 'graphql/validation/validate';
 
 const fakeDefinitionAST = parse(/* GraphQL */ `
   enum fake__Locale {
-    az
-    cz
-    de
-    de_AT
-    de_CH
-    en
-    en_AU
-    en_BORK
-    en_CA
-    en_GB
-    en_IE
-    en_IND
-    en_US
-    en_au_ocker
-    es
-    es_MX
-    fa
-    fr
-    fr_CA
-    ge
-    id_ID
-    it
-    ja
-    ko
-    nb_NO
-    nep
-    nl
-    pl
-    pt_BR
-    ru
-    sk
-    sv
-    tr
-    uk
-    vi
-    zh_CN
-    zh_TW
+    ${Object.keys(allFakers).join(' ')}
   }
 
   enum fake__Types {

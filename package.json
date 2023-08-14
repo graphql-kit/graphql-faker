@@ -1,6 +1,6 @@
 {
   "name": "graphql-faker",
-  "version": "2.0.0-rc.25",
+  "version": "2.0.0",
   "description": "Mock or extend your GraphQL API with faked data. No coding required",
   "author": "IvanGoncharov <ivan.goncharov.ua@gmail.com>",
   "license": "MIT",

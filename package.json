@@ -21,6 +21,7 @@
     "node": ">= 18.12.0"
   },
   "scripts": {
+    "preversion": "npm ci --ignore-scripts && npm test",
     "test": "npm run lint && npm run check && npm run prettier:check && npm run check:spelling",
     "lint": "eslint --cache --max-warnings 0 .",
     "check": "tsc --noEmit",

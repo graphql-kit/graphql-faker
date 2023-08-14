@@ -4,7 +4,6 @@ import './GraphQLEditor/editor.css';
 import 'graphiql/graphiql.css';
 import 'graphql-voyager/dist/voyager.css';
 
-import classNames from 'classnames';
 import GraphiQL from 'graphiql';
 import { GraphQLSchema, Source } from 'graphql';
 import { Voyager } from 'graphql-voyager';
@@ -191,30 +190,27 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
           <ul>
             <li
               onClick={() => this.switchTab(0)}
-              className={classNames({
-                '-active': activeTab === 0,
-                '-unsaved': hasUnsavedChanges,
-              })}
+              className={`${activeTab === 0 ? '-active' : ''} ${
+                hasUnsavedChanges ? '-unsaved' : ''
+              }`}
             >
               {' '}
               <EditIcon />{' '}
             </li>
             <li
               onClick={() => !hasUnsavedChanges && this.switchTab(1)}
-              className={classNames({
-                '-disabled': hasUnsavedChanges,
-                '-active': activeTab === 1,
-              })}
+              className={`${activeTab === 1 ? '-active' : ''} ${
+                hasUnsavedChanges ? '-unsaved' : ''
+              }`}
             >
               {' '}
               <ConsoleIcon />{' '}
             </li>
             <li
               onClick={() => !hasUnsavedChanges && this.switchTab(2)}
-              className={classNames({
-                '-disabled': hasUnsavedChanges,
-                '-active': activeTab === 2,
-              })}
+              className={`${activeTab === 2 ? '-active' : ''} ${
+                hasUnsavedChanges ? '-unsaved' : ''
+              }`}
             >
               {' '}
               <VoyagerIcon />{' '}
@@ -232,11 +228,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
           </ul>
         </nav>
         <div className="tabs-container">
-          <div
-            className={classNames('tab-content', 'editor-container', {
-              '-active': activeTab === 0,
-            })}
-          >
+          <div className={`tab-content editor-container ${activeTab === 0 ? '-active' : ''}`}>
             <GraphQLEditor
               schema={unsavedSchema || schema}
               onEdit={this.onEdit}
@@ -245,9 +237,7 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
             />
             <div className="action-panel">
               <a
-                className={classNames('material-button', {
-                  '-disabled': !hasUnsavedChanges,
-                })}
+                className={`material-button ${hasUnsavedChanges ? '' : '-disabled'}`}
                 onClick={this.saveUserSDL}
               >
                 <span> Save </span>
@@ -258,18 +248,10 @@ class FakeEditor extends React.Component<any, FakeEditorState> {
               </div>
             </div>
           </div>
-          <div
-            className={classNames('tab-content', {
-              '-active': activeTab === 1,
-            })}
-          >
+          <div className={`tab-content ${activeTab === 1 ? '-active' : ''}`}>
             <GraphiQL fetcher={(e) => this.graphQLFetcher(e)} schema={schema} />
           </div>
-          <div
-            className={classNames('tab-content', {
-              '-active': activeTab === 2,
-            })}
-          >
+          <div className={'tab-content ' + (activeTab === 2 ? '-active' : '')}>
             <Voyager
               introspection={(e) => this.graphQLFetcher({ query: e })}
               hideSettings={activeTab !== 2}

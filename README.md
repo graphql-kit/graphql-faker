@@ -93,7 +93,7 @@ graphql-faker --forward-headers Authorization --extend http://example.com/graphq
 
 To specify a custom file, mount a volume where the file is located to `/workdir`:
 
-    docker run -v=${PWD}:/workdir apisguru/graphql-faker path/to/schema.sdl
+    docker run -p=9002:9002 -v=${PWD}:/workdir apisguru/graphql-faker path/to/schema.sdl
 
 Because the process is running inside of the container, `--open` does not work.
 

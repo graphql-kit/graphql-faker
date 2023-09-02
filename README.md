@@ -25,6 +25,12 @@ We use `@fake` directive to let you specify how to fake data. And if 60+ fakers 
       pets: [Pet] @listLength(min: 1, max: 10)
     }
 
+The `@override` directive can also be used to specify that an existing field should be overriden:
+
+    extend type Post {
+      acticle: String! @override @fake(type: lorem, options: { loremSize: paragraphs })
+    }
+
 No need to remember or read any docs. Autocompletion is included!
 
 ## Features

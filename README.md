@@ -27,6 +27,11 @@ We use `@fake` directive to let you specify how to fake data. And if 60+ fakers 
 
 No need to remember or read any docs. Autocompletion is included!
 
+## Endpoint
+
+Use the following URL to query data
+`http://localhost:<port>/graphql`
+
 ## Features
 
 - 60+ different types of faked data e.g. `streetAddress`, `firstName`, `lastName`, `imageUrl`, `lorem`, `semver`

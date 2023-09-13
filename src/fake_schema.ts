@@ -48,6 +48,8 @@ interface DirectiveArgs {
   fake?: FakeArgs;
   examples?: ExamplesArgs;
   listLength?: ListLengthArgs;
+  value?: ValueArgs;
+  values?: ValuesArgs;
 }
 
 export const fakeTypeResolver: GraphQLTypeResolver<unknown, unknown> = async (

@@ -29,7 +29,17 @@ interface FakeArgs {
 }
 interface ExamplesArgs {
   values: [any];
+  options: { [key: string]: any };
 }
+
+interface ValueArgs {
+  value: [any];
+}
+
+interface ValuesArgs {
+  values: [any];
+}
+
 interface ListLengthArgs {
   min: number;
   max: number;
@@ -97,6 +107,16 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
   return resolved;
 
   function fakeValueOfType(type) {
+    const plainValueCB =
+        getValueCB(fieldDef) ||
+        getValuesCB(fieldDef) ||
+        getValueCB(type) ||
+        getValuesCB(type);
+
+    if(plainValueCB) {
+      return plainValueCB();
+    }
+
     if (isNonNullType(type)) {
       return fakeValueOfType(type.ofType);
     }
@@ -147,6 +167,19 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
     const listLength = schema.getDirective('listLength');
     const args = getDirectiveArgs(listLength, object) as ListLengthArgs;
     return args ? getRandomInt(args.min, args.max) : getRandomInt(2, 4);
+  }
+
+  function getValueCB(object) {
+    const valueDirective = schema.getDirective('value');
+    const args = getDirectiveArgs(valueDirective, object) as ValueArgs;
+    return args && (() => args.value);
+  }
+
+  function getValuesCB(object) {
+    console.log(object);
+    const valuesDirective = schema.getDirective('values');
+    const args = getDirectiveArgs(valuesDirective, object) as ValuesArgs;
+    return args && (() => args.values);
   }
 };
 

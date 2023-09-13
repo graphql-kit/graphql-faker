@@ -184,6 +184,8 @@ const fakeDefinitionAST = parse(/* GraphQL */ `
 
   scalar examples__JSON
   directive @examples(values: [examples__JSON]!) on FIELD_DEFINITION | SCALAR
+  directive @value(value: examples__JSON) on FIELD_DEFINITION | SCALAR
+  directive @values(values: [examples__JSON]!) on FIELD_DEFINITION | SCALAR
 `);
 
 function defToName(defNode) {

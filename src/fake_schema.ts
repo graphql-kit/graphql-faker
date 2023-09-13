@@ -27,30 +27,24 @@ interface FakeArgs {
   options: { [key: string]: any };
   locale: string;
 }
+
 interface ExamplesArgs {
   values: [any];
-  options: { [key: string]: any };
-}
-
-interface ValueArgs {
-  value: [any];
 }
 
 interface ValuesArgs {
   values: [any];
 }
 
+interface ValueArgs {
+  value: any;
+}
+
 interface ListLengthArgs {
   min: number;
   max: number;
 }
-interface DirectiveArgs {
-  fake?: FakeArgs;
-  examples?: ExamplesArgs;
-  listLength?: ListLengthArgs;
-  value?: ValueArgs;
-  values?: ValuesArgs;
-}
+type DirectiveArgs = FakeArgs | ValueArgs | ValuesArgs | ExamplesArgs | ListLengthArgs;
 
 export const fakeTypeResolver: GraphQLTypeResolver<unknown, unknown> = async (
   value,
@@ -178,7 +172,6 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
   }
 
   function getValuesCB(object) {
-    console.log(object);
     const valuesDirective = schema.getDirective('values');
     const args = getDirectiveArgs(valuesDirective, object) as ValuesArgs;
     return args && (() => args.values);

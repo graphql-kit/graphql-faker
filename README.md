@@ -40,8 +40,8 @@ Examples how to use exact values by `@value` directive:
     type Person {
       rights: [PersonRights!] @value(values: [{name: "READ"}, {name: "WRITE"}])
       roles: [PersonalRoles] @value(values: ["STUDENT"])
-      isActive: @value(value: true)
-      staticToken: @value(value: "TOKEN")
+      isActive: Boolean @value(value: true)
+      staticToken: String @value(value: "TOKEN")
     }
 
 No need to remember or read any docs. Autocompletion is included!

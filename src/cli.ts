@@ -7,6 +7,7 @@ interface Options {
   fileName: string;
   port: number;
   corsOrigin: string | true;
+  ssl: boolean
   openEditor: boolean;
   extendURL: string | undefined;
   headers: { [key: string]: string };
@@ -57,6 +58,7 @@ export function parseCLI(): Options {
   return {
     fileName,
     port: parsePortNumber(values.port),
+    ssl: values.ssl,
     corsOrigin: values['cors-origin'] ?? values.co ?? true,
     openEditor: values.open,
     extendURL: values.extend,
@@ -92,6 +94,8 @@ export function parseCLI(): Options {
       -h, --help           Show help                                       [boolean]
       --port, -p           HTTP Port                        [number] [default: 9002]
       --open, -o           Open page with SDL editor and GraphiQL in browser
+                                                                           [boolean]
+      --ssl, -s            Run over https protocol
                                                                            [boolean]
       --cors-origin, --co  CORS: Specify the custom origin for the
                            Access-Control-Allow-Origin header, by default it is the
@@ -156,6 +160,10 @@ export function parseCLI(): Options {
             multiple: true,
             default: [],
           },
+          ssl : {
+            short: 's',
+            type: 'boolean',
+          }
         },
       });
     } catch (error) {

@@ -6,6 +6,8 @@ import * as cors from 'cors';
 import * as express from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import * as fs from 'fs';
+import * as https from 'https';
+import * as http from 'http';
 import { printSchema, Source } from 'graphql';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 import * as open from 'open';
@@ -143,7 +145,23 @@ function runServer(
     ),
   );
 
-  const server = app.listen(port);
+  // Create the HTTPS or HTTP server, per configuration
+  let server;
+  const protocol = cliOptions.ssl ? 'https': 'http';
+
+  if (cliOptions.ssl) {
+    // Assumes certificates are in a .ssl folder off of the package root. Make sure
+    // these files are secured.
+    server = https.createServer(
+        {
+          key: fs.readFileSync(`./ssl/server.key`),
+          cert: fs.readFileSync(`./ssl/server.crt`)
+        },
+        app,
+    ).listen(port);
+  } else {
+    server = http.createServer(app).listen(port);
+  }
 
   const shutdown = () => {
     server.close();
@@ -156,14 +174,14 @@ function runServer(
   log(`\n${chalk.green('✔')} Your GraphQL Fake API is ready to use 🚀
   Here are your links:
 
-  ${chalk.blue('❯')} Interactive Editor: http://localhost:${port}/editor
-  ${chalk.blue('❯')} GraphQL API:        http://localhost:${port}/graphql
-  ${chalk.blue('❯')} GraphQL Voyager:    http://localhost:${port}/voyager
+  ${chalk.blue('❯')} Interactive Editor: ${protocol}://localhost:${port}/editor
+  ${chalk.blue('❯')} GraphQL API:        ${protocol}://localhost:${port}/graphql
+  ${chalk.blue('❯')} GraphQL Voyager:    ${protocol}://localhost:${port}/voyager
 
   `);
 
   if (openEditor) {
-    setTimeout(() => open(`http://localhost:${port}/editor`), 500);
+    setTimeout(() => open(`${protocol}://localhost:${port}/editor`), 500);
   }
 }
 

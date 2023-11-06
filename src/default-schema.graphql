@@ -26,6 +26,15 @@ type Employee {
   address: String @fake(type: streetAddress, options: { useFullAddress: true })
   subordinates: [Employee!] @listLength(min: 0, max: 3)
   company: Company
+  workDates: [String!]
+    @fake(
+      type: dateInRange
+      options: {
+        dateFrom: "2023-11-05T16:56:52.372Z"
+        dateTo: "2023-11-15T16:56:52.372Z",
+        dateFormat: "YYYY-MM-DD"
+      }
+    )
 }
 
 type Query {

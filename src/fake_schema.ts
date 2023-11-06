@@ -102,6 +102,10 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
     }
 
     if (isListType(type)) {
+      if (Array.isArray(fakeValueOfType(type.ofType))) {
+        return fakeValueOfType(type.ofType).sort();
+      }
+
       return Array(getListLength(fieldDef))
         .fill(null)
         .map(() => fakeValueOfType(type.ofType));

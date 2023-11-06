@@ -12,7 +12,7 @@ export function getRandomItem<T>(array: ReadonlyArray<T>): T {
 export const stdScalarFakers = {
   Int: () => faker.number.int({ min: 0, max: 99999 }),
   Float: () => faker.number.float({ min: 0, max: 99999, precision: 0.01 }),
-  String: () => 'string',
+  String: () => faker.word.sample(),
   Boolean: () => faker.datatype.boolean(),
   ID: () => toBase64(faker.number.int({ max: 9999999999 }).toString()),
 };
@@ -84,6 +84,17 @@ function fakeFunctions(fakerInstance: typeof faker) {
         moment(fakerInstance.date.between({ from: dateFrom, to: dateTo }))
           .format(dateFormat)
           .toString(),
+    },
+    dateInRange: {
+      args: ['dateFormat', 'dateFrom', 'dateTo'],
+      func: (dateFormat, dateFrom, dateTo) =>
+        Array.from({
+          length: moment(dateTo).diff(moment(dateFrom), 'days'),
+        }).map((_, index) =>
+          moment(dateFrom).add(index, 'days')
+            .format(dateFormat)
+            .toString(),
+        ),
     },
     pastDate: {
       args: ['dateFormat'],

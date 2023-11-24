@@ -100,11 +100,9 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
   return resolved;
 
   function fakeValueOfType(type) {
-    const plainValueCB =
-        getValueCB(fieldDef) ||
-        getValueCB(type);
+    const plainValueCB = getValueCB(fieldDef) || getValueCB(type);
 
-    if(plainValueCB) {
+    if (plainValueCB) {
       return plainValueCB();
     }
 
@@ -164,12 +162,12 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
     const valueDirective = schema.getDirective('value');
     const args = getDirectiveArgs(valueDirective, object) as ValueArgs;
 
-    if(args?.value) {
-      return () => args.value;
+    if (typeof args?.value !== 'undefined') {
+      return args && (() => args.value);
     }
 
-    if(args?.values) {
-      return () => args.values;
+    if (typeof args?.values !== 'undefined') {
+      return args && (() => args.values);
     }
   }
 };

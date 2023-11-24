@@ -27,18 +27,21 @@ interface FakeArgs {
   options: { [key: string]: any };
   locale: string;
 }
+
 interface ExamplesArgs {
   values: [any];
 }
+
+interface ValueArgs {
+  value?: any;
+  values?: [any];
+}
+
 interface ListLengthArgs {
   min: number;
   max: number;
 }
-interface DirectiveArgs {
-  fake?: FakeArgs;
-  examples?: ExamplesArgs;
-  listLength?: ListLengthArgs;
-}
+type DirectiveArgs = FakeArgs | ValueArgs | ExamplesArgs | ListLengthArgs;
 
 export const fakeTypeResolver: GraphQLTypeResolver<unknown, unknown> = async (
   value,
@@ -97,6 +100,12 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
   return resolved;
 
   function fakeValueOfType(type) {
+    const plainValueCB = getValueCB(fieldDef) || getValueCB(type);
+
+    if (plainValueCB) {
+      return plainValueCB();
+    }
+
     if (isNonNullType(type)) {
       return fakeValueOfType(type.ofType);
     }
@@ -147,6 +156,19 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
     const listLength = schema.getDirective('listLength');
     const args = getDirectiveArgs(listLength, object) as ListLengthArgs;
     return args ? getRandomInt(args.min, args.max) : getRandomInt(2, 4);
+  }
+
+  function getValueCB(object) {
+    const valueDirective = schema.getDirective('value');
+    const args = getDirectiveArgs(valueDirective, object) as ValueArgs;
+
+    if (typeof args?.value !== 'undefined') {
+      return args && (() => args.value);
+    }
+
+    if (typeof args?.values !== 'undefined') {
+      return args && (() => args.values);
+    }
   }
 };
 
